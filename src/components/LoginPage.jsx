@@ -1,5 +1,5 @@
 "use client";
-import logo from "/Users/ihaein/Git/CountOnMe/frontend/src/img/com logo.png";
+
 import { useState } from "react";
 import {
   Dialog,
@@ -64,11 +64,11 @@ const callsToAction = [
   { name: "Contact sales", href: "#", icon: PhoneIcon },
 ];
 
-export default function Header() {
+export default function Example() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white">
+    <header className="bg-[#FFFCF2]">
       <nav
         aria-label="Global"
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
@@ -76,7 +76,11 @@ export default function Header() {
         <div className="flex lg:flex-1">
           <a href="#" className="-m-1.5 p-1.5">
             <span className="sr-only">Your Company</span>
-            <div className="h-screen w-screen bg-[url('/Users/ihaein/Git/CountOnMe/frontend/src/img/com logo.png')"></div>
+            <img
+              alt="logo"
+              src="./src/assets/icon.png"
+              className="h-12 w-auto border border-[#403D39]"
+            />
           </a>
         </div>
         <div className="flex lg:hidden">
