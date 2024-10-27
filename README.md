@@ -13,5 +13,5 @@ yarn dev
 
 ### Structure
 
-`src/components`: 작은 단위의 컴포넌트가 담긴 폴더
-`src/pages`: 실제 각 페이지를 위한 컴포넌트
+- `src/components`: 작은 단위의 컴포넌트가 담긴 폴더
+- `src/pages`: 실제 각 페이지를 위한 컴포넌트
