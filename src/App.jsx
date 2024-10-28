@@ -1,5 +1,6 @@
+import Footer from '../src/components/Footer';
 function App() {
-  return <div className="bg-red-500">Test</div>;
+  return <Footer />;
 }
 
 export default App;
