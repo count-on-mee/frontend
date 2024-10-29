@@ -4,10 +4,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'prompt': ['Prompt', 'sans-serif']
+        prompt: ['Prompt', 'sans-serif'],
       },
-    }
+    },
   },
   plugins: [],
 };
-
