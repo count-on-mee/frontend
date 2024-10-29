@@ -1,22 +1,18 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import {
-  Dialog,
-  DialogPanel,
-} from '@headlessui/react'
-import {
-  Bars3Icon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline'
+import { useState } from 'react';
+import { Dialog, DialogPanel } from '@headlessui/react';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
-
-export default function Example() {
+export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="bg-[#FFFCF2]">
-      <nav aria-label="Global" className="flex max-w-full items-center justify-between py-2 px-10 border-b-2 border-[#403D39]">
+      <nav
+        aria-label="Global"
+        className="flex max-w-full items-center justify-between py-2 px-10 border-b-2 border-[#403D39]"
+      >
         <div className="flex">
           <a href="#" className="-m-1.5 p-1.5">
             <span className="sr-only">Your Company</span>
@@ -38,26 +34,45 @@ export default function Example() {
           </button>
         </div>
         <div className="hidden lg:flex lg:gap-x-5">
-          <a href="#" className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]">
+          <a
+            href="#"
+            className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
+          >
             spot
           </a>
-          <a href="#" className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]">
+          <a
+            href="#"
+            className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
+          >
             curation
           </a>
-          <a href="#" className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]">
+          <a
+            href="#"
+            className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
+          >
             count on me
           </a>
-          <a href="#" className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]">
+          <a
+            href="#"
+            className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
+          >
             support
           </a>
         </div>
         <div className="hidden lg:flex lg:justify-end">
-          <a href="#" className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light">
+          <a
+            href="#"
+            className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
+          >
             Log in
           </a>
         </div>
       </nav>
-      <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
+      <Dialog
+        open={mobileMenuOpen}
+        onClose={setMobileMenuOpen}
+        className="lg:hidden"
+      >
         <div className="fixed inset-0 z-10" />
         <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-[#FFFCF2] px-6 py-6 sm:max-w-sm sm:ring-2 sm:ring-[#403D39] ">
           <div className="flex items-center justify-between">
@@ -119,5 +134,5 @@ export default function Example() {
         </DialogPanel>
       </Dialog>
     </header>
-  )
+  );
 }
