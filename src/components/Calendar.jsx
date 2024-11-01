@@ -58,11 +58,13 @@ function Calendar() {
   function createEvent() {
     if (selectedStartDay && selectedEndDay) {
       const newEvent = {
+        // eslint-disable-next-line no-undef
         id: meetings.length + 1,
         name: '여행',
         startDatetime: format(selectedStartDay, 'yyyy-MM-dd'),
         endDatetime: format(selectedEndDay, 'yyyy-MM-dd'),
       };
+      // eslint-disable-next-line no-undef
       meetings.push(newEvent);
       setSelectedStartDay(null);
       setSelectedEndDay(null);

@@ -1,12 +1,12 @@
 'use client';
 
-import HeroSection from '../assets/img/HeroSection.jpg';
+import heroSectionImg from '../assets/img/heroSection.jpg';
 
-export default function HeroSection1() {
+export default function HeroSection() {
   return (
     <div
       className="bg-cover bg-center bg-no-repeat min-h-screen font-prompt"
-      style={{ backgroundImage: `url(${HeroSection})` }}
+      style={{ backgroundImage: `url(${heroSectionImg})` }}
     >
       <header className="absolute inset-x-0 top-0 z-50">
         <nav

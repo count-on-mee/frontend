@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
-import Main from './pages/Main';
-import Login from './pages/Login';
+import Main from './pages/MainPage';
+import Login from './pages/LoginPage';
 import CalendarPage from './pages/CalendarPage';
 
 function App() {
