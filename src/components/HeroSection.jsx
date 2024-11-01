@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import HeroSection from '../assets/img/HeroSection.jpg';
 
 export default function HeroSection1() {
   return (
     <div
-      className="bg-cover bg-center bg-no-repeat min-h-screen"
+      className="bg-cover bg-center bg-no-repeat min-h-screen font-prompt"
       style={{ backgroundImage: `url(${HeroSection})` }}
     >
       <header className="absolute inset-x-0 top-0 z-50">
