@@ -1,9 +1,8 @@
-import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Calendar from '../components/Calendar';
 
-function Calendarpage() {
+export default function CalendarPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -16,5 +15,3 @@ function Calendarpage() {
     </div>
   );
 }
-
-export default Calendarpage;

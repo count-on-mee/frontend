@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import HeroSection from '../assets/img/HeroSection.jpg';
 
 export default function HeroSection1() {

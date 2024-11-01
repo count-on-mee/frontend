@@ -1,4 +1,3 @@
-import React from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import {
   add,
@@ -195,7 +194,7 @@ function CalendarPopup() {
           <div className="absolute inset-0 bg-[#FFFCF2] opacity-70 backdrop-filter backdrop-blur-xl"></div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-xl w-full max-w-md h-[90vh] relative z-10">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-md h-[70vh] relative z-10">
           <Calendar />
         </div>
       </div>
