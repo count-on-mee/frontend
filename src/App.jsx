@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import CalendarPage from './pages/CalendarPage';
 import DestinationListPage from './pages/DestinationListPage';
 import SpotPage from './pages/SpotPage';
+import MapPage from './pages/MapPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Route path="/calendar" element={<CalendarPage />} />
       <Route path="/spot" element={<SpotPage />} />
       <Route path="/destination" element={<DestinationListPage />} />
+      <Route path="/map" element={<MapPage />} />
     </Routes>
   );
 }
