@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -18,7 +19,7 @@ export default function Header() {
             <span className="sr-only">Your Company</span>
             <img
               alt="logo"
-              src="./src/assets/img/icon.png"
+              src="/src/assets/img/icon.png"
               className="w-24 h-15 border border-[#403D39]"
             />
           </a>
@@ -34,38 +35,38 @@ export default function Header() {
           </button>
         </div>
         <div className="hidden lg:flex lg:gap-x-5">
-          <a
-            href="#"
+          <Link
+            to="/map/spot"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             spot
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="/map/curation"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             curation
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="/"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             count on me
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="/"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             support
-          </a>
+          </Link>
         </div>
         <div className="hidden lg:flex lg:justify-end">
-          <a
-            href="#"
+          <Link
+            href="/"
             className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
           >
             Log in
-          </a>
+          </Link>
         </div>
       </nav>
       <Dialog

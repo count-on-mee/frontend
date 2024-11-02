@@ -5,7 +5,6 @@ import {
   ChevronDownIcon,
   BookmarkIcon,
 } from '@heroicons/react/24/outline';
-import Header from '../components/Header';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -102,7 +101,7 @@ function SpotList({ spots, searchTerm, onSearch, onSelectSpot }) {
   );
 
   return (
-    <div className="h-screen bg-[#FFFCF2] w-1/4 overflow-y-auto border-r-2 border-[#403D39]">
+    <div className="h-screen bg-[#FFFCF2] w-1/2 overflow-y-auto border-r-2 border-[#403D39]">
       <Searchbar searchTerm={searchTerm} onSearch={onSearch} />
       <SortDropdown />
       {filteredSpots.map(spot => (
@@ -115,14 +114,14 @@ function SpotList({ spots, searchTerm, onSearch, onSelectSpot }) {
 function SpotDetail({ selectedSpot }) {
   if (!selectedSpot) {
     return (
-      <div className="bg-[#FFFCF2] w-1/4 border-r-2 border-[#403D39]">
+      <div className="bg-[#FFFCF2] w-1/2 border-r-2 border-[#403D39]">
         Select a spot to view details
       </div>
     );
   }
 
   return (
-    <div className="bg-[#FFFCF2] w-1/4 border-r-2 border-[#403D39]">
+    <div className="bg-[#FFFCF2] w-1/2 border-r-2 border-[#403D39]">
       <Spot spot={selectedSpot} />
     </div>
   );
@@ -147,8 +146,7 @@ function SpotPage() {
 
   return (
     <div>
-      <Header />
-      <div className="flex">
+      <div className="flex fixed z-10">
         <SpotList
           spots={spots}
           searchTerm={searchTerm}
