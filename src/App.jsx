@@ -3,6 +3,7 @@ import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
 import CalendarPage from './pages/CalendarPage';
 import DestinationListPage from './pages/DestinationListPage';
+import MapPage from './pages/MapPage';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/calendar" element={<CalendarPage />} />
       <Route path="/destination" element={<DestinationListPage />} />
+      <Route path="/map" element={<MapPage />} />
     </Routes>
   );
 }
