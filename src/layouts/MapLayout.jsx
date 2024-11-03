@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet } from 'react-router-dom';
 import {
   Container as MapDiv,
   NaverMap,
@@ -19,14 +19,17 @@ export default function MapLayout() {
         style={{
           width: '100%',
           height: '680px',
-        }}>
+        }}
+      >
         <NaverMap
           defaultCenter={new navermaps.LatLng(37.3595704, 127.105399)}
-          defaultZoom={15}>
+          defaultZoom={15}
+        >
           <Marker
-            defaultPosition={new navermaps.LatLng(37.3595704, 127.105399)} />
+            defaultPosition={new navermaps.LatLng(37.3595704, 127.105399)}
+          />
         </NaverMap>{' '}
       </MapDiv>
     </div>
   );
-};
+}
