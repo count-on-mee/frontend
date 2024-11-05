@@ -1,4 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import { useNavigate } from 'react-router-dom';
+import { useTrip } from '../components/Trip';
 import {
   add,
   eachDayOfInterval,
@@ -11,63 +13,43 @@ import {
   parse,
   startOfToday,
   isWithinInterval,
+  isAfter,
 } from 'date-fns';
-import { useState } from 'react';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
 function Calendar() {
+  const navigate = useNavigate();
+  const { tripDates, setTripDates, currentMonth, changeMonth } = useTrip();
   const today = startOfToday();
-  const [currentMonth, setCurrentMonth] = useState(format(today, 'yyyy-MMM'));
   const firstDayCurrentMonth = parse(currentMonth, 'yyyy-MMM', new Date());
-
-  const [selectedStartDay, setSelectedStartDay] = useState(null);
-  const [selectedEndDay, setSelectedEndDay] = useState(null);
 
   const days = eachDayOfInterval({
     start: firstDayCurrentMonth,
     end: endOfMonth(firstDayCurrentMonth),
   });
 
-  function previousMonth() {
-    const firstDayNextMonth = add(firstDayCurrentMonth, { months: -1 });
-    setCurrentMonth(format(firstDayNextMonth, 'yyyy-MMM'));
-  }
-
-  function nextMonth() {
-    const firstDayNextMonth = add(firstDayCurrentMonth, { months: 1 });
-    setCurrentMonth(format(firstDayNextMonth, 'yyyy-MMM'));
-  }
-
   function handleDateClick(day) {
-    if (!selectedStartDay || (selectedStartDay && selectedEndDay)) {
-      setSelectedStartDay(day);
-      setSelectedEndDay(null);
-    } else {
-      if (day < selectedStartDay) {
-        setSelectedStartDay(day);
-        setSelectedEndDay(selectedStartDay);
+    if (isAfter(day, today) || isEqual(day, today)) {
+      if (!tripDates.startDate || (tripDates.startDate && tripDates.endDate)) {
+        setTripDates({ startDate: day, endDate: null });
       } else {
-        setSelectedEndDay(day);
+        if (day < tripDates.startDate) {
+          setTripDates({ startDate: day, endDate: tripDates.startDate });
+        } else {
+          setTripDates({ ...tripDates, endDate: day });
+        }
       }
     }
   }
 
   function createEvent() {
-    if (selectedStartDay && selectedEndDay) {
-      const newEvent = {
-        // eslint-disable-next-line no-undef
-        id: meetings.length + 1,
-        name: '여행',
-        startDatetime: format(selectedStartDay, 'yyyy-MM-dd'),
-        endDatetime: format(selectedEndDay, 'yyyy-MM-dd'),
-      };
-      // eslint-disable-next-line no-undef
-      meetings.push(newEvent);
-      setSelectedStartDay(null);
-      setSelectedEndDay(null);
+    if (tripDates.startDate && tripDates.endDate) {
+      navigate(
+        `/destination?start=${format(tripDates.startDate, 'yyyy-MM-dd')}&end=${format(tripDates.endDate, 'yyyy-MM-dd')}`,
+      );
     }
   }
 
@@ -77,7 +59,7 @@ function Calendar() {
         <div className="flex items-center justify-start p-4">
           <button
             type="button"
-            onClick={previousMonth}
+            onClick={() => changeMonth(-1)}
             className="flex items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
           >
             <span className="sr-only">Previous month</span>
@@ -92,7 +74,7 @@ function Calendar() {
             </span>
           </h2>
           <button
-            onClick={nextMonth}
+            onClick={() => changeMonth(1)}
             type="button"
             className="flex items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
           >
@@ -122,29 +104,29 @@ function Calendar() {
               <button
                 type="button"
                 onClick={() => handleDateClick(day)}
+                disabled={isAfter(today, day)}
                 className={classNames(
-                  isEqual(day, selectedStartDay) && 'bg-[#EB5E28] text-white',
-                  isEqual(day, selectedEndDay) && 'bg-[#EB5E28] text-white',
-                  !isEqual(day, selectedStartDay) &&
-                    !isEqual(day, selectedEndDay) &&
-                    selectedStartDay &&
-                    selectedEndDay &&
+                  isEqual(day, tripDates.startDate) &&
+                    'bg-[#EB5E28] text-white',
+                  isEqual(day, tripDates.endDate) && 'bg-[#EB5E28] text-white',
+                  !isEqual(day, tripDates.startDate) &&
+                    !isEqual(day, tripDates.endDate) &&
+                    tripDates.startDate &&
+                    tripDates.endDate &&
                     isWithinInterval(day, {
-                      start: selectedStartDay,
-                      end: selectedEndDay,
+                      start: tripDates.startDate,
+                      end: tripDates.endDate,
                     }) &&
                     'bg-[#EB5E28]',
-                  !isEqual(day, selectedStartDay) &&
-                    !isEqual(day, selectedEndDay) &&
-                    isToday(day) &&
-                    'text-red-500',
-                  !isEqual(day, selectedStartDay) &&
-                    !isEqual(day, selectedEndDay) &&
+                  isAfter(today, day) && 'text-gray-400 cursor-not-allowed',
+                  !isAfter(today, day) && isToday(day) && 'text-red-500',
+                  !isEqual(day, tripDates.startDate) &&
+                    !isEqual(day, tripDates.endDate) &&
                     !isToday(day) &&
                     isSameMonth(day, firstDayCurrentMonth) &&
                     'text-gray-900',
-                  !isEqual(day, selectedStartDay) &&
-                    !isEqual(day, selectedEndDay) &&
+                  !isEqual(day, tripDates.startDate) &&
+                    !isEqual(day, tripDates.endDate) &&
                     !isToday(day) &&
                     !isSameMonth(day, firstDayCurrentMonth) &&
                     'text-gray-400',
@@ -160,13 +142,13 @@ function Calendar() {
         </div>
       </div>
       <div className="p-4">
-        {selectedStartDay && selectedEndDay ? (
+        {tripDates.startDate && tripDates.endDate ? (
           <button
             onClick={createEvent}
             type="button"
             className="w-full py-2 px-4 bg-[#EB5E28] text-white rounded-full hover:bg-[#D54E23] transition-colors"
           >
-            Create Event
+            완료
           </button>
         ) : (
           <p className="text-center text-gray-500">
