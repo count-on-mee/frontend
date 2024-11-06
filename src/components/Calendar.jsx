@@ -173,13 +173,15 @@ const colStartClasses = [
 function CalendarPopup() {
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen p-4">
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-[#FFFCF2] opacity-70 backdrop-filter backdrop-blur-xl"></div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-xl w-full max-w-md h-[70vh] relative z-10">
-          <Calendar />
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-md relative z-10 flex flex-col">
+          <div className="flex-grow overflow-hidden">
+            <Calendar />
+          </div>
         </div>
       </div>
     </div>
