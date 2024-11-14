@@ -1,11 +1,17 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { useTrip } from '../components/Trip';
 
 function DestinationList() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const {
+    selectedDestinations = [],
+    setSelectedDestinations,
+    tripDates,
+  } = useTrip();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedItems, setSelectedItems] = useState({});
 
   const destinations = useMemo(
     () =>
@@ -24,28 +30,38 @@ function DestinationList() {
     [destinations, searchTerm],
   );
 
-  const goBack = () => navigate(-1);
+  const goBack = () => navigate('/calendar');
 
-  const toggleSelection = id => {
-    setSelectedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  const toggleSelection = dest => {
+    setSelectedDestinations(prev => {
+      const isSelected = prev.some(d => d.id === dest.id);
+      if (isSelected) {
+        return prev.filter(d => d.id !== dest.id);
+      } else {
+        return [...prev, dest];
+      }
+    });
   };
 
   const handleSearch = e => setSearchTerm(e.target.value);
 
   const handleNext = () => {
-    const selectedDestinations = Object.keys(selectedItems).filter(
-      id => selectedItems[id],
-    );
     if (selectedDestinations.length > 0) {
-      console.log('Selected destinations:', selectedDestinations);
+      navigate('/myscraplist', {
+        state: {
+          selectedDestinations,
+          startDate: tripDates.startDate,
+          endDate: tripDates.endDate,
+        },
+      });
     } else {
-      alert('여행지를 선택해주세요.메롱메롱');
+      alert('여행지를 선택해주세요.');
     }
   };
 
   return (
-    <div className="mx-auto max-w-screen px-4 py-14 sm:px-8 font-prompt bg-[#FFFCF2]">
-      <div className="flex items-center justify-between pb-10">
+    <div className="flex flex-col h-full bg-[#FFFCF2] font-mixed px-10 py-7">
+      <div className="flex items-center justify-between p-10">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -61,7 +77,7 @@ function DestinationList() {
             d="M15.75 19.5 8.25 12l7.5-7.5"
           />
         </svg>
-        <h2 className="text-6xl font-semibold text-[#252422]">
+        <h2 className="text-4xl font-semibold text-[#252422]">
           어디로 떠나시나요?
         </h2>
         <div className="size-10"></div>
@@ -69,7 +85,7 @@ function DestinationList() {
       <div className="w-4/5 mx-auto py-10 relative">
         <MagnifyingGlassIcon className="absolute h-5 w-5 left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <input
-          className="w-full h-12 rounded-full border-2 border-[#403D39] font-prompt pl-10 pr-4 focus:outline-none focus:border-[#EB5E28] transition-colors"
+          className="w-full h-12 rounded-full border-2 border-[#403D39] pl-10 pr-4 focus:outline-none focus:border-[#EB5E28] transition-colors"
           type="text"
           placeholder="목적지 검색"
           value={searchTerm}
@@ -101,15 +117,17 @@ function DestinationList() {
                 <td className="border-b border-[#252422] bg-[#FFFCF2] px-5 py-5">
                   <div className="flex justify-end">
                     <button
-                      onClick={() => toggleSelection(dest.id)}
+                      onClick={() => toggleSelection(dest)}
                       className={`rounded-full px-5 py-2 text-base font-semibold transition-colors duration-200 ease-in-out 
                       ${
-                        selectedItems[dest.id]
+                        selectedDestinations.some(d => d.id === dest.id)
                           ? 'bg-[#EB5E28] text-white hover:bg-[#D64E1E]'
                           : 'bg-[#FFFCF2] border border-[#252422] text-[#252422] hover:bg-gray-200'
                       }`}
                     >
-                      {selectedItems[dest.id] ? '선택' : '선택'}
+                      {selectedDestinations.some(d => d.id === dest.id)
+                        ? '선택'
+                        : '선택'}
                     </button>
                   </div>
                 </td>
