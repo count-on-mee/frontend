@@ -9,9 +9,6 @@ function SortDropdown() {
   const sortOptions = [
     { name: '추천순', href: '#', current: true },
     { name: '거리순', href: '#', current: false },
-    { name: '뭐할지', href: '#', current: false },
-    { name: '고민중', href: '#', current: false },
-    { name: '하하하', href: '#', current: false },
   ];
   return (
     <div className="flex items-baseline ml-5">

@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import CalendarPage from './pages/CalendarPage';
 import DestinationListPage from './pages/DestinationListPage';
 import SpotPage from './pages/SpotPage';
+import CurationPage from './pages/CurationPage';
 import MapLayout from './layouts/MapLayout';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
       <Route path="/destination" element={<DestinationListPage />} />
       <Route path="/map" element={<MapLayout />}>
         <Route path="spot" element={<SpotPage />} />
+        <Route path="curation" element={<CurationPage />} />
       </Route>
     </Routes>
   );
