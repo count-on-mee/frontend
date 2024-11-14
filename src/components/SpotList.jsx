@@ -1,28 +1,24 @@
-import { useMemo } from 'react';
 import Searchbar from './Searchbar';
 import SortDropdown from './SortDropdown';
 import Spot from './Spot';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import markersAtom from '../recoil/markers';
+import { withCenter } from '../recoil/selectedSpot';
 
-export default function SpotList({
-  spots,
-  searchTerm,
-  onSearch,
-  onSelectSpot,
-}) {
-  const filteredSpots = useMemo(
-    () =>
-      spots.filter(spot =>
-        spot.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-    [spots, searchTerm],
-  );
+export default function SpotList({ searchTerm, onSearch }) {
+  const spots = useRecoilValue(markersAtom);
+  const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
 
   return (
-    <div className="h-screen bg-[#FFFCF2] w-1/2 overflow-y-auto border-r-2 border-[#403D39]">
+    <div className="h-screen bg-[#FFFCF2] w-full overflow-y-auto border-r-2 border-[#403D39]">
       <Searchbar searchTerm={searchTerm} onSearch={onSearch} />
       <SortDropdown />
-      {filteredSpots.map(spot => (
-        <Spot key={spot.id} spot={spot} onClick={() => onSelectSpot(spot)} />
+      {spots.map(spot => (
+        <Spot
+          key={spot.id}
+          spot={spot}
+          onClick={() => setSelectedSpotWithCenter(spot)}
+        />
       ))}
     </div>
   );
