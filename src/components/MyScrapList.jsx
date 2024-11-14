@@ -25,6 +25,7 @@ function MyScriptList() {
         places: Array.from({ length: 5 }, (_, j) => ({
           id: `${i + 1}-${j + 1}`,
           name: `Place ${j + 1} in List ${i + 1}`,
+          url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
         })),
       })),
     [],
@@ -35,9 +36,11 @@ function MyScriptList() {
       Array.from({ length: 10 }, (_, i) => ({
         id: `rec-${i + 1}`,
         name: `Recommended List ${i + 1}`,
+        url: `https://loremflickr.com/300/200?random=${i + 1}`,
         places: Array.from({ length: 5 }, (_, j) => ({
           id: `rec-${i + 1}-${j + 1}`,
           name: `Recommended Place ${j + 1} in List ${i + 1}`,
+          url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
         })),
       })),
     [],
@@ -150,8 +153,9 @@ function MyScriptList() {
                         <div className="h-10 w-10 flex-shrink-0">
                           <img
                             className="h-full w-full rounded-full"
-                            src={`https://source.unsplash.com/100x100/?travel,${place.name}`}
+                            src={place.url}
                             alt={place.name}
+                            loading="lazy"
                           />
                         </div>
                         <div className="ml-3">
@@ -189,9 +193,10 @@ function MyScriptList() {
                 className="bg-white rounded-lg shadow-md overflow-hidden"
               >
                 <img
-                  src={`https://source.unsplash.com/300x200/?travel,${list.name}`}
+                  src={list.url}
                   alt={list.name}
                   className="w-full h-32 object-cover"
+                  loading="lazy"
                 />
                 <div className="p-4">
                   <h4 className="text-lg font-semibold">{list.name}</h4>
