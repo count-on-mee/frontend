@@ -5,12 +5,11 @@ import CalendarPage from './pages/CalendarPage';
 import DestinationListPage from './pages/DestinationListPage';
 import SpotPage from './pages/SpotPage';
 import MapLayout from './layouts/MapLayout';
-import { Provider } from 'react-redux';
-import store from './store';
+import { RecoilRoot } from 'recoil';
 
 function App() {
   return (
-    <Provider store={store}>
+    <RecoilRoot>
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -20,7 +19,7 @@ function App() {
           <Route path="spot" element={<SpotPage />} />
         </Route>
       </Routes>
-    </Provider>
+    </RecoilRoot>
   );
 }
 

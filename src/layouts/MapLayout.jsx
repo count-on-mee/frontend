@@ -1,5 +1,5 @@
-import { useRef, useCallback } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Container as MapDiv,
   NaverMap,
@@ -9,15 +9,35 @@ import {
 import Header from '../components/Header';
 import MapPanel from '../components/map/MapPanel';
 import MapResearch from '../components/map/MapResearch';
-import { useDispatch, useSelector } from 'react-redux';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import centerAtom from '../recoil/center';
+import zoomAtom from '../recoil/zoom';
+import markersAtom from '../recoil/markers';
+import selectedSpotAtom, { withCenter } from '../recoil/selectedSpot';
 
 export default function MapLayout() {
   const naverMaps = useNavermaps();
+  const [mapDivWidth, setMapDivWidth] = useState('100%');
   const mapRef = useRef(null);
-  const dispatch = useDispatch();
-  const markers = useSelector(state => state.markers);
-  const center = useSelector(state => state.center);
-  const zoom = useSelector(state => state.zoom);
+
+  const [markers, setMarkers] = useRecoilState(markersAtom);
+  const [center, setCenter] = useRecoilState(centerAtom);
+  const [zoom, setZoom] = useRecoilState(zoomAtom);
+  const [selectedSpot, setSelectedSpot] = useRecoilState(selectedSpotAtom);
+  const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isSidebar = location.pathname.includes('/map/spot');
+
+  useEffect(() => {
+    handleLocateMe();
+  }, []);
+
+  useEffect(() => {
+    const width = isSidebar ? (selectedSpot ? '50%' : '75%') : '100%';
+    setMapDivWidth(width);
+  }, [isSidebar, selectedSpot]);
 
   const handleZoomIn = () => {
     if (mapRef.current) {
@@ -35,9 +55,9 @@ export default function MapLayout() {
 
   const handleZoomChanged = useCallback(
     newZoom => {
-      dispatch({ type: 'SET_ZOOM', payload: newZoom });
+      setZoom(newZoom);
     },
-    [dispatch],
+    [setZoom],
   );
 
   const handleLocateMe = () => {
@@ -45,10 +65,7 @@ export default function MapLayout() {
       navigator.geolocation.getCurrentPosition(
         position => {
           const { latitude, longitude } = position.coords;
-          dispatch({
-            type: 'SET_CENTER',
-            payload: { lat: latitude, lng: longitude },
-          });
+          setCenter({ lat: latitude, lng: longitude });
         },
         error => {
           console.error('Error occurred while fetching location:', error);
@@ -69,7 +86,7 @@ export default function MapLayout() {
               alert('An error occurred while fetching location.');
           }
         },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
       );
     } else {
       alert('Geolocation is not supported by this browser.');
@@ -77,50 +94,51 @@ export default function MapLayout() {
   };
 
   const handleSearch = async () => {
-    if (mapRef.current) {
-      const currentCenter = mapRef.current.getCenter();
-      const currentZoom = mapRef.current.getZoom();
-      const url = new URL('http://localhost:8888/spots/search');
-      url.searchParams.append('lat', currentCenter.lat());
-      url.searchParams.append('lng', currentCenter.lng());
-      url.searchParams.append('zoom', currentZoom);
+    setSelectedSpot(null);
+    const url = new URL('http://localhost:8888/spots/search');
+    url.searchParams.append('lat', center.lat);
+    url.searchParams.append('lng', center.lng);
+    url.searchParams.append('zoom', zoom);
 
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-        });
-        const data = await response.json();
-        dispatch({
-          type: 'SET_MARKERS',
-          payload: data.map(place => ({
-            id: place.spotId,
-            position: new naverMaps.LatLng(
-              place.location.lat,
-              place.location.lng,
-            ),
-            title: place.title,
-            address: place.address,
-            imgUrl: place.imgUrl,
-            businessHours: place.businessHours,
-            isOpen: place.isOpen,
-            isScraped: place.isScraped,
-          })),
-        });
-      } catch (error) {
-        console.error('Error occurred while searching:', error);
-      }
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+      });
+      const data = await response.json();
+      setMarkers(
+        data.map(place => ({
+          id: place.spotId,
+          position: new naverMaps.LatLng(
+            place.location.lat,
+            place.location.lng,
+          ),
+          title: place.title,
+          address: place.address,
+          imgUrl: place.imgUrl,
+          businessHours: place.businessHours,
+          isOpen: place.isOpen,
+          isScraped: place.isScraped,
+        })),
+      );
+    } catch (error) {
+      console.error('Error occurred while searching:', error);
     }
+  };
+
+  const handleMarkerClick = marker => {
+    setSelectedSpotWithCenter(marker);
+    navigate('/map/spot');
   };
 
   return (
     <div className="flex flex-col h-screen">
       <Header />
-      <Outlet /> {/* 자식 컴포넌트가 렌더링될 위치 */}
-      <div className="flex-grow flex">
+      <Outlet context={{ handleSearch }} />
+      <div className="flex flex-grow">
+        <div className="flex-grow" />
         <MapDiv
-          className="overflow-hidden flex-grow"
           style={{
-            width: '100%',
+            width: mapDivWidth,
             height: '100%',
           }}
         >
@@ -154,6 +172,7 @@ export default function MapLayout() {
                 key={marker.id}
                 position={marker.position}
                 title={marker.title}
+                onClick={() => handleMarkerClick(marker)}
               />
             ))}
           </NaverMap>
