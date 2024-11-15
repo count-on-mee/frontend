@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-import { Outlet } from 'react-router-dom';
-=======
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
->>>>>>> 620a231344f9e1870ccfb18cfc902c0e1b7eb0a4
 import {
   Container as MapDiv,
   NaverMap,
@@ -137,26 +133,6 @@ export default function MapLayout() {
   return (
     <div className="flex flex-col h-screen">
       <Header />
-<<<<<<< HEAD
-      <Outlet /> {/* 자식 컴포넌트가 렌더링될 위치 */}
-      {/* 변경되지 않을 컴포넌트 */}
-      <MapDiv
-        style={{
-          width: '100%',
-          height: '600px',
-        }}
-      >
-        <NaverMap
-          defaultCenter={new navermaps.LatLng(37.3595704, 127.105399)}
-          defaultZoom={15}
-        >
-          <Marker
-            defaultPosition={new navermaps.LatLng(37.3595704, 127.105399)}
-          />
-        </NaverMap>{' '}
-      </MapDiv>
-      <Footer />
-=======
       <Outlet context={{ handleSearch }} />
       <div className="flex flex-grow">
         <div className="flex-grow" />
@@ -203,7 +179,6 @@ export default function MapLayout() {
           <MapResearch onSearch={handleSearch} />
         </MapDiv>
       </div>
->>>>>>> 620a231344f9e1870ccfb18cfc902c0e1b7eb0a4
     </div>
   );
 }
