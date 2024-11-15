@@ -131,9 +131,9 @@ const Itinerary = () => {
         onClick={() => setSelectedDay(i + 1)}
         className={`px-3 py-2 rounded-full ${
           selectedDay === i + 1
-            ? 'bg-[#D54E23] text-white'
-            : 'bg-gray-200 text-gray-700'
-        } hover:bg-[#EB5E28] hover:text-white transition duration-300`}
+            ? 'bg-[#D54E23] text-[#2E2F35]'
+            : 'bg-[#2E2F35] text-[#FAF998]'
+        } hover:bg-[#EB5E28] hover:text-[#FAF998] transition duration-300`}
       >
         Day {i + 1}
       </button>
