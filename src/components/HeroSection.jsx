@@ -29,7 +29,7 @@ export default function HeroSection() {
             </h1>
             <div className="mt-60 flex items-center justify-center gap-x-6">
               <a
-                href="#"
+                href="/map"
                 className="rounded-[40px] bg-[#FFFCF2] px-12 py-4 text-xl font-regular text-black shadow-sm hover:bg-[#EB5E28] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB5E28] border-2 border-[#252422]"
               >
                 지금 시작하기

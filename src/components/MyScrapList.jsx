@@ -110,9 +110,7 @@ function MyScriptList() {
             d="M15.75 19.5 8.25 12l7.5-7.5"
           />
         </svg>
-        <h2 className="text-3xl font-semibold text-[#252422]">
-          My Script List
-        </h2>
+        <h2 className="text-3xl font-semibold text-[#252422]">My Scrap List</h2>
         <div className="size-10"></div>
       </div>
       <div className="flex flex-1 overflow-hidden">

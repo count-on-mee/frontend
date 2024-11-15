@@ -1,11 +1,10 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useTrip } from '../components/Trip';
 
 function DestinationList() {
   const navigate = useNavigate();
-  const location = useLocation();
   const {
     selectedDestinations = [],
     setSelectedDestinations,
