@@ -1,4 +1,3 @@
-import { TripProvider, useTrip } from './components/Trip';
 import { Route, Routes } from 'react-router-dom';
 import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
