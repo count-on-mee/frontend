@@ -1,15 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { useTrip } from '../components/Trip';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import selectedDestinationsAtom from '../recoil/selectedDestinations';
+import tripDatesAtom from '../recoil/tripDates';
 
 function DestinationList() {
   const navigate = useNavigate();
-  const {
-    selectedDestinations = [],
-    setSelectedDestinations,
-    tripDates,
-  } = useTrip();
+  const [selectedDestinations, setSelectedDestinations] = useRecoilState(
+    selectedDestinationsAtom,
+  );
+  const tripDates = useRecoilValue(tripDatesAtom);
   const [searchTerm, setSearchTerm] = useState('');
 
   const destinations = useMemo(

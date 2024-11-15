@@ -2,11 +2,13 @@ import React, { useState, forwardRef, useMemo, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import { format, addDays } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { useTrip } from '../components/Trip';
 import { DragDropContext, Draggable } from '@hello-pangea/dnd';
 import StrictModeDroppable from '../components/StrictModeDroppable';
 import 'react-datepicker/dist/react-datepicker.css';
 import { CalendarIcon } from '@heroicons/react/24/solid';
+import { useRecoilState } from 'recoil';
+import tripDatesAtom from '../recoil/tripDates';
+import selectedSpotsAtom from '../recoil/selectedSpots';
 
 const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
   <button
@@ -52,10 +54,11 @@ const calculateDistances = async spots => {
 };
 
 const Itinerary = () => {
-  const { tripDates, setTripDates, selectedSpots, setSelectedSpots } =
-    useTrip();
+  const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
+  const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDay, setSelectedDay] = useState(1);
+  const [distances, setDistances] = useState([]);
 
   useEffect(() => {
     const getDistances = async () => {
@@ -80,7 +83,7 @@ const Itinerary = () => {
     if (!tripDates.endDate || isNaN(new Date(tripDates.endDate).getTime())) {
       setTripDates(prev => ({ ...prev, endDate: addDays(new Date(), 7) }));
     }
-  }, [tripDates]);
+  }, [tripDates, setTripDates]);
 
   const onDragEnd = result => {
     if (!result.destination) return;
@@ -107,6 +110,7 @@ const Itinerary = () => {
       return newDates;
     });
   };
+
   const totalDays = useMemo(() => {
     if (!tripDates.startDate || !tripDates.endDate) return 0;
     return (

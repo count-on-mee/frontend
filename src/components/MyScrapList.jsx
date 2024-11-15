@@ -1,18 +1,17 @@
 import React, { Suspense, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import {
-  Container as MapDiv,
-  NaverMap,
-  Marker,
-  useNavermaps,
-} from 'react-naver-maps';
-import { useTrip } from '../components/Trip';
+import { Container as MapDiv, NaverMap, useNavermaps } from 'react-naver-maps';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import selectedSpotsAtom from '../recoil/selectedSpots';
+import selectedDestinationsAtom from '../recoil/selectedDestinations';
+import tripDatesAtom from '../recoil/tripDates';
 
 function MyScriptList() {
   const navigate = useNavigate();
-  const { selectedSpots, setSelectedSpots, selectedDestinations, tripDates } =
-    useTrip();
+  const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
+  const selectedDestinations = useRecoilValue(selectedDestinationsAtom);
+  const tripDates = useRecoilValue(tripDatesAtom);
   const [searchTerm, setSearchTerm] = useState('');
 
   const goBack = () => navigate('/destination');
@@ -71,6 +70,7 @@ function MyScriptList() {
       }
     });
   };
+
   const handleStartTrip = () => {
     if (selectedSpots.length > 0) {
       navigate('/com/itinerary');
@@ -80,7 +80,6 @@ function MyScriptList() {
   };
   function MapLayout() {
     const navermaps = useNavermaps();
-
     return (
       <div className="w-1/2 p-4">
         <MapDiv style={{ width: '100%', height: 'calc(100vh - 100px)' }}>
@@ -92,6 +91,7 @@ function MyScriptList() {
       </div>
     );
   }
+
   return (
     <div className="flex flex-col h-full bg-[#FFFCF2] px-10 py-7 ">
       <div className="flex items-center justify-between p-10">
@@ -120,7 +120,6 @@ function MyScriptList() {
               ? `${selectedDestinations.map(d => d.name).join(', ')}`
               : 'Your List'}
           </h2>
-
           <div className="w-full mb-6 relative">
             <MagnifyingGlassIcon className="absolute h-5 w-5 left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
@@ -213,6 +212,7 @@ function MyScriptList() {
     </div>
   );
 }
+
 function MyScrapListPopup() {
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -220,7 +220,6 @@ function MyScrapListPopup() {
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-[#FFFCF2] opacity-70 backdrop-filter backdrop-blur-xl"></div>
         </div>
-
         <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[90vh] relative z-10 overflow-hidden">
           <div className="h-full overflow-y-auto">
             <MyScriptList />

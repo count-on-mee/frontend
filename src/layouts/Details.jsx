@@ -1,5 +1,7 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import tripDatesAtom from '../recoil/tripDates';
+import selectedDestinationsAtom from '../recoil/selectedDestinations';
+import selectedSpotsAtom from '../recoil/selectedSpots';
 
 const AccordionItem = ({ title, content, isOpen, onToggle }) => {
   return (
@@ -16,28 +18,12 @@ const AccordionItem = ({ title, content, isOpen, onToggle }) => {
 };
 
 const ExpensesSection = () => {
-  const [expenses, setExpenses] = useState({
-    transportation: [
-      { type: '가는편', amount: '' },
-      { type: '오는편', amount: '' },
-    ],
-    accommodation: [
-      { type: '1박 가격', amount: '' },
-      { type: '인당 추가 요금', amount: '' },
-    ],
-    food: [{ name: '', amount: '' }],
-  });
-  const [newRow, setNewRow] = useState({
-    transportation: null,
-    accommodation: null,
-    food: null,
-  });
-  const [total, setTotal] = useState(0);
-  const [numberOfPeople, setNumberOfPeople] = useState(1);
-  const [selectedRow, setSelectedRow] = useState({
-    category: null,
-    index: null,
-  });
+  const [expenses, setExpenses] = useRecoilState(expensesAtom);
+  const [newRow, setNewRow] = useRecoilState(newRowAtom);
+  const [total, setTotal] = useRecoilState(totalAtom);
+  const [numberOfPeople, setNumberOfPeople] =
+    useRecoilState(numberOfPeopleAtom);
+  const [selectedRow, setSelectedRow] = useRecoilState(selectedRowAtom);
 
   const handleRowClick = (category, index) => {
     if (selectedRow.category === category && selectedRow.index === index) {
@@ -290,17 +276,10 @@ const ExpensesSection = () => {
 };
 
 const AccommodationSection = () => {
-  const [accommodations, setAccommodations] = useState([
-    {
-      name: '',
-      pricePerNight: '',
-      additionalFee: '',
-      distanceFromStation: '',
-      etc: '',
-    },
-  ]);
-  const [newRow, setNewRow] = useState(null);
-  const [selectedRow, setSelectedRow] = useState(null);
+  const [accommodations, setAccommodations] =
+    useRecoilState(accommodationsAtom);
+  const [newRow, setNewRow] = useRecoilState(newRowAtom);
+  const [selectedRow, setSelectedRow] = useRecoilState(selectedRowAtom);
 
   const handleInputChange = (index, field, value) => {
     const newAccommodations = [...accommodations];
@@ -468,18 +447,24 @@ const AccommodationSection = () => {
   );
 };
 const AddSpotSection = ({ onClose, onSelect }) => {
-  const userLists = useMemo(
-    () =>
-      Array.from({ length: 20 }, (_, i) => ({
-        id: i + 1,
-        name: `My List ${i + 1}`,
-        places: Array.from({ length: 5 }, (_, j) => ({
-          id: `${i + 1}-${j + 1}`,
-          name: `Place ${j + 1} in List ${i + 1}`,
-        })),
+  const selectedDestinations = useRecoilValue(selectedDestinationsAtom);
+  const tripDates = useRecoilValue(tripDatesAtom);
+
+  const userLists = useMemo(() => {
+    const startDate = new Date(tripDates.startDate);
+    const endDate = new Date(tripDates.endDate);
+    const daysDiff =
+      Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+    return selectedDestinations.map((destination, i) => ({
+      id: i + 1,
+      name: `${destination} 여행 ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`,
+      places: Array.from({ length: daysDiff }, (_, j) => ({
+        id: `${i + 1}-${j + 1}`,
+        name: `${destination}의 장소 ${j + 1}`,
       })),
-    [],
-  );
+    }));
+  }, [tripDates, selectedDestinations]);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -561,9 +546,9 @@ const CommentIcon = ({ onClick }) => (
 );
 
 const SpotSection = () => {
-  const [spots, setSpots] = useState([]);
+  const [spots, setSpots] = useRecoilState(selectedSpotsAtom);
+  const [comments, setComments] = useRecoilState(commentsAtom);
   const [showPopup, setShowPopup] = useState(false);
-  const [comments, setComments] = useState({});
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
   const [editingCommentIndex, setEditingCommentIndex] = useState(null);
 

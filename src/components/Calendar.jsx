@@ -1,8 +1,9 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useNavigate } from 'react-router-dom';
-import { useTrip } from '../components/Trip';
+import { useRecoilState } from 'recoil';
+import tripDatesAtom from '../recoil/tripDates';
+import currentMonthAtom from '../recoil/currentMonth';
 import {
-  add,
   eachDayOfInterval,
   endOfMonth,
   format,
@@ -22,7 +23,8 @@ function classNames(...classes) {
 
 function Calendar() {
   const navigate = useNavigate();
-  const { tripDates, setTripDates, currentMonth, changeMonth } = useTrip();
+  const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
+  const [currentMonth, setCurrentMonth] = useRecoilState(currentMonthAtom);
   const today = startOfToday();
   const firstDayCurrentMonth = parse(currentMonth, 'yyyy-MMM', new Date());
 
@@ -43,6 +45,18 @@ function Calendar() {
         }
       }
     }
+  }
+
+  function changeMonth(amount) {
+    setCurrentMonth(prevMonth => {
+      const firstDayNextMonth = parse(
+        prevMonth + '-01',
+        'yyyy-MMM-dd',
+        new Date(),
+      );
+      firstDayNextMonth.setMonth(firstDayNextMonth.getMonth() + amount);
+      return format(firstDayNextMonth, 'yyyy-MMM');
+    });
   }
 
   function createEvent() {
