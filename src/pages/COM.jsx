@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import COMNavbar from '../components/COMNavbar';
 import {
   Container as MapDiv,
   NaverMap,
@@ -8,7 +9,6 @@ import {
 import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import COMNavbar from '../components/COMNavbar';
 
 const COM = () => {
   const navermaps = useNavermaps();
