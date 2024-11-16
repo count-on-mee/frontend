@@ -1,10 +1,10 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { scrappedCurationsState } from '../atoms/ScrapAtom';
+import scrappedCurationsAtom from '../recoil/scrappedcuration';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 export default function Curation({ curation, onClick }) {
-  const scrappedCurations = useRecoilValue(scrappedCurationsState);
-  const setScrappedCuration = useSetRecoilState(scrappedCurationsState);
+  const scrappedCurations = useRecoilValue(scrappedCurationsAtom);
+  const setScrappedCuration = useSetRecoilState(scrappedCurationsAtom);
 
   const handleScrapClick = () => {
     setScrappedCuration(prev => ({

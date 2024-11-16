@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-export const curationsAtom = atom({
+const curationsAtom = atom({
   key: 'curationsAtom',
   default: Array.from({ length: 50 }, (_, i) => ({
     id: i + 1,
@@ -8,3 +8,5 @@ export const curationsAtom = atom({
     description: `Description ${i + 1}`,
   })),
 });
+
+export default curationsAtom;

@@ -13,3 +13,5 @@ const spotsAtom = atom({
     }))
   })),
 });
+
+export default spotsAtom;

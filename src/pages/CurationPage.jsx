@@ -2,7 +2,7 @@ import { useState } from 'react';
 import CurationList from '../components/CurationList';
 import CurationDetail from '../components/CurationDetail';
 import { useRecoilValue } from 'recoil';
-import { curationsAtom } from '../atoms/CurationsAtom';
+import curationsAtom from '../recoil/curation';
 
 function CurationPage() {
   const [searchTerm, setSearchTerm] = useState('');

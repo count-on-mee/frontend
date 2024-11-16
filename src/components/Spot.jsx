@@ -1,10 +1,10 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { scrappedSpotsState } from '../atoms/ScrapAtom';
+import scrappedSpotsAtom from '../recoil/scrappedspot';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 export default function Spot({ spot, selectedSpot, onClick }) {
-  const scrappedSpots = useRecoilValue(scrappedSpotsState);
-  const setScrappedSpots = useSetRecoilState(scrappedSpotsState);
+  const scrappedSpots = useRecoilValue(scrappedSpotsAtom);
+  const setScrappedSpots = useSetRecoilState(scrappedSpotsAtom);
 
   const handleScrapClick = () => {
     setScrappedSpots(prev => ({

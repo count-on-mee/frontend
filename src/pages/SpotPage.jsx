@@ -2,7 +2,7 @@ import { useState } from 'react';
 import SpotList from '../components/SpotList';
 import SpotDetail from '../components/SpotDetail';
 import { useRecoilValue } from 'recoil';
-import { spotsAtom } from '../atoms/SpotsAtom';
+import spotsAtom from '../recoil/spot';
 
 function SpotPage() {
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import Curation from './Curation';
 import SpotDetail from './SpotDetail';
-import { spotsAtom } from '../atoms/SpotsAtom';
+import spotsAtom from '../recoil/spot';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { useRecoilValue } from 'recoil';
 
@@ -17,6 +17,9 @@ export default function CurationDetail({
   };
   const randomSpots = useMemo(() => getRandomSpots(spots, 10), [spots]);
   const [selectedSpot, setSelectedSpot] = useState(null);
+  const handleSelectSpot = (spot) => {
+    setSelectedSpot(spot);
+  };
 
   return (
     <>
@@ -24,7 +27,7 @@ export default function CurationDetail({
         <div className="flex-wrap">
           <button>
             <ChevronLeftIcon
-              className="w-6 h-6 left-3 top-2 m-3"
+              className="w-6 h-6 m-3"
               onClick={() => setSelectedCuration()}
             />
           </button>
@@ -33,7 +36,7 @@ export default function CurationDetail({
         {randomSpots.map(spot => (
           <div
             key={spot.id}
-            onClick={() => setSelectedSpot(spot)}
+            onClick={() => handleSelectSpot(spot)}
             className="mx-auto w-4/5 bg-white border border-[#403D39] rounded-xl my-3"
           >
             <img

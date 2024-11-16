@@ -1,3 +1,3 @@
-import spotsAtom from './atom'
+import spotsAtom from './atom';
 
-export default spotsAtom
+export default spotsAtom;
