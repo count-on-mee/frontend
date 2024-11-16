@@ -16,7 +16,7 @@ function SpotPage() {
     if (markers.length === 0) {
       handleSearch();
     }
-  }, []);
+  }, [markers, handleSearch]);
 
   return (
     <div>
@@ -31,6 +31,7 @@ function SpotPage() {
           selectedSpot={selectedSpot}
         />
       )}
+      </div>
     </div>
   );
 }
