@@ -28,7 +28,8 @@
 
 ::-webkit-scrollbar-track {
   background-color: rgb(64, 61, 57, 0.2);
-  
+}
+
 .react-datepicker {
   @apply bg-[#E9E8E5] font-prompt rounded-lg shadow-lg max-w-md mx-auto;
 }

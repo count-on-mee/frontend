@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { useOutletContext } from 'react-router-dom';
 import SpotList from '../components/SpotList';
 import SpotDetail from '../components/SpotDetail';
@@ -10,7 +10,7 @@ function SpotPage() {
   const { handleSearch } = useOutletContext();
   const [searchTerm] = useState('');
   const markers = useRecoilValue(markersAtom);
-  const selectedSpot = useRecoilValue(selectedSpotAtom);
+  const [selectedSpot, setSelectedSpot] = useRecoilState(selectedSpotAtom);
 
   useEffect(() => {
     if (markers.length === 0) {
@@ -27,10 +27,8 @@ function SpotPage() {
           onSearch={handleSearch}
         />
         {selectedSpot && (
-        <SpotDetail
-          selectedSpot={selectedSpot}
-        />
-      )}
+        <SpotDetail selectedSpot={selectedSpot} setSelectedSpot={setSelectedSpot}/>
+        )}
       </div>
     </div>
   );
