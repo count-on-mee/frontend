@@ -60,6 +60,13 @@ export default function MapLayout() {
     [setZoom],
   );
 
+  const handleCenterChanged = () => {
+    if (mapRef.current) {
+      const newCenter = mapRef.current.getCenter();
+      setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
+    }
+  };
+
   const handleLocateMe = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -153,6 +160,7 @@ export default function MapLayout() {
             mapTypeId={naverMaps.MapTypeId.NORMAL}
             zoomControl={false}
             center={new naverMaps.LatLng(center.lat, center.lng)}
+            onCenterChanged={handleCenterChanged}
             defaultZoom={zoom}
             onZoomChanged={handleZoomChanged}
             draggable={true}
