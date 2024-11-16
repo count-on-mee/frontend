@@ -26,8 +26,11 @@ function SpotPage() {
           searchTerm={searchTerm}
           onSearch={handleSearch}
         />
-        {selectedSpot && <SpotDetail selectedSpot={selectedSpot} />}
-      </div>
+        {selectedSpot && (
+        <SpotDetail
+          selectedSpot={selectedSpot}
+        />
+      )}
     </div>
   );
 }

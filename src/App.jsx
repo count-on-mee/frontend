@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import CalendarPage from './pages/CalendarPage';
 import DestinationListPage from './pages/DestinationListPage';
 import SpotPage from './pages/SpotPage';
+import CurationPage from './pages/CurationPage';
 import MapLayout from './layouts/MapLayout';
 import COM from './pages/COM';
 import Itinerary from './layouts/Itinerary';
@@ -26,6 +27,7 @@ function App() {
         </Route>
         <Route path="/map" element={<MapLayout />}>
           <Route path="spot" element={<SpotPage />} />
+          <Route path="curation" element={<CurationPage />} />
         </Route>
       </Routes>
     </RecoilRoot>
