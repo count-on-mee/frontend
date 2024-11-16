@@ -1,7 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@font-face {
+  font-family: 'Goorm';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/goorm-sans-code.woff2')
+    format('woff2');
+  unicode-range: U+AC00-D7A3;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 ::-webkit-scrollbar {
   width: 5px;
@@ -19,4 +28,46 @@
 
 ::-webkit-scrollbar-track {
   background-color: rgb(64, 61, 57, 0.2);
+  
+.react-datepicker {
+  @apply bg-[#E9E8E5] font-prompt rounded-lg shadow-lg max-w-md mx-auto;
+}
+
+.react-datepicker__header {
+  @apply bg-transparent border-none;
+}
+
+.react-datepicker__month-container {
+  @apply w-full;
+}
+
+.react-datepicker__month {
+  @apply p-4;
+}
+
+.react-datepicker__day-names,
+.react-datepicker__week {
+  @apply flex justify-between;
+}
+
+.react-datepicker__day-name,
+.react-datepicker__day {
+  @apply w-8 h-8 flex items-center justify-center;
+}
+
+.react-datepicker__day--selected {
+  @apply bg-[#D54E23] rounded-full !important;
+}
+.react-datepicker__day:hover,
+.react-datepicker__day--keyboard-selected {
+  @apply bg-[#D54E23] opacity-70 rounded-full !important;
+}
+.react-datepicker__day:hover {
+  @apply bg-[#D54E23] rounded-full !important; /* Ensure it applies the same background color */
+}
+.react-datepicker__day--in-selecting-range {
+  @apply bg-[#D54E23]  opacity-70 rounded-full !important; /* Ensure it applies the same background color */
+}
+.react-datepicker__day--in-range {
+  @apply bg-transparent text-black  opacity-70 rounded-full !important; /* Ensure it applies the same background color */
 }
