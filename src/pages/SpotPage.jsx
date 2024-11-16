@@ -1,29 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRecoilValue } from 'recoil';
+import { useOutletContext } from 'react-router-dom';
 import SpotList from '../components/SpotList';
 import SpotDetail from '../components/SpotDetail';
-import { useRecoilValue } from 'recoil';
-import spotsAtom from '../recoil/spot';
+import markersAtom from '../recoil/markers';
+import selectedSpotAtom from '../recoil/selectedSpot';
 
 function SpotPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSpot, setSelectedSpot] = useState(null);
-  const spots = useRecoilValue(spotsAtom);
+  const { handleSearch } = useOutletContext();
+  const [searchTerm] = useState('');
+  const markers = useRecoilValue(markersAtom);
+  const selectedSpot = useRecoilValue(selectedSpotAtom);
 
-  const handleSearch = e => setSearchTerm(e.target.value);
-  const handleSelectSpot = spot => setSelectedSpot(spot);
+  useEffect(() => {
+    if (markers.length === 0) {
+      handleSearch();
+    }
+  }, []);
 
   return (
-    <div className="flex fixed w-1/2 z-10">
-      <SpotList
-        spots={spots}
-        searchTerm={searchTerm}
-        onSearch={handleSearch}
-        onSelectSpot={handleSelectSpot}
-      />
-      {selectedSpot && (
+    <div>
+      <div className={`flex fixed ${selectedSpot ? 'w-1/2' : 'w-1/4'} z-10`}>
+        <SpotList
+          spots={markers}
+          searchTerm={searchTerm}
+          onSearch={handleSearch}
+        />
+        {selectedSpot && (
         <SpotDetail
           selectedSpot={selectedSpot}
-          setSelectedSpot={setSelectedSpot}
         />
       )}
     </div>
