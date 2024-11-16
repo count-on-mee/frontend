@@ -1,3 +1,3 @@
-import curationsAtom from './CurationsAtoms';
+import curationsAtom from './atom';
 
 export default curationsAtom;
