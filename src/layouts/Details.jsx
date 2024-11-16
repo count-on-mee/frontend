@@ -1,7 +1,9 @@
+import React, { useState, useEffect } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import tripDatesAtom from '../recoil/tripDates';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import selectedSpotsAtom from '../recoil/selectedSpots';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 const AccordionItem = ({ title, content, isOpen, onToggle }) => {
   return (
@@ -18,12 +20,28 @@ const AccordionItem = ({ title, content, isOpen, onToggle }) => {
 };
 
 const ExpensesSection = () => {
-  const [expenses, setExpenses] = useRecoilState(expensesAtom);
-  const [newRow, setNewRow] = useRecoilState(newRowAtom);
-  const [total, setTotal] = useRecoilState(totalAtom);
-  const [numberOfPeople, setNumberOfPeople] =
-    useRecoilState(numberOfPeopleAtom);
-  const [selectedRow, setSelectedRow] = useRecoilState(selectedRowAtom);
+  const [expenses, setExpenses] = useState({
+    transportation: [
+      { type: '가는편', amount: '' },
+      { type: '오는편', amount: '' },
+    ],
+    accommodation: [
+      { type: '1박 가격', amount: '' },
+      { type: '인당 추가 요금', amount: '' },
+    ],
+    food: [{ name: '', amount: '' }],
+  });
+  const [newRow, setNewRow] = useState({
+    transportation: null,
+    accommodation: null,
+    food: null,
+  });
+  const [total, setTotal] = useState(0);
+  const [numberOfPeople, setNumberOfPeople] = useState(1);
+  const [selectedRow, setSelectedRow] = useState({
+    category: null,
+    index: null,
+  });
 
   const handleRowClick = (category, index) => {
     if (selectedRow.category === category && selectedRow.index === index) {
@@ -276,10 +294,17 @@ const ExpensesSection = () => {
 };
 
 const AccommodationSection = () => {
-  const [accommodations, setAccommodations] =
-    useRecoilState(accommodationsAtom);
-  const [newRow, setNewRow] = useRecoilState(newRowAtom);
-  const [selectedRow, setSelectedRow] = useRecoilState(selectedRowAtom);
+  const [accommodations, setAccommodations] = useState([
+    {
+      name: '',
+      pricePerNight: '',
+      additionalFee: '',
+      distanceFromStation: '',
+      etc: '',
+    },
+  ]);
+  const [newRow, setNewRow] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   const handleInputChange = (index, field, value) => {
     const newAccommodations = [...accommodations];
@@ -455,7 +480,6 @@ const AddSpotSection = ({ onClose, onSelect }) => {
     const endDate = new Date(tripDates.endDate);
     const daysDiff =
       Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-
     return selectedDestinations.map((destination, i) => ({
       id: i + 1,
       name: `${destination} 여행 ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`,
@@ -547,10 +571,10 @@ const CommentIcon = ({ onClick }) => (
 
 const SpotSection = () => {
   const [spots, setSpots] = useRecoilState(selectedSpotsAtom);
-  const [comments, setComments] = useRecoilState(commentsAtom);
   const [showPopup, setShowPopup] = useState(false);
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
   const [editingCommentIndex, setEditingCommentIndex] = useState(null);
+  const [comments, setComments] = useState({});
 
   const selectSpot = spot => {
     setSpots(prev => [...prev, spot]);

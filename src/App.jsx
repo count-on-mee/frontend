@@ -17,10 +17,10 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/destination" element={<DestinationListPage />} />
         <Route path="/myscraplist" element={<MyScrapListPage />} />
         <Route path="/com" element={<COM />}>
+          <Route path="calendar" element={<CalendarPage />} />
           <Route path="itinerary" element={<Itinerary />} />
           <Route path="details" element={<Details />} />
         </Route>
