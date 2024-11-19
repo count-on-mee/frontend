@@ -14,7 +14,7 @@ function MyScriptList() {
   const tripDates = useRecoilValue(tripDatesAtom);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const goBack = () => navigate('/destination');
+  const goBack = () => navigate('/com/destination');
 
   const userLists = useMemo(
     () =>

@@ -30,7 +30,7 @@ function DestinationList() {
     [destinations, searchTerm],
   );
 
-  const goBack = () => navigate('/calendar');
+  const goBack = () => navigate('/com/calendar');
 
   const toggleSelection = dest => {
     setSelectedDestinations(prev => {
@@ -47,13 +47,7 @@ function DestinationList() {
 
   const handleNext = () => {
     if (selectedDestinations.length > 0) {
-      navigate('/myscraplist', {
-        state: {
-          selectedDestinations,
-          startDate: tripDates.startDate,
-          endDate: tripDates.endDate,
-        },
-      });
+      navigate('/com/myscraplist');
     } else {
       alert('여행지를 선택해주세요.');
     }
