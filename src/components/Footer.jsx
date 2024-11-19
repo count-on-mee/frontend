@@ -3,18 +3,18 @@ import logo from '../assets/img/logo.png';
 const Footer = () => {
   return (
     <footer className="bg-[#FFFCF2]">
-      <div className="mx-auto w-full max-w-screen-xl p-3 py-3 lg:py-7">
+      <div className="mx-auto max-w-full p-2 py-2 lg:py-2">
         <div className="md:flex md:justify-between">
           <div className="mb-4 md:mb-0">
             <a href="" className="flex items-center">
               <img
                 src={logo}
-                className="h-10 md:h-10 lg:h-10 w-auto max-h-12"
+                className="h-8 md:h-8 lg:h-8 w-auto max-h-10"
                 alt=""
               />
             </a>
           </div>
-          <div className="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-6 sm:gap-4 sm:grid-cols-3">
             <div>
               <ul className="text-gray-500 dark:text-gray-400 font-medium">
                 <li className="mb-2">
@@ -51,7 +51,7 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+        <hr className="my-4 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-6" />
         <div className="sm:flex sm:items-center sm:justify-between">
           <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400">
             © 2024 CountonMe. All Rights Reserved.
