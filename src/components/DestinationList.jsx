@@ -47,7 +47,7 @@ function DestinationList() {
 
   const handleNext = () => {
     if (selectedDestinations.length > 0) {
-      navigate('/com/myscraplist');
+      navigate('/com/my-scrap-list');
     } else {
       alert('여행지를 선택해주세요.');
     }
