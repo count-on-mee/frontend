@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import tripDatesAtom from '../recoil/tripDates';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
@@ -543,7 +544,9 @@ const SpotSection = () => {
           {spots.map((spot, spotIndex) => (
             <li key={spotIndex} className="bg-white p-4 rounded-lg shadow">
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">{spot}</span>
+                <span className="text-lg font-semibold">
+                  스팟 {spotIndex + 1}: {spot.name}
+                </span>
                 <button
                   onClick={() => handleCommentSubmit(spotIndex, '')}
                   className="text-blue-500 hover:text-blue-700"
@@ -618,36 +621,20 @@ const SpotSection = () => {
   );
 };
 
-const AddSpotSection = ({ onClose }) => {
-  const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
-  const scrapList = useRecoilValue(scrapListAtom); // 전체 스팟 리스트를 가져옵니다.
-  const tripDates = useRecoilValue(tripDatesAtom);
+const AddSpotSection = ({ onClose, onSelect, selectedSpots }) => {
+  const scrapList = useRecoilValue(scrapListAtom);
+  const [localSelectedSpots, setLocalSelectedSpots] = useState(selectedSpots);
 
-  const userLists = useMemo(() => {
-    const startDate = new Date(tripDates.startDate);
-    const endDate = new Date(tripDates.endDate);
-    const daysDiff =
-      Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-
-    return scrapList.map((spot, i) => ({
-      id: i + 1,
-      name: `${spot.name} 여행 ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`,
-      places: Array.from({ length: daysDiff }, (_, j) => ({
-        id: `${i + 1}-${j + 1}`,
-        name: `${spot.name}의 장소 ${j + 1}`,
-      })),
-    }));
-  }, [tripDates, scrapList]);
-
-  const handleSpotToggle = spotName => {
-    setSelectedSpots(prev =>
-      prev.includes(spotName)
-        ? prev.filter(spot => spot !== spotName)
-        : [...prev, spotName],
+  const handleSpotToggle = spot => {
+    setLocalSelectedSpots(prev =>
+      prev.some(s => s.id === spot.id)
+        ? prev.filter(s => s.id !== spot.id)
+        : [...prev, spot],
     );
   };
 
   const handleConfirm = () => {
+    onSelect(localSelectedSpots);
     onClose();
   };
 
@@ -683,41 +670,31 @@ const AddSpotSection = ({ onClose }) => {
                 </svg>
               </button>
             </div>
-            <div className="space-y-6">
-              {userLists.map(list => (
-                <div key={list.id} className="bg-[#D6D6CB] rounded-lg p-4">
-                  <h3 className="text-xl font-semibold text-[#252422] mb-3">
-                    {list.name}
-                  </h3>
-                  <ul className="space-y-2">
-                    {list.places.map(place => (
-                      <li
-                        key={place.id}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="text-[#252422]">{place.name}</span>
-                        <button
-                          onClick={() => handleSpotToggle(place.name)}
-                          className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors ${
-                            selectedSpots.includes(place.name)
-                              ? 'bg-[#EB5E28] text-white'
-                              : 'bg-gray-300 text-gray-600 hover:bg-[#EB5E28] hover:text-white'
-                          }`}
-                        >
-                          {selectedSpots.includes(place.name)
-                            ? '선택됨'
-                            : '선택하기'}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+            <ul className="space-y-4">
+              {scrapList.map(spot => (
+                <li key={spot.id} className="bg-white rounded-lg p-4 shadow">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-semibold">{spot.name}</span>
+                    <button
+                      onClick={() => handleSpotToggle(spot)}
+                      className={`px-4 py-2 rounded-full ${
+                        localSelectedSpots.some(s => s.id === spot.id)
+                          ? 'bg-[#EB5E28] text-white'
+                          : 'bg-gray-200 text-gray-800'
+                      }`}
+                    >
+                      {localSelectedSpots.some(s => s.id === spot.id)
+                        ? '선택됨'
+                        : '선택'}
+                    </button>
+                  </div>
+                </li>
               ))}
-            </div>
+            </ul>
             <div className="mt-6 flex justify-end">
               <button
                 onClick={handleConfirm}
-                className="bg-[#EB5E28] text-white font-semibold py-2 px-6 rounded-full hover:bg-[#D64E1E] transition duration-300 shadow-lg"
+                className="bg-[#EB5E28] text-white px-4 py-2 rounded-lg hover:bg-[#cc4f22] transition-colors"
               >
                 확인
               </button>
@@ -728,6 +705,7 @@ const AddSpotSection = ({ onClose }) => {
     </div>
   );
 };
+
 const TodoList = () => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
@@ -769,7 +747,7 @@ const TodoList = () => {
       </div>
       <ul className="space-y-3">
         {tasks.map((task, index) => (
-          <li key={index} className="flex items-center">
+          <li key={spot.name} className="flex items-center">
             <span
               onClick={() => toggleTaskCompletion(index)}
               className={`cursor-pointer w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-300 ${

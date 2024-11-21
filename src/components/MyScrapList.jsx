@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { Suspense, useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Container as MapDiv, NaverMap, useNavermaps } from 'react-naver-maps';
@@ -6,52 +6,56 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import selectedSpotsAtom from '../recoil/selectedSpots';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import tripDatesAtom from '../recoil/tripDates';
+import scrapListAtom from '../recoil/scrapList';
 
 function MyScriptList() {
   const navigate = useNavigate();
   const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
   const selectedDestinations = useRecoilValue(selectedDestinationsAtom);
   const tripDates = useRecoilValue(tripDatesAtom);
+  const [scrapList, setScrapList] = useRecoilState(scrapListAtom);
+  const [displayList, setDisplayList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const goBack = () => navigate('/com/destination');
 
-  const userLists = useMemo(
-    () =>
-      Array.from({ length: 20 }, (_, i) => ({
-        id: i + 1,
-        name: `My List ${i + 1}`,
-        places: Array.from({ length: 5 }, (_, j) => ({
-          id: `${i + 1}-${j + 1}`,
-          name: `Place ${j + 1} in List ${i + 1}`,
-          url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
-        })),
+  const recommendedList = useMemo(() => {
+    return Array.from({ length: 20 }, (_, i) => ({
+      id: i + 1,
+      name: `Recommended List ${i + 1}`,
+      places: Array.from({ length: 5 }, (_, j) => ({
+        id: `${i + 1}-${j + 1}`,
+        name: `Place ${j + 1} in Recommended List ${i + 1}`,
+        url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
       })),
-    [],
-  );
+    }));
+  }, []);
 
-  const recommendedLists = useMemo(
-    () =>
-      Array.from({ length: 10 }, (_, i) => ({
-        id: `rec-${i + 1}`,
-        name: `Recommended List ${i + 1}`,
-        url: `https://loremflickr.com/300/200?random=${i + 1}`,
-        places: Array.from({ length: 5 }, (_, j) => ({
-          id: `rec-${i + 1}-${j + 1}`,
-          name: `Recommended Place ${j + 1} in List ${i + 1}`,
-          url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
+  useEffect(() => {
+    if (scrapList.length === 0) {
+      const initialScrapList = [
+        ...Array.from({ length: 20 }, (_, i) => ({
+          id: i + 1,
+          name: `My List ${i + 1}`,
+          places: Array.from({ length: 5 }, (_, j) => ({
+            id: `${i + 1}-${j + 1}`,
+            name: `Place ${j + 1} in List ${i + 1}`,
+            url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
+          })),
         })),
-      })),
-    [],
-  );
+      ];
+      setScrapList(initialScrapList);
+    }
+    setDisplayList(scrapList.length > 0 ? scrapList : recommendedList);
+  }, [scrapList, recommendedList, setScrapList]);
 
   const allPlaces = useMemo(() => {
     const places = [];
-    [...userLists, ...recommendedLists].forEach(list => {
+    displayList.forEach(list => {
       places.push(...list.places);
     });
     return places;
-  }, [userLists, recommendedLists]);
+  }, [displayList]);
 
   const filteredPlaces = useMemo(
     () =>
@@ -81,6 +85,7 @@ function MyScriptList() {
       alert('스팟을 선택해주세요.');
     }
   };
+
   function MapLayout() {
     const navermaps = useNavermaps();
     return (
@@ -110,7 +115,7 @@ function MyScriptList() {
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M15.75 19.5 8.25 12l7.5-7.5"
+            d="M15.75 19.5L8.25 12l7.5-7.5"
           />
         </svg>
         <h2 className="text-3xl font-semibold text-[#252422]">My Scrap List</h2>
@@ -133,7 +138,6 @@ function MyScriptList() {
               onChange={handleSearch}
             />
           </div>
-
           <div
             className="overflow-y-auto rounded-lg mb-10"
             style={{ maxHeight: 'calc(100vh - 350px)' }}
@@ -170,7 +174,7 @@ function MyScriptList() {
                         }`}
                       >
                         {selectedSpots.some(spot => spot.id === place.id)
-                          ? '선택 '
+                          ? '선택'
                           : '선택'}
                       </button>
                     </td>
@@ -179,22 +183,18 @@ function MyScriptList() {
               </tbody>
             </table>
           </div>
-
           <h3 className="text-2xl font-semibold text-[#252422] mt-8 mb-4">
             Curations
           </h3>
           <div className="grid grid-cols-2 gap-4">
-            {recommendedLists.slice(0, 4).map(list => (
+            {recommendedList.slice(0, 4).map(list => (
               <div
                 key={list.id}
                 className="bg-white rounded-lg shadow-md overflow-hidden"
               >
-                <img
-                  src={list.url}
-                  alt={list.name}
-                  className="w-full h-32 object-cover"
-                  loading="lazy"
-                />
+                {/* Assuming there's a URL for the list image */}
+                {/* This should be corrected based on actual data structure */}
+                {/*<img src={list.url} alt={list.name} className="w-full h-32 object-cover" loading="lazy" />*/}
                 <div className="p-4">
                   <h4 className="text-lg font-semibold">{list.name}</h4>
                 </div>
