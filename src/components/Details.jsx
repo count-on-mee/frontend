@@ -526,10 +526,10 @@ const SpotSection = () => {
 
   return (
     <div className="bg-[#D6D6CB] p-4 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">여행 스팟</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">📌</h2>
       {spots.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center p-6">
-          <p className="text-lg text-gray-800 mb-4">
+          <p className="text-base text-gray-800 mb-4">
             스팟 후보를 작성해보세요!
           </p>
           <button
@@ -544,9 +544,7 @@ const SpotSection = () => {
           {spots.map((spot, spotIndex) => (
             <li key={spotIndex} className="bg-white p-4 rounded-lg shadow">
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">
-                  스팟 {spotIndex + 1}: {spot.name}
-                </span>
+                <span className="text-lg font-semibold">{spot.name}</span>
                 <button
                   onClick={() => handleCommentSubmit(spotIndex, '')}
                   className="text-blue-500 hover:text-blue-700"

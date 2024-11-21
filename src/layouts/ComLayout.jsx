@@ -86,7 +86,7 @@ const COMLayout = () => {
                     className="sticky"
                     style={{
                       top: `${Math.max(0, scrollY)}px`,
-                      height: '80vh',
+                      height: '70vh',
                       transition: 'top 0.1s ease-out',
                     }}
                   >
