@@ -1,6 +1,6 @@
 import React, { useState, forwardRef, useMemo, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
-import { format, addDays } from 'date-fns';
+import { format, addDays, eachDayOfInterval } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { DragDropContext, Draggable } from '@hello-pangea/dnd';
 import StrictModeDroppable from '../components/StrictModeDroppable';
@@ -20,6 +20,8 @@ const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
     <span>{value || placeholder}</span>
   </button>
 ));
+
+CustomInput.displayName = 'CustomInput';
 
 const calculateDistances = async spots => {
   const service = new google.maps.DistanceMatrixService();
@@ -59,6 +61,17 @@ const Itinerary = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDay, setSelectedDay] = useState(1);
   const [distances, setDistances] = useState([]);
+  const [tripPeriod, setTripPeriod] = useState(0);
+
+  useEffect(() => {
+    if (tripDates.startDate && tripDates.endDate) {
+      const period = eachDayOfInterval({
+        start: tripDates.startDate,
+        end: tripDates.endDate,
+      });
+      setTripPeriod(period.length);
+    }
+  }, [tripDates]);
 
   useEffect(() => {
     const getDistances = async () => {
@@ -119,15 +132,20 @@ const Itinerary = () => {
       ) + 1
     );
   }, [tripDates]);
+
   const filteredSpots = useMemo(() => {
     return selectedSpots.filter((spot, index) => {
-      const spotDate = addDays(new Date(tripDates.startDate), index);
+      const spotDate = addDays(
+        new Date(tripDates.startDate),
+        index % tripPeriod,
+      );
       return (
         spotDate.getDate() ===
         addDays(new Date(tripDates.startDate), selectedDay - 1).getDate()
       );
     });
-  }, [selectedSpots, tripDates.startDate, selectedDay]);
+  }, [selectedSpots, tripPeriod, selectedDay, tripDates.startDate]);
+
   const dayButtons = useMemo(() => {
     return Array.from({ length: totalDays }, (_, i) => (
       <button
@@ -165,7 +183,7 @@ const Itinerary = () => {
                   {format(
                     addDays(
                       new Date(tripDates.startDate),
-                      selectedSpots.indexOf(spot),
+                      selectedSpots.indexOf(spot) % tripPeriod,
                     ),
                     'yyyy-MM-dd',
                   )}
@@ -180,11 +198,11 @@ const Itinerary = () => {
           )}
         </React.Fragment>
       )),
-    [filteredSpots, tripDates.startDate, selectedSpots],
+    [filteredSpots, tripDates.startDate, selectedSpots, tripPeriod],
   );
 
   return (
-    <div className="bg-transparent p-3 sm:p-3 rounded-lg font-mixed">
+    <div className="bg-transparent p-3 sm:p-3 rounded-lg font-mixed">
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
         <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
           <DatePicker

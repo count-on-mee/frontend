@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 
 const StrictModeDroppable = ({ children, ...props }) => {

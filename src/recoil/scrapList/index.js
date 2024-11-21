@@ -1,1 +1,3 @@
-export { scrapListAtom } from './atom';
+import scrapListAtom from './atom';
+
+export default scrapListAtom;
