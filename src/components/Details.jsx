@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import tripDatesAtom from '../recoil/tripDates';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import selectedSpotsAtom from '../recoil/selectedSpots';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import scrapListAtom from '../recoil/scrapList';
 
 const AccordionItem = ({ title, content, isOpen, onToggle }) => {
   return (
-    <div className="border-b border-black font-mixed">
-      <div className="flex items-center p-4">
-        <button className="mr-4 focus:outline-none" onClick={onToggle}>
-          {isOpen ? '▼' : '▶'}
-        </button>
-        <h2 className="font-bold ">{title}</h2>
+    <div className="border-b border-none font-mixed">
+      <div className="flex items-center p-4 cursor-pointer" onClick={onToggle}>
+        <span className="mr-4">{isOpen ? '▼' : '▶'}</span>
+        <h2 className="font-bold">{title}</h2>
       </div>
       {isOpen && <div className="p-4">{content}</div>}
     </div>
@@ -471,8 +469,158 @@ const AccommodationSection = () => {
     </div>
   );
 };
-const AddSpotSection = ({ onClose, onSelect }) => {
-  const selectedDestinations = useRecoilValue(selectedDestinationsAtom);
+
+const CommentIcon = ({ onClick }) => (
+  <svg
+    onClick={onClick}
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5 cursor-pointer text-gray-500 hover:text-[#EB5E28]"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+  >
+    <path
+      fillRule="evenodd"
+      d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
+
+const SpotSection = () => {
+  const [spots, setSpots] = useRecoilState(selectedSpotsAtom);
+  const [showPopup, setShowPopup] = useState(false);
+  const [comments, setComments] = useState({});
+  const [editingComment, setEditingComment] = useState(null);
+
+  const openPopup = () => setShowPopup(true);
+  const closePopup = () => setShowPopup(false);
+
+  const handleCommentSubmit = (spotIndex, comment) => {
+    if (comment.trim()) {
+      setComments(prev => ({
+        ...prev,
+        [spotIndex]: [...(prev[spotIndex] || []), comment],
+      }));
+    }
+  };
+
+  const handleCommentEdit = (spotIndex, commentIndex, newComment) => {
+    if (newComment.trim()) {
+      setComments(prev => ({
+        ...prev,
+        [spotIndex]: prev[spotIndex].map((comment, index) =>
+          index === commentIndex ? newComment : comment,
+        ),
+      }));
+      setEditingComment(null);
+    }
+  };
+
+  const handleCommentDelete = (spotIndex, commentIndex) => {
+    setComments(prev => ({
+      ...prev,
+      [spotIndex]: prev[spotIndex].filter((_, index) => index !== commentIndex),
+    }));
+  };
+
+  return (
+    <div className="bg-[#D6D6CB] p-4 rounded-lg shadow-md">
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">여행 스팟</h2>
+      {spots.length === 0 ? (
+        <div className="flex flex-col items-center justify-center text-center p-6">
+          <p className="text-lg text-gray-800 mb-4">
+            스팟 후보를 작성해보세요!
+          </p>
+          <button
+            onClick={openPopup}
+            className="bg-orange-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-orange-600 transition duration-300 shadow-lg"
+          >
+            Spot 추가하기
+          </button>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {spots.map((spot, spotIndex) => (
+            <li key={spotIndex} className="bg-white p-4 rounded-lg shadow">
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-semibold">{spot}</span>
+                <button
+                  onClick={() => handleCommentSubmit(spotIndex, '')}
+                  className="text-blue-500 hover:text-blue-700"
+                >
+                  댓글 추가
+                </button>
+              </div>
+              <ul className="mt-2 space-y-2">
+                {comments[spotIndex]?.map((comment, commentIndex) => (
+                  <li
+                    key={commentIndex}
+                    className="flex justify-between items-center"
+                  >
+                    {editingComment?.spot === spotIndex &&
+                    editingComment?.comment === commentIndex ? (
+                      <input
+                        type="text"
+                        defaultValue={comment}
+                        onBlur={e =>
+                          handleCommentEdit(
+                            spotIndex,
+                            commentIndex,
+                            e.target.value,
+                          )
+                        }
+                        autoFocus
+                      />
+                    ) : (
+                      <>
+                        <span>{comment}</span>
+                        <div>
+                          <button
+                            onClick={() =>
+                              setEditingComment({
+                                spot: spotIndex,
+                                comment: commentIndex,
+                              })
+                            }
+                            className="text-green-500 hover:text-green-700 mr-2"
+                          >
+                            수정
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleCommentDelete(spotIndex, commentIndex)
+                            }
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      )}
+      {showPopup && (
+        <AddSpotSection
+          onClose={closePopup}
+          onSelect={selectedSpots => {
+            setSpots(selectedSpots);
+            closePopup();
+          }}
+          selectedSpots={spots}
+        />
+      )}
+    </div>
+  );
+};
+
+const AddSpotSection = ({ onClose }) => {
+  const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
+  const scrapList = useRecoilValue(scrapListAtom); // 전체 스팟 리스트를 가져옵니다.
   const tripDates = useRecoilValue(tripDatesAtom);
 
   const userLists = useMemo(() => {
@@ -480,15 +628,28 @@ const AddSpotSection = ({ onClose, onSelect }) => {
     const endDate = new Date(tripDates.endDate);
     const daysDiff =
       Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-    return selectedDestinations.map((destination, i) => ({
+
+    return scrapList.map((spot, i) => ({
       id: i + 1,
-      name: `${destination} 여행 ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`,
+      name: `${spot.name} 여행 ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`,
       places: Array.from({ length: daysDiff }, (_, j) => ({
         id: `${i + 1}-${j + 1}`,
-        name: `${destination}의 장소 ${j + 1}`,
+        name: `${spot.name}의 장소 ${j + 1}`,
       })),
     }));
-  }, [tripDates, selectedDestinations]);
+  }, [tripDates, scrapList]);
+
+  const handleSpotToggle = spotName => {
+    setSelectedSpots(prev =>
+      prev.includes(spotName)
+        ? prev.filter(spot => spot !== spotName)
+        : [...prev, spotName],
+    );
+  };
+
+  const handleConfirm = () => {
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -536,10 +697,16 @@ const AddSpotSection = ({ onClose, onSelect }) => {
                       >
                         <span className="text-[#252422]">{place.name}</span>
                         <button
-                          onClick={() => onSelect(place.name)}
-                          className="bg-[#EB5E28] text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-[#D64E1E] transition-colors"
+                          onClick={() => handleSpotToggle(place.name)}
+                          className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors ${
+                            selectedSpots.includes(place.name)
+                              ? 'bg-[#EB5E28] text-white'
+                              : 'bg-gray-300 text-gray-600 hover:bg-[#EB5E28] hover:text-white'
+                          }`}
                         >
-                          선택하기
+                          {selectedSpots.includes(place.name)
+                            ? '선택됨'
+                            : '선택하기'}
                         </button>
                       </li>
                     ))}
@@ -547,201 +714,17 @@ const AddSpotSection = ({ onClose, onSelect }) => {
                 </div>
               ))}
             </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleConfirm}
+                className="bg-[#EB5E28] text-white font-semibold py-2 px-6 rounded-full hover:bg-[#D64E1E] transition duration-300 shadow-lg"
+              >
+                확인
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
-const CommentIcon = ({ onClick }) => (
-  <svg
-    onClick={onClick}
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-5 w-5 cursor-pointer text-gray-500 hover:text-[#EB5E28]"
-    viewBox="0 0 20 20"
-    fill="currentColor"
-  >
-    <path
-      fillRule="evenodd"
-      d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
-
-const SpotSection = () => {
-  const [spots, setSpots] = useRecoilState(selectedSpotsAtom);
-  const [showPopup, setShowPopup] = useState(false);
-  const [activeCommentIndex, setActiveCommentIndex] = useState(null);
-  const [editingCommentIndex, setEditingCommentIndex] = useState(null);
-  const [comments, setComments] = useState({});
-
-  const selectSpot = spot => {
-    setSpots(prev => [...prev, spot]);
-    setShowPopup(false);
-  };
-
-  const openPopup = () => setShowPopup(true);
-  const closePopup = () => setShowPopup(false);
-
-  const handleCommentClick = index => {
-    setActiveCommentIndex(activeCommentIndex === index ? null : index);
-    setEditingCommentIndex(null);
-  };
-
-  const handleCommentSubmit = (index, comment) => {
-    if (comment.trim()) {
-      setComments(prev => ({
-        ...prev,
-        [index]: [...(prev[index] || []), comment],
-      }));
-      setActiveCommentIndex(null);
-    }
-  };
-
-  const handleCommentEdit = (spotIndex, commentIndex) => {
-    setEditingCommentIndex({ spot: spotIndex, comment: commentIndex });
-  };
-
-  const handleCommentUpdate = (spotIndex, commentIndex, newComment) => {
-    if (newComment.trim()) {
-      setComments(prev => ({
-        ...prev,
-        [spotIndex]: prev[spotIndex].map((comment, index) =>
-          index === commentIndex ? newComment : comment,
-        ),
-      }));
-      setEditingCommentIndex(null);
-    }
-  };
-
-  const handleCommentDelete = (spotIndex, commentIndex) => {
-    setComments(prev => ({
-      ...prev,
-      [spotIndex]: prev[spotIndex].filter((_, index) => index !== commentIndex),
-    }));
-  };
-
-  return (
-    <div className="bg-[#D6D6CB] p-4 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">여행 스팟</h2>
-      {spots.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center p-6">
-          <p className="text-lg text-gray-800 mb-4">
-            스팟 후보를 작성해보세요!
-          </p>
-          <button
-            onClick={openPopup}
-            className="bg-orange-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-orange-600 transition duration-300 shadow-lg"
-          >
-            Spot 추가하기
-          </button>
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {spots.map((spot, index) => (
-            <li
-              key={index}
-              className="group flex flex-col text-gray-800 relative"
-            >
-              <div className="flex items-center">
-                <span className="mr-2">•</span>
-                {spot}
-                <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <CommentIcon onClick={() => handleCommentClick(index)} />
-                </div>
-              </div>
-              {activeCommentIndex === index && (
-                <div className="mt-2 p-2 rounded shadow-md bg-white">
-                  <textarea
-                    className="w-full p-2 border rounded"
-                    placeholder="댓글을 입력하세요..."
-                    onKeyPress={e => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleCommentSubmit(index, e.target.value);
-                        e.target.value = '';
-                      }
-                    }}
-                  />
-                </div>
-              )}
-              {comments[index] && comments[index].length > 0 && (
-                <div className="mt-2 ml-4">
-                  <h3 className="font-semibold">댓글:</h3>
-                  <ul className="list-disc pl-5">
-                    {comments[index].map((comment, commentIndex) => (
-                      <li
-                        key={commentIndex}
-                        className="mt-1 flex justify-between items-center"
-                      >
-                        {editingCommentIndex &&
-                        editingCommentIndex.spot === index &&
-                        editingCommentIndex.comment === commentIndex ? (
-                          <input
-                            type="text"
-                            defaultValue={comment}
-                            className="border rounded p-1 flex-grow"
-                            onKeyPress={e => {
-                              if (e.key === 'Enter') {
-                                handleCommentUpdate(
-                                  index,
-                                  commentIndex,
-                                  e.target.value,
-                                );
-                              }
-                            }}
-                            onBlur={e =>
-                              handleCommentUpdate(
-                                index,
-                                commentIndex,
-                                e.target.value,
-                              )
-                            }
-                          />
-                        ) : (
-                          <>
-                            {comment}
-                            <div className="flex space-x-2 ml-2">
-                              <button
-                                onClick={() =>
-                                  handleCommentEdit(index, commentIndex)
-                                }
-                                className="text-sm text-blue-500 hover:text-blue-700"
-                              >
-                                수정
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleCommentDelete(index, commentIndex)
-                                }
-                                className="text-sm text-red-500 hover:text-red-700"
-                              >
-                                삭제
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </li>
-          ))}
-          <li>
-            <button
-              onClick={openPopup}
-              className="mt-4 bg-orange-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-orange-600 transition duration-300 shadow-lg"
-            >
-              Spot 추가하기
-            </button>
-          </li>
-        </ul>
-      )}
-      {showPopup && (
-        <AddSpotSection onClose={closePopup} onSelect={selectSpot} />
-      )}
     </div>
   );
 };
