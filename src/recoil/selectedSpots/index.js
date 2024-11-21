@@ -1,4 +1,3 @@
-import { scrapListAtom } from './atom';
+import selectedSpotsAtom from './atom';
 
-export { scrapListAtom };
-export default scrapListAtom;
+export default selectedSpotsAtom;
