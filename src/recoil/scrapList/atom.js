@@ -1,4 +1,3 @@
-// recoil/scrapList/atom.js
 import { atom } from 'recoil';
 
 const scrapListAtom = atom({
