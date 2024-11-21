@@ -65,7 +65,7 @@ function Calendar() {
         startDate: tripDates.startDate,
         endDate: tripDates.endDate,
       });
-      navigate('/com/destination');
+      navigate('/com/destination-list');
     }
   }
 
