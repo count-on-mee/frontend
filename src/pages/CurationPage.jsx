@@ -2,19 +2,19 @@ import { useState } from 'react';
 import CurationList from '../components/CurationList';
 import CurationDetail from '../components/CurationDetail';
 import { useRecoilValue } from 'recoil';
-import curationsAtom from '../recoil/curation';
+import dCuration from '../dummydata/curation.json'
 
 function CurationPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCuration, setSelectedCuration] = useState(null);
-  const curations = useRecoilValue(curationsAtom);
+  const curations = dCuration;
 
   const handleSearch = e => setSearchTerm(e.target.value);
   const handleSelectCuration = curation => setSelectedCuration(curation);
 
   return (
-    <div className="flex fixed w-1/2 h-full z-10 overflow-y-auto">
-      {!selectedCuration && (
+    <div>
+      <div className="flex fixed w-1/2 z-10">
         <CurationList
           curations={curations}
           searchTerm={searchTerm}
@@ -22,7 +22,6 @@ function CurationPage() {
           onSelectCuration={handleSelectCuration}
           selectedCuration={selectedCuration}
         />
-      )}
       {selectedCuration && (
         <CurationDetail
           className="w-1/2"
@@ -32,6 +31,8 @@ function CurationPage() {
         />
       )}
     </div>
+    </div>
+    
   );
 }
 

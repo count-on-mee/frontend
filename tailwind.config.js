@@ -4,6 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        mixed: ['Goorm', 'Prompt', 'sans-serif'],
         prompt: ['Prompt', 'sans-serif'],
       },
     },
