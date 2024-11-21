@@ -63,8 +63,3 @@ function Carousel ({ imgUrls, spot }) {
 
 export default Carousel;
 
-     
-
-
-
-

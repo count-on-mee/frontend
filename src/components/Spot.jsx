@@ -37,5 +37,6 @@ export default function Spot({ spot, selectedSpot, onClick }) {
       <p className="mx-7 text-sm font-mixed text-gray-400">{spot.address}</p>
       {/* {selectedSpot && <p className="ml-5 text-sm">{selectedSpot?.address}</p>} */}
     </div>
+
   );
 }
