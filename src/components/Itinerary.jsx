@@ -21,6 +21,8 @@ const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
   </button>
 ));
 
+CustomInput.displayName = 'CustomInput';
+
 const calculateDistances = async spots => {
   const service = new google.maps.DistanceMatrixService();
   const results = [];
@@ -184,7 +186,7 @@ const Itinerary = () => {
   );
 
   return (
-    <div className="bg-transparent p-3 sm:p-3 rounded-lg font-mixed">
+    <div className="bg-transparent p-3 sm:p-3 rounded-lg font-mixed">
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
         <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
           <DatePicker
@@ -234,6 +236,7 @@ const Itinerary = () => {
           {isEditing ? '저장' : '수정'}
         </button>
       </div>
+      {selectedSpots}
       <div className="mb-4 flex flex-wrap gap-2">{dayButtons}</div>
       <DragDropContext onDragEnd={onDragEnd}>
         <StrictModeDroppable droppableId="spots">

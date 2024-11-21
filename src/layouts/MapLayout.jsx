@@ -139,7 +139,6 @@ export default function MapLayout() {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header />
       <Outlet context={{ handleSearch }} />
       <div className="flex flex-grow">
         <div className="flex-grow" />

@@ -35,24 +35,24 @@ export default function Header() {
           </button>
         </div>
         <div className="hidden lg:flex lg:gap-x-5">
-          <Link
-            to="/map/spot"
+          <a
+            href="/map/spot"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             spot
-          </Link>
-          <Link
-            to="/map/curation"
+          </a>
+          <a
+            href="/map/curation"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             curation
-          </Link>
-          <Link
-            to="/com/calendar"
+          </a>
+          <a
+            href="/com/my-trip-list"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             count on me
-          </Link>
+          </a>
           <Link
             to="/"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
@@ -62,7 +62,7 @@ export default function Header() {
         </div>
         <div className="hidden lg:flex lg:justify-end">
           <Link
-            href="/"
+            to="/login"
             className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
           >
             Log in
@@ -81,8 +81,8 @@ export default function Header() {
               <span className="sr-only">Your Company</span>
               <img
                 alt=""
-                src="/src/assets/img/icon.png"
-                className="h-16 w-24 border border-[#403D39]"
+                src="./src/assets/img/icon.png"
+                className="h-16 w-auto border border-[#403D39]"
               />
             </a>
             <button
@@ -97,24 +97,25 @@ export default function Header() {
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-[#403D39]/10">
               <div className="space-y-2 py-6">
-                <Link
-                  to="/map/spot"
+                <a
+                  href="#"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-[#403D39] hover:bg-[#EB5E28]/20"
                 >
                   spot
-                </Link>
-                <Link
-                  to="/map/curation"
+                </a>
+                <a
+                  href="#"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-[#403D39] hover:bg-[#EB5E28]/20"
                 >
                   curation
-                </Link>
+                </a>
                 <Link
                   to="/com/calendar"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-[#403D39] hover:bg-[#EB5E28]/20"
                 >
                   count on me
                 </Link>
+
                 <a
                   href="#"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-[#403D39] hover:bg-[#EB5E28]/20"

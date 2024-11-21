@@ -11,14 +11,18 @@ import Itinerary from './components/Itinerary';
 import Details from './components/Details';
 import MyScrapListPage from './pages/MyScrapListPage';
 import { RecoilRoot } from 'recoil';
+import Header from './components/Header';
+import MyTripListPage from './pages/MyTripListPage';
 
 function App() {
   return (
     <RecoilRoot>
+      <Header />
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/com" element={<COMLayout />}>
+          <Route path="my-trip-list" element={<MyTripListPage />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="destination-list" element={<DestinationListPage />} />
           <Route path="my-scrap-list" element={<MyScrapListPage />} />
