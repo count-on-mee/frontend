@@ -11,11 +11,11 @@ export default function CurationDetail({
 }) {
   const spots = useRecoilValue(spotsAtom);
 
-  const getRandomSpots = (spots, count) => {
-    const shuffled = [...spots].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count);
-  };
-  const randomSpots = useMemo(() => getRandomSpots(spots, 10), [spots]);
+  // const getRandomSpots = (spots, count) => {
+  //   const shuffled = [...spots].sort(() => Math.random() - 0.5);
+  //   return shuffled.slice(0, count);
+  // };
+  // const randomSpots = useMemo(() => getRandomSpots(spots, 10), [spots]);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const handleSelectSpot = (spot) => {
     setSelectedSpot(spot);
@@ -23,7 +23,7 @@ export default function CurationDetail({
 
   return (
     <>
-      <div className="w-1/2 bg-[#FFFCF2] border-r-2 border-[#403D39] overflow-y-auto">
+      <div className="w-1/2 bg-[#FFFCF2] border-r-2 border-[#403D39] overflow-y-auto pt-[86px]">
         <div className="flex-wrap">
           <button>
             <ChevronLeftIcon
@@ -40,11 +40,11 @@ export default function CurationDetail({
             className="mx-auto w-4/5 bg-white border border-[#403D39] rounded-xl my-3"
           >
             <img
-              src={spot.image || '../src/assets/img/icon.png'}
+              src={spot.imgUrl || '../src/assets/img/icon.png'}
               className="inline border border-[#403D39] my-3 w-10 h-10 mx-3 opacity-70 object-cover rounded-full"
-              alt={spot.name}
+              alt={spot.title}
             />
-            <p className="inline text-xl font-prompt">{spot.name}</p>
+            <p className="inline text-xl font-prompt">{spot.title}</p>
           </div>
         ))}
       </div>

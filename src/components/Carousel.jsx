@@ -10,7 +10,7 @@ function Carousel ({ imgUrls, spot }) {
     const newIndex = currentIndex === 0 ? imgUrls.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
   };
-
+  
   const handleNext = (event) => {
     event.stopPropagation();
     const newIndex = currentIndex === imgUrls.length - 1 ? 0 : currentIndex + 1;
@@ -62,3 +62,9 @@ function Carousel ({ imgUrls, spot }) {
 }
 
 export default Carousel;
+
+     
+
+
+
+
