@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import CurationList from '../components/CurationList';
 import CurationDetail from '../components/CurationDetail';
-import { useRecoilValue } from 'recoil';
-import dCuration from '../dummydata/curation.json'
+import curationData from '../dummydata/curation.json'
 
 function CurationPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCuration, setSelectedCuration] = useState(null);
-  const curations = dCuration;
-
+  const curations = curationData
   const handleSearch = e => setSearchTerm(e.target.value);
   const handleSelectCuration = curation => setSelectedCuration(curation);
 

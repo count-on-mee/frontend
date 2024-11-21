@@ -1,10 +1,6 @@
 import { useMemo } from 'react';
 import Searchbar from './Searchbar';
 import Curation from './Curation';
-import dCuration from '../dummydata/curation.json';
-import { BookmarkIcon } from '@heroicons/react/24/outline';
-import scrappedCurationsAtom from '../recoil/scrappedcuration';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 export default function CurationList({
   curations,
@@ -13,15 +9,6 @@ export default function CurationList({
   onSelectCuration,
   selectedCuration,
 }) {
-  const scrappedCurations = useRecoilValue(scrappedCurationsAtom);
-  const setScrappedCuration = useSetRecoilState(scrappedCurationsAtom);
-
-  const handleScrapClick = () => {
-    setScrappedCuration(prev => ({
-      ...prev,
-      [curation.id]: !prev[curation.id],
-    }));
-  };
 
   const filteredCurations = useMemo(
     () =>
@@ -30,7 +17,6 @@ export default function CurationList({
       ),
     [curations, searchTerm],
   );
-  
   
   if (selectedCuration) return null;
   else
@@ -43,6 +29,7 @@ export default function CurationList({
             key={curation.id}
             curation={curation}
             onClick={() => onSelectCuration(curation)}
+            selectedCuration={selectedCuration}
           />
         ))}
       </div>

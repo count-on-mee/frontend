@@ -2,7 +2,7 @@
   {
     "id": 1,
     "title": "동대문 맛집 추천",
-    "imageUrl": "https://cdn.inhapress.com/news/photo/201806/7824_2702_353.jpg",
+    "imgUrl": "https://cdn.inhapress.com/news/photo/201806/7824_2702_353.jpg",
     "spot": [
       {
         "id": 1,
@@ -48,8 +48,8 @@
   },
   {
     "id": 2,
-    "title": "체크하기",
-    "imageUrl": "https://cdn.inhapress.com/news/photo/201806/7824_2702_353.jpg",
+    "title": "맛집2",
+    "imgUrl": "https://cdn.inhapress.com/news/photo/201806/7824_2702_353.jpg",
     "spot": [
       {
         "id": 1,
@@ -95,8 +95,8 @@
   },
   {
     "id": 3,
-    "title": "체크하기",
-    "imageUrl": "https://cdn.inhapress.com/news/photo/201806/7824_2702_353.jpg",
+    "title": "맛집3",
+    "imgUrl": "https://cdn.inhapress.com/news/photo/201806/7824_2702_353.jpg",
     "spot": [
       {
         "id": 1,
