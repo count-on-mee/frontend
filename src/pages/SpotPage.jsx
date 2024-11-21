@@ -19,7 +19,6 @@ function SpotPage() {
       handleSearch();
     }
   }, [markers, handleSearch]);
-  }, [markers, handleSearch]);
 
   return (
     <div>
@@ -41,10 +40,7 @@ function SpotPage() {
         <SpotDetail selectedSpot={selectedSpot} setSelectedSpot={setSelectedSpot}/>
         )}
       </div>
-        <SpotDetail selectedSpot={selectedSpot} setSelectedSpot={setSelectedSpot}/>
-      )}
-      </div>
-    </div>
+    </div>  
   );
 }
 
