@@ -1,6 +1,5 @@
 import Spot from './Spot';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import curation from '../dummydata/curation.json';
 
 export default function SpotDetail({ selectedSpot, setSelectedSpot }) {
   const handleClose = () => {
@@ -19,7 +18,21 @@ export default function SpotDetail({ selectedSpot, setSelectedSpot }) {
           <Spot spot={selectedSpot} />
         </div>
       )}  
-      <p className="font-prompt">Photos</p>
+      <div className="font-prompt p-5 text-xl">Photos</div>
+      <div className="grid grid-cols-2 p-2 gap-2">
+        <div className="w-full h-52 border border-[#403D39] flex rounded-md bg-white justify-center items-center">
+          <img
+            src='../src/assets/img/logo.png'
+            className= "w-full px-2"
+          />
+        </div>
+        <div className="w-full h-52 border border-[#403D39] flex rounded-md bg-white justify-center items-center">
+          <img
+            src='../src/assets/img/logo.png'
+            className= "w-full px-2"
+          />
+        </div>
+      </div>
     </div>
   );
 }
