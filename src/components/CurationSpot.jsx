@@ -29,7 +29,7 @@ export default function CurationSpot({spot, setSelectedSpot, spots}) {
       <div className='relative pb-5 border-b-2 border-[#403D39] mt-5'>
         <img
          src={spot.imgUrl} 
-         className='mt-5 w-4/5 h-36 mx-auto opacity-70 object-cover rounded-md'
+         className='mt-5 w-72 h-36 mx-auto opacity-70 object-cover rounded-md'
         />
         <BookmarkIcon
           className={`absolute top-3 right-10 w-5 h-5 ${scrappedSpots[spot.id] ? 'fill-[#EB5E28] stroke-[#EB5E28]' : ''}`}

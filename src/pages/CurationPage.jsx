@@ -12,20 +12,21 @@ function CurationPage() {
 
   return (
     <div>
-      <div className="flex fixed w-1/2 z-10">
+      <div className="flex fixed w-full h-svh z-10 pb-[86px] overflow-y-auto">
         <CurationList
           curations={curations}
           searchTerm={searchTerm}
           onSearch={handleSearch}
           onSelectCuration={handleSelectCuration}
           selectedCuration={selectedCuration}
+          className="w-1/2"
         />
       {selectedCuration && (
         <CurationDetail
-          className="w-1/2"
           selectedCuration={selectedCuration}
           setSelectedCuration={setSelectedCuration}
           setSearchTerm={setSearchTerm}
+          className="w-1/2"
         />
       )}
     </div>

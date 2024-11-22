@@ -23,8 +23,8 @@ export default function CurationDetail({
   };
 
   return (
-    <div className='flex'>
-      <div className="w-full bg-[#FFFCF2] border-r-2 border-[#403D39] overflow-y-auto">
+    <div className="flex w-1/2">
+      <div className="bg-[#FFFCF2] w-1/2 border-r-2 border-[#403D39] overflow-y-auto">
         <div className="flex-wrap">
           <button>
             <ChevronLeftIcon
@@ -51,8 +51,8 @@ export default function CurationDetail({
           
       </div>
       {selectedSpot && (
-        <div className='w-full'>
-          <CurationSpot 
+        <div className='w-1/2'>
+          <CurationSpot
             spot={selectedSpot}
             setSelectedSpot={setSelectedSpot}
             spots={spots}/>
