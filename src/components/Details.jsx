@@ -921,7 +921,7 @@ const Details = () => {
       dataLength={3}
       next={() => {}}
       hasMore={true}
-      loader={<h4>Loading...</h4>}
+      // loader={<h4>Loading...</h4>}
     >
       <div className="bg-[FFCF#F2] ">
         <AccordionItem
