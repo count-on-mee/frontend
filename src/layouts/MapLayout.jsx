@@ -14,6 +14,7 @@ import centerAtom from '../recoil/center';
 import zoomAtom from '../recoil/zoom';
 import markersAtom from '../recoil/markers';
 import selectedSpotAtom, { withCenter } from '../recoil/selectedSpot';
+import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 
 export default function MapLayout() {
   const naverMaps = useNavermaps();
@@ -185,6 +186,14 @@ export default function MapLayout() {
           </NaverMap>
           <MapResearch onSearch={handleSearch} />
         </MapDiv>
+        <button
+          onClick={()=> { navigate('/map/spot') }}
+          className='absolute top-1/2 w-10 h-10 bg-[#403D39] rounded-r-lg'
+        >
+          <ChevronDoubleRightIcon 
+            className='w-6 h-6 ml-3 stroke-[#FFFCF2]'
+          />
+        </button>
       </div>
     </div>
   );

@@ -1,59 +1,63 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Curation from './Curation';
-import SpotDetail from './SpotDetail';
-import spotsAtom from '../recoil/spot';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-import { useRecoilValue } from 'recoil';
+import curationData from '../dummydata/curation.json';
+import CurationSpot from './CurationSpot';
 
 export default function CurationDetail({
   selectedCuration,
   setSelectedCuration,
 }) {
-  const spots = useRecoilValue(spotsAtom);
-
-  const getRandomSpots = (spots, count) => {
-    const shuffled = [...spots].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count);
-  };
-  const randomSpots = useMemo(() => getRandomSpots(spots, 10), [spots]);
+  const [curations, setCurations] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
+
+  useEffect(() => {
+    setCurations(curationData);
+  }, [])
+
+  const spots = curationData[0].spot;
+  
   const handleSelectSpot = (spot) => {
+    console.log('Spot clicked:', spot);
     setSelectedSpot(spot);
   };
 
   return (
-    <>
-      <div className="w-1/2 bg-[#FFFCF2] border-r-2 border-[#403D39] overflow-y-auto">
+    <div className='flex'>
+      <div className="w-full bg-[#FFFCF2] border-r-2 border-[#403D39] overflow-y-auto">
         <div className="flex-wrap">
           <button>
             <ChevronLeftIcon
               className="w-6 h-6 m-3"
-              onClick={() => setSelectedCuration()}
+              onClick={() => setSelectedCuration(null)}
             />
           </button>
-          <Curation className="my-10 flex" curation={selectedCuration} />
+          <Curation className="my-5 flex" curation={selectedCuration} />
         </div>
-        {randomSpots.map(spot => (
+        {spots.map(spot => (
           <div
             key={spot.id}
             onClick={() => handleSelectSpot(spot)}
-            className="mx-auto w-4/5 bg-white border border-[#403D39] rounded-xl my-3"
+            className="mx-auto w-5/6 bg-white border border-[#403D39] rounded-xl my-3"
           >
             <img
-              src={spot.image || '../src/assets/img/icon.png'}
+              src={spot.imgUrl || '../src/assets/img/icon.png'}
               className="inline border border-[#403D39] my-3 w-10 h-10 mx-3 opacity-70 object-cover rounded-full"
-              alt={spot.name}
+              alt={spot.title}
             />
-            <p className="inline text-xl font-prompt">{spot.name}</p>
-          </div>
-        ))}
+          <p className="inline text-xs font-mixed font-bold">{spot.title}</p>
+        </div>
+          ))}
+          
       </div>
       {selectedSpot && (
-        <SpotDetail
-          selectedSpot={selectedSpot}
-          setSelectedSpot={setSelectedSpot}
-        />
+        <div className='w-full'>
+          <CurationSpot 
+            spot={selectedSpot}
+            setSelectedSpot={setSelectedSpot}
+            spots={spots}/>
+        </div>
       )}
-    </>
+    </div>
   );
 }
