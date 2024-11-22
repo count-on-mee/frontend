@@ -12,7 +12,7 @@ export const useAuth = () => {
 
       if (data.token) {
         Cookies.set('token', data.token, { secure: true, sameSite: 'Strict' });
-        setUser(data.user); // 유저 상태 업데이트
+        setUser(data.user);
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -21,7 +21,7 @@ export const useAuth = () => {
 
   const logout = () => {
     Cookies.remove('token');
-    setUser(null); // 유저 상태 초기화
+    setUser(null);
   };
 
   return { login, logout };

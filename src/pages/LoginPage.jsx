@@ -1,13 +1,9 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import useInitializeUser from '../hooks/useInitializeUser';
 
 export default function LoginPage() {
-  const initializeUser = useInitializeUser();
-
   const handleNaverLogin = async () => {
     window.location.href = 'http://localhost:8888/auth/naver';
-    initializeUser();
   };
 
   const handleKakaoLogin = () => {

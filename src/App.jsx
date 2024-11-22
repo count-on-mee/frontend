@@ -40,7 +40,6 @@ function App() {
 
 function InitializeUserWrapper() {
   useInitializeUser();
-  return null;
 }
 
 export default App;

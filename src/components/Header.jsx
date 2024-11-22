@@ -68,7 +68,12 @@ export default function Header() {
         </div>
         <div className="hidden lg:flex lg:justify-end">
           {user ? (
-            <button onClick={logout}>Logout</button>
+            <button
+              className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
+              onClick={logout}
+            >
+              Logout
+            </button>
           ) : (
             <Link
               to="/login"
