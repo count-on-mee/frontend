@@ -48,13 +48,13 @@ export default function Header() {
             curation
           </Link>
           <Link
-            to="/com/calendar"
+            to="/com/my-trip-list"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             count on me
           </Link>
           <Link
-            to="/"
+            to="/#"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             support
@@ -62,7 +62,7 @@ export default function Header() {
         </div>
         <div className="hidden lg:flex lg:justify-end">
           <Link
-            href="/"
+            to="/login"
             className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
           >
             Log in
