@@ -9,11 +9,13 @@ import {
 import Header from '../components/Header';
 import MapPanel from '../components/map/MapPanel';
 import MapResearch from '../components/map/MapResearch';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import centerAtom from '../recoil/center';
 import zoomAtom from '../recoil/zoom';
 import markersAtom from '../recoil/markers';
 import selectedSpotAtom, { withCenter } from '../recoil/selectedSpot';
+import selectedCurationAtom from '../recoil/selectedCuration';
+import selectedCurationSpotAtom from '../recoil/selectedCurationSpot';
 import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 
 export default function MapLayout() {
@@ -25,20 +27,34 @@ export default function MapLayout() {
   const [center, setCenter] = useRecoilState(centerAtom);
   const [zoom, setZoom] = useRecoilState(zoomAtom);
   const [selectedSpot, setSelectedSpot] = useRecoilState(selectedSpotAtom);
+  const selectedCuration = useRecoilValue(selectedCurationAtom);
+  const selectedCurationSpot = useRecoilValue(selectedCurationSpotAtom);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
 
   const navigate = useNavigate();
   const location = useLocation();
-  const isSidebar = location.pathname.includes('/map/spot');
+  const isSpot = location.pathname.includes('/map/spot');
+  const isCuration = location.pathname.includes('/map/curation');
 
   useEffect(() => {
     handleLocateMe();
   }, []);
 
   useEffect(() => {
-    const width = isSidebar ? (selectedSpot ? '50%' : '75%') : '100%';
+    const width = isSpot ? (selectedSpot ? '50%' : '75%') : '100%';
     setMapDivWidth(width);
-  }, [isSidebar, selectedSpot]);
+  }, [isSpot, selectedSpot]);
+
+  useEffect(() => {
+    const width = isCuration
+      ? selectedCuration
+        ? selectedCurationSpot
+          ? '50%'
+          : '75%'
+        : '50%'
+      : '100%';
+    setMapDivWidth(width);
+  }, [isCuration, selectedCuration, selectedCurationSpot, isSpot]);
 
   const handleZoomIn = () => {
     if (mapRef.current) {
@@ -188,12 +204,12 @@ export default function MapLayout() {
           <MapResearch onSearch={handleSearch} />
         </MapDiv>
         <button
-          onClick={()=> { navigate('/map/spot') }}
-          className='absolute top-1/2 w-10 h-10 bg-[#403D39] rounded-r-lg'
+          onClick={() => {
+            navigate('/map/spot');
+          }}
+          className="absolute top-1/2 w-10 h-10 bg-[#403D39] rounded-r-lg"
         >
-          <ChevronDoubleRightIcon 
-            className='w-6 h-6 ml-3 stroke-[#FFFCF2]'
-          />
+          <ChevronDoubleRightIcon className="w-6 h-6 ml-3 stroke-[#FFFCF2]" />
         </button>
       </div>
     </div>
