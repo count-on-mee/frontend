@@ -488,20 +488,45 @@ const CommentIcon = ({ onClick }) => (
 );
 
 const SpotSection = () => {
-  const [spots, setSpots] = useRecoilState(selectedSpotsAtom);
+  const [selectedSpots] = useRecoilState(selectedSpotsAtom);
+  const [dummySpots, setDummySpots] = useState([]);
+  const [localSelectedSpots, setLocalSelectedSpots] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [comments, setComments] = useState({});
+  const [newComment, setNewComment] = useState({});
   const [editingComment, setEditingComment] = useState(null);
+  const [showInput, setShowInput] = useState({});
+  const [insertIndex, setInsertIndex] = useState(null);
 
-  const openPopup = () => setShowPopup(true);
+  useEffect(() => {
+    const initialDummySpots = Array.from({ length: 15 }, (_, i) => ({
+      id: i + 1,
+      name: `My List ${i + 1}`,
+      places: Array.from({ length: 5 }, (_, j) => ({
+        id: `${i + 1}-${j + 1}`,
+        name: `Place ${j + 1} in List ${i + 1}`,
+        url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
+      })),
+    }));
+    setDummySpots(initialDummySpots);
+  }, []);
+
+  const openPopup = (index = null) => {
+    setInsertIndex(index);
+    setShowPopup(true);
+  };
+
   const closePopup = () => setShowPopup(false);
 
-  const handleCommentSubmit = (spotIndex, comment) => {
-    if (comment.trim()) {
+  const handleCommentSubmit = spotIndex => {
+    const comment = newComment[spotIndex];
+    if (comment && comment.trim()) {
       setComments(prev => ({
         ...prev,
         [spotIndex]: [...(prev[spotIndex] || []), comment],
       }));
+      setNewComment(prev => ({ ...prev, [spotIndex]: '' }));
+      setShowInput(prev => ({ ...prev, [spotIndex]: false }));
     }
   };
 
@@ -527,104 +552,210 @@ const SpotSection = () => {
   return (
     <div className="bg-[#D6D6CB] p-4 rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">📌</h2>
-      {spots.length === 0 ? (
+      {localSelectedSpots.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center p-6">
           <p className="text-base text-gray-800 mb-4">
             스팟 후보를 작성해보세요!
           </p>
           <button
-            onClick={openPopup}
-            className="bg-orange-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-orange-600 transition duration-300 shadow-lg"
+            onClick={() => openPopup()}
+            className="bg-transparent text-black font-semibold py-2 px-6 rounded-full border border-black hover:bg-orange-600 transition duration-300 shadow-lg"
           >
             Spot 추가하기
           </button>
         </div>
       ) : (
-        <ul className="space-y-2">
-          {spots.map((spot, spotIndex) => (
-            <li key={spotIndex} className="bg-white p-4 rounded-lg shadow">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">{spot.name}</span>
-                <button
-                  onClick={() => handleCommentSubmit(spotIndex, '')}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  댓글 추가
-                </button>
-              </div>
-              <ul className="mt-2 space-y-2">
-                {comments[spotIndex]?.map((comment, commentIndex) => (
-                  <li
-                    key={commentIndex}
-                    className="flex justify-between items-center"
-                  >
-                    {editingComment?.spot === spotIndex &&
-                    editingComment?.comment === commentIndex ? (
+        <>
+          <ul className="space-y-2">
+            {localSelectedSpots.map((spot, spotIndex) => (
+              <React.Fragment key={spot.id}>
+                <li>
+                  <div className="flex justify-between items-center">
+                    <div className="relative">
+                      <span className="text-lg font-semibold cursor-pointer inline-block group">
+                        {spot.name}
+                        <div className="absolute left-0 top-full mt-2 bg-white p-2 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pointer-events-none">
+                          <div className="flex space-x-2">
+                            {spot.places.map(place => (
+                              <img
+                                key={place.id}
+                                src={place.url}
+                                alt={place.name}
+                                className="w-16 h-16 object-cover rounded"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <svg
+                        onClick={() =>
+                          setShowInput(prev => ({
+                            ...prev,
+                            [spotIndex]: !prev[spotIndex],
+                          }))
+                        }
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        className="h-6 w-6 cursor-pointer text-[#252422] hover:text-[#CCC5B9]"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  {showInput[spotIndex] && (
+                    <div className="mt-4 flex items-center">
                       <input
                         type="text"
-                        defaultValue={comment}
-                        onBlur={e =>
-                          handleCommentEdit(
-                            spotIndex,
-                            commentIndex,
-                            e.target.value,
-                          )
+                        value={newComment[spotIndex] || ''}
+                        onChange={e =>
+                          setNewComment(prev => ({
+                            ...prev,
+                            [spotIndex]: e.target.value,
+                          }))
                         }
-                        autoFocus
+                        placeholder="댓글을 입력하세요..."
+                        className="border bg-transparent rounded-full  p-2 w-full border-[#252422] hover:text-black"
                       />
-                    ) : (
-                      <>
-                        <span>{comment}</span>
-                        <div>
-                          <button
-                            onClick={() =>
-                              setEditingComment({
-                                spot: spotIndex,
-                                comment: commentIndex,
-                              })
+                      <button
+                        onClick={() => handleCommentSubmit(spotIndex)}
+                        className="w-1/5 ml-5 bg-transparent border border-black text-black px-2 py-2 rounded-full hover:bg-gray-500 hover:text-black transition-colors"
+                      >
+                        추가
+                      </button>
+                    </div>
+                  )}
+                  <ul className="mt-2 space-y-2">
+                    {comments[spotIndex]?.map((comment, commentIndex) => (
+                      <li
+                        key={commentIndex}
+                        className="flex justify-between items-center"
+                      >
+                        {editingComment?.spot === spotIndex &&
+                        editingComment?.comment === commentIndex ? (
+                          <input
+                            type="text"
+                            defaultValue={comment}
+                            onBlur={e =>
+                              handleCommentEdit(
+                                spotIndex,
+                                commentIndex,
+                                e.target.value,
+                              )
                             }
-                            className="text-green-500 hover:text-green-700 mr-2"
-                          >
-                            수정
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleCommentDelete(spotIndex, commentIndex)
-                            }
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            삭제
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
+                            autoFocus
+                          />
+                        ) : (
+                          <>
+                            <span>{comment}</span>
+                            <div className="flex items-center">
+                              <svg
+                                onClick={() =>
+                                  setEditingComment({
+                                    spot: spotIndex,
+                                    comment: commentIndex,
+                                  })
+                                }
+                                width="24px"
+                                height="24px"
+                                viewBox="0 0 24 24"
+                                fill="#000000"
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="cursor-pointer text-green-500 hover:text-green-700 mr-2"
+                              >
+                                <path d="m3.99 16.854-1.314 3.504a.75.75 0 0 0 .966.965l3.503-1.314a3 3 0 0 0 1.068-.687L18.36 9.175s-.354-1.061-1.414-2.122c-1.06-1.06-2.122-1.414-2.122-1.414L4.677 15.786a3 3 0 0 0-.687 1.068zm12.249-12.63l1.383-1.383c.248-.248.579-.406.925-.348.487.08 1.232.322 1.934 1.025.703.703.945 1.447 1.025 1.934.058.346-.1.677-.348.925L19.7747s-.353-1.06-1.414-2.12c-1.06-1.062-2.121-1.415-2.121-1.415z" />
+                              </svg>
+                              <svg
+                                onClick={() =>
+                                  handleCommentDelete(spotIndex, commentIndex)
+                                }
+                                fill="#000000"
+                                version="1.1"
+                                id="Layer_1"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 330 330"
+                                xmlSpace="preserve"
+                                className="cursor-pointer text-red-500 hover:text-red-700 w-5 h-5"
+                              >
+                                <path d="M315,285H201.214l124.393-124.394c5.858-5.857,5.858-15.355,0-21.213l-120-120c-5.857-5.858-15.355-5.858-21.213,0l-180,179.999C1.58,202.205,0,206.02,0,209.999s1.58,7.794,4.394,10.607l90,90c2.813,2.813,6.628,4.393,10.606,4.393L165,315c0.006,0,0.011-0.001,0.017-0.001L315,315c8.283,0,15-6.716,15-15C330,291.716,323.284,285,315,285z" />
+                              </svg>
+                            </div>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+                {spotIndex < localSelectedSpots.length - 1 && (
+                  <hr className="border-t border-black my-[16px]" />
+                )}
+              </React.Fragment>
+            ))}
+            <li className="flex justify-center mt-4">
+              <button
+                onClick={() => openPopup(localSelectedSpots.length)}
+                className="bg-[#EB5E28] rounded-full p-2 hover:bg-gray-300 transition duration-300"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+              </button>
             </li>
-          ))}
-        </ul>
+          </ul>
+        </>
       )}
       {showPopup && (
         <AddSpotSection
           onClose={closePopup}
-          onSelect={selectedSpots => {
-            setSpots(selectedSpots);
+          onSelect={newSpots => {
+            setLocalSelectedSpots(prevSpots => {
+              const updatedSpots = [...prevSpots];
+              if (insertIndex !== null) {
+                updatedSpots.splice(insertIndex, 0, ...newSpots);
+              } else {
+                updatedSpots.push(...newSpots);
+              }
+              return updatedSpots;
+            });
             closePopup();
           }}
-          selectedSpots={spots}
+          dummySpots={dummySpots}
+          localSelectedSpots={localSelectedSpots}
         />
       )}
     </div>
   );
 };
 
-const AddSpotSection = ({ onClose, onSelect, selectedSpots }) => {
-  const scrapList = useRecoilValue(scrapListAtom);
-  const [localSelectedSpots, setLocalSelectedSpots] = useState(selectedSpots);
+const AddSpotSection = ({
+  onClose,
+  onSelect,
+  dummySpots,
+  localSelectedSpots,
+}) => {
+  const [tempSelectedSpots, setTempSelectedSpots] = useState([]);
 
   const handleSpotToggle = spot => {
-    setLocalSelectedSpots(prev =>
+    setTempSelectedSpots(prev =>
       prev.some(s => s.id === spot.id)
         ? prev.filter(s => s.id !== spot.id)
         : [...prev, spot],
@@ -632,7 +763,7 @@ const AddSpotSection = ({ onClose, onSelect, selectedSpots }) => {
   };
 
   const handleConfirm = () => {
-    onSelect(localSelectedSpots);
+    onSelect(tempSelectedSpots);
     onClose();
   };
 
@@ -642,11 +773,11 @@ const AddSpotSection = ({ onClose, onSelect, selectedSpots }) => {
         <div className="fixed inset-0 transition-opacity" aria-hidden="true">
           <div className="absolute inset-0 bg-[#FFFCF2] opacity-70 backdrop-filter backdrop-blur-xl"></div>
         </div>
-        <div className="bg-[#D6D6CB] rounded-lg shadow-xl w-full max-w-4xl h-[90vh] relative z-10 overflow-hidden">
-          <div className="h-full overflow-y-auto p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-semibold text-[#252422]">
-                My Scrap List
+        <div className="bg-[#D6D6CB] rounded-lg shadow-xl w-full max-w-[90%] h-[90vh] relative z-[10] overflow-hidden">
+          <div className="h-full overflow-y-auto p-[24px]">
+            <div className="flex items-center justify-between mb-[24px]">
+              <h2 className="text-[24px] font-semibold text-[#252422]">
+                My Scarp List
               </h2>
               <button
                 onClick={onClose}
@@ -654,7 +785,7 @@ const AddSpotSection = ({ onClose, onSelect, selectedSpots }) => {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="h-[24px] w-[24px]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -668,31 +799,31 @@ const AddSpotSection = ({ onClose, onSelect, selectedSpots }) => {
                 </svg>
               </button>
             </div>
-            <ul className="space-y-4">
-              {scrapList.map(spot => (
-                <li key={spot.id} className="bg-white rounded-lg p-4 shadow">
+            <ul className="space-y-[16px]">
+              {dummySpots.map(spot => (
+                <li key={spot.id} className="hr">
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-semibold">{spot.name}</span>
                     <button
                       onClick={() => handleSpotToggle(spot)}
-                      className={`px-4 py-2 rounded-full ${
-                        localSelectedSpots.some(s => s.id === spot.id)
-                          ? 'bg-[#EB5E28] text-white'
-                          : 'bg-gray-200 text-gray-800'
+                      className={`px-4 py-2 rounded-full transition-colors ${
+                        tempSelectedSpots.some(s => s.id === spot.id)
+                          ? 'bg-[#EB5E28] text-black border border-black'
+                          : 'bg-transparent text-gray-800 hover:bg-gray-500 border border-black'
                       }`}
                     >
-                      {localSelectedSpots.some(s => s.id === spot.id)
-                        ? '선택됨'
+                      {tempSelectedSpots.some(s => s.id === spot.id)
+                        ? '선택'
                         : '선택'}
                     </button>
                   </div>
                 </li>
               ))}
             </ul>
-            <div className="mt-6 flex justify-end">
+            <div className="mt-[24px] flex justify-end">
               <button
                 onClick={handleConfirm}
-                className="bg-[#EB5E28] text-white px-4 py-2 rounded-lg hover:bg-[#cc4f22] transition-colors"
+                className="bg-[#EB5E28] text-black border border-black px-4 py-2 rounded-full hover:bg-[#cc4f22] transition-colors"
               >
                 확인
               </button>
@@ -703,7 +834,6 @@ const AddSpotSection = ({ onClose, onSelect, selectedSpots }) => {
     </div>
   );
 };
-
 const TodoList = () => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
@@ -712,7 +842,7 @@ const TodoList = () => {
     if (newTask.trim()) {
       setTasks(prevTasks => [
         ...prevTasks,
-        { text: newTask, completed: false },
+        { id: Date.now(), text: newTask, completed: false },
       ]);
       setNewTask('');
     }
@@ -727,25 +857,25 @@ const TodoList = () => {
   };
 
   return (
-    <div className="bg-[#D6D6CB] p-7 rounded-lg shadow-lg">
-      <div className="flex flex-col sm:flex-row w-full space-y-2 sm:space-y-0 sm:space-x-2">
+    <div className="bg-[#D6D6CB] space-y-4 p-5 rounded-lg shadow-lg">
+      <div className="flex flex-col  sm:flex-row w-full  sm:space-y-0 sm:space-x-2">
         <input
           type="text"
           value={newTask}
           onChange={e => setNewTask(e.target.value)}
-          placeholder="새 할 일을 입력하세요..."
-          className="w-full sm:w-4/5 px-5 py-1 sm:py-1 md:py-2 lg:py-3 border bg-transparent border-black rounded-full font-bold text-base"
+          placeholder="해야할 일을 입력하세요"
+          className="w-full sm:w-4/5 px-5 py-1 sm:py-1 md:py-2 lg:py-2 border bg-transparent border-black rounded-full font-bold text-base"
         />
         <button
           onClick={handleAddTask}
-          className="w-full sm:w-1/5 px-2 py-1 sm:py-1 md:py-2 lg:py-3 border border-black rounded-full font-bold text-lg"
+          className="px-3 py-1 sm:py-1 md:py-2 lg:py-2 border border-black rounded-full font-bold text-lg"
         >
           추가
         </button>
       </div>
-      <ul className="space-y-3">
+      <ul className="space-y-2">
         {tasks.map((task, index) => (
-          <li key={spot.name} className="flex items-center">
+          <li key={task.id} className="flex items-center space-y-2">
             <span
               onClick={() => toggleTaskCompletion(index)}
               className={`cursor-pointer w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-300 ${
@@ -753,7 +883,11 @@ const TodoList = () => {
                   ? 'bg-[#EB5E28] border-[#EB5E28]'
                   : 'border-gray-400'
               }`}
-            ></span>
+            >
+              {task.completed && (
+                <span className="w-3 h-3 bg-white rounded-full"></span>
+              )}
+            </span>
             <span
               className={`ml-4 text-lg ${
                 task.completed ? 'line-through text-gray-500' : 'text-gray-800'
