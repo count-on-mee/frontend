@@ -2,58 +2,271 @@
   {
     "id": 1,
     "title": "동대문 맛집 추천",
-    "imgUrl": "https://cdn.inhapress.com/news/photo/201806/7824_2702_353.jpg",
+    "imgUrl": "https://cdn.docdocdoc.co.kr/news/photo/200809/63566_13723_0623.jpg",
     "spot": [
       {
         "id": 1,
-        "spot_id": 3,
+        "spotId": 3,
         "title": "탭샵바 동대문두타점",
         "addr": "서울 중구 장충단로 275 두타몰 B2 탭샵바",
         "tel": null,
-        "order": 1
+        "order": 1,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240905_300/1725524873804lqKgN_JPEG/KakaoTalk_20240905_172709934.jpg"
       },
       {
         "id": 2,
-        "spot_id": 4,
+        "spotId": 4,
         "title": "순미네 행복게장 동대문점",
         "addr": "서울 중구 을지로43길 38 2층 순미네행복게장",
         "tel": null,
-        "order": 2
+        "order": 2,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240501_278/1714491135006Wyt34_JPEG/2.jpg"
       },
       {
         "id": 3,
-        "spot_id": 6,
+        "spotId": 6,
         "title": "청도미나리식당 동대문역사문화공원점",
         "addr": "서울 중구 을지로43길 7 지하1층",
         "tel": null,
-        "order": 3
+        "order": 3,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231026_134/1698298643955YA4eK_JPEG/1698297760247.jpg"
       },
       {
         "id": 4,
-        "spot_id": 11,
+        "spotId": 11,
         "title": "계진상 동대문현대시티아울렛점",
         "addr": "서울 중구 장충단로13길 20 현대시티아울렛 지하 2층 계진상",
         "tel": null,
-        "order": 4
+        "order": 4,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20241027_199/1730002515117m3Px8_JPEG/1000040763.jpg"
       },
       {
         "id": 5,
-        "spot_id": 45,
+        "spotId": 45,
         "title": "에베레스트레스토랑 동대문역사문화공원점",
         "addr": "서울 중구 장충단로 247 굿모닝시티 쇼핑몰 지하 3층",
         "tel": null,
-        "order": 5
+        "order": 5,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231221_20/1703134508363jKmTW_JPEG/KakaoTalk_20200428_120136567.jpg"
       } 
     ]
   },
   {
     "id": 2,
-    "title": "맛집2",
-    "imgUrl": "https://cdn.inhapress.com/news/photo/201806/7824_2702_353.jpg",
+    "title": "해방촌 핫플레이스",
+    "imgUrl": "https://ak-d.tripcdn.com/images/1i6682224q5meibgy837C_W_640_0_R5_Q80.jpg?proc=source/trip",
     "spot": [
       {
         "id": 1,
-        "spot_id": 3,
+        "spotId": 3,
+        "title": "탭샵바 동대문두타점",
+        "addr": "서울 중구 장충단로 275 두타몰 B2 탭샵바",
+        "tel": null,
+        "order": 1,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240905_300/1725524873804lqKgN_JPEG/KakaoTalk_20240905_172709934.jpg"
+      },
+      {
+        "id": 2,
+        "spotId": 4,
+        "title": "순미네 행복게장 동대문점",
+        "addr": "서울 중구 을지로43길 38 2층 순미네행복게장",
+        "tel": null,
+        "order": 2,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240501_278/1714491135006Wyt34_JPEG/2.jpg"
+      },
+      {
+        "id": 3,
+        "spotId": 6,
+        "title": "청도미나리식당 동대문역사문화공원점",
+        "addr": "서울 중구 을지로43길 7 지하1층",
+        "tel": null,
+        "order": 3,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231026_134/1698298643955YA4eK_JPEG/1698297760247.jpg"
+      },
+      {
+        "id": 4,
+        "spotId": 11,
+        "title": "계진상 동대문현대시티아울렛점",
+        "addr": "서울 중구 장충단로13길 20 현대시티아울렛 지하 2층 계진상",
+        "tel": null,
+        "order": 4,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20241027_199/1730002515117m3Px8_JPEG/1000040763.jpg"
+      },
+      {
+        "id": 5,
+        "spotId": 45,
+        "title": "에베레스트레스토랑 동대문역사문화공원점",
+        "addr": "서울 중구 장충단로 247 굿모닝시티 쇼핑몰 지하 3층",
+        "tel": null,
+        "order": 5,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231221_20/1703134508363jKmTW_JPEG/KakaoTalk_20200428_120136567.jpg"
+      } 
+    ]
+  },
+  {
+    "id": 3,
+    "title": "수영하기 좋은 해변",
+    "imgUrl": "https://img.khan.co.kr/news/2023/05/29/news-p.v1.20230529.48bd5adb4593498783732052a241d4d4_P1.webp",
+    "spot": [
+      {
+        "id": 1,
+        "spotId": 3,
+        "title": "탭샵바 동대문두타점",
+        "addr": "서울 중구 장충단로 275 두타몰 B2 탭샵바",
+        "tel": null,
+        "order": 1,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240905_300/1725524873804lqKgN_JPEG/KakaoTalk_20240905_172709934.jpg"
+      },
+      {
+        "id": 2,
+        "spotId": 4,
+        "title": "순미네 행복게장 동대문점",
+        "addr": "서울 중구 을지로43길 38 2층 순미네행복게장",
+        "tel": null,
+        "order": 2,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240501_278/1714491135006Wyt34_JPEG/2.jpg"
+      },
+      {
+        "id": 3,
+        "spotId": 6,
+        "title": "청도미나리식당 동대문역사문화공원점",
+        "addr": "서울 중구 을지로43길 7 지하1층",
+        "tel": null,
+        "order": 3,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231026_134/1698298643955YA4eK_JPEG/1698297760247.jpg"
+      },
+      {
+        "id": 4,
+        "spotId": 11,
+        "title": "계진상 동대문현대시티아울렛점",
+        "addr": "서울 중구 장충단로13길 20 현대시티아울렛 지하 2층 계진상",
+        "tel": null,
+        "order": 4,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20241027_199/1730002515117m3Px8_JPEG/1000040763.jpg"
+      },
+      {
+        "id": 5,
+        "spotId": 45,
+        "title": "에베레스트레스토랑 동대문역사문화공원점",
+        "addr": "서울 중구 장충단로 247 굿모닝시티 쇼핑몰 지하 3층",
+        "tel": null,
+        "order": 5,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231221_20/1703134508363jKmTW_JPEG/KakaoTalk_20200428_120136567.jpg"
+      } 
+    ]
+  },
+  {
+    "id": 4,
+    "title": "노을 성지 오름",
+    "imgUrl": "https://ak-d.tripcdn.com/images/1i6562224q6wnxb3k5E42_W_640_0_R5_Q80.jpg?proc=source/trip",
+    "spot": [
+      {
+        "id": 1,
+        "spotId": 3,
+        "title": "탭샵바 동대문두타점",
+        "addr": "서울 중구 장충단로 275 두타몰 B2 탭샵바",
+        "tel": null,
+        "order": 1,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240905_300/1725524873804lqKgN_JPEG/KakaoTalk_20240905_172709934.jpg"
+      },
+      {
+        "id": 2,
+        "spotId": 4,
+        "title": "순미네 행복게장 동대문점",
+        "addr": "서울 중구 을지로43길 38 2층 순미네행복게장",
+        "tel": null,
+        "order": 2,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240501_278/1714491135006Wyt34_JPEG/2.jpg"
+      },
+      {
+        "id": 3,
+        "spotId": 6,
+        "title": "청도미나리식당 동대문역사문화공원점",
+        "addr": "서울 중구 을지로43길 7 지하1층",
+        "tel": null,
+        "order": 3,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231026_134/1698298643955YA4eK_JPEG/1698297760247.jpg"
+      },
+      {
+        "id": 4,
+        "spotId": 11,
+        "title": "계진상 동대문현대시티아울렛점",
+        "addr": "서울 중구 장충단로13길 20 현대시티아울렛 지하 2층 계진상",
+        "tel": null,
+        "order": 4,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20241027_199/1730002515117m3Px8_JPEG/1000040763.jpg"
+      },
+      {
+        "id": 5,
+        "spotId": 45,
+        "title": "에베레스트레스토랑 동대문역사문화공원점",
+        "addr": "서울 중구 장충단로 247 굿모닝시티 쇼핑몰 지하 3층",
+        "tel": null,
+        "order": 5,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231221_20/1703134508363jKmTW_JPEG/KakaoTalk_20200428_120136567.jpg"
+      } 
+    ]
+  },
+  {
+    "id": 5,
+    "title": "피크닉 하기 좋은 행궁동",
+    "imgUrl": "https://www.welvoter.co.kr/imgdata/welvoter_co_kr/202406/2024062006023360.png",
+    "spot": [
+      {
+        "id": 1,
+        "spotId": 3,
+        "title": "탭샵바 동대문두타점",
+        "addr": "서울 중구 장충단로 275 두타몰 B2 탭샵바",
+        "tel": null,
+        "order": 1,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240905_300/1725524873804lqKgN_JPEG/KakaoTalk_20240905_172709934.jpg"
+      },
+      {
+        "id": 2,
+        "spotId": 4,
+        "title": "순미네 행복게장 동대문점",
+        "addr": "서울 중구 을지로43길 38 2층 순미네행복게장",
+        "tel": null,
+        "order": 2,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20240501_278/1714491135006Wyt34_JPEG/2.jpg"
+      },
+      {
+        "id": 3,
+        "spotId": 6,
+        "title": "청도미나리식당 동대문역사문화공원점",
+        "addr": "서울 중구 을지로43길 7 지하1층",
+        "tel": null,
+        "order": 3,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231026_134/1698298643955YA4eK_JPEG/1698297760247.jpg"
+      },
+      {
+        "id": 4,
+        "spotId": 11,
+        "title": "계진상 동대문현대시티아울렛점",
+        "addr": "서울 중구 장충단로13길 20 현대시티아울렛 지하 2층 계진상",
+        "tel": null,
+        "order": 4,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20241027_199/1730002515117m3Px8_JPEG/1000040763.jpg"
+      },
+      {
+        "id": 5,
+        "spotId": 45,
+        "title": "에베레스트레스토랑 동대문역사문화공원점",
+        "addr": "서울 중구 장충단로 247 굿모닝시티 쇼핑몰 지하 3층",
+        "tel": null,
+        "order": 5,
+        "imgUrl": "https://ldb-phinf.pstatic.net/20231221_20/1703134508363jKmTW_JPEG/KakaoTalk_20200428_120136567.jpg"
+      } 
+    ]
+  },
+  {
+    "id": 6,
+    "title": "서순라길 한 바퀴 10곳",
+    "imgUrl": "https://i3n.news1.kr/system/photos/2021/11/19/5081402/high.jpg",
+    "spot": [
+      {
+        "id": 1,
+        "spotId": 3,
         "title": "탭샵바 동대문두타점",
         "addr": "서울 중구 장충단로 275 두타몰 B2 탭샵바",
         "tel": null,
@@ -61,7 +274,7 @@
       },
       {
         "id": 2,
-        "spot_id": 4,
+        "spotId": 4,
         "title": "순미네 행복게장 동대문점",
         "addr": "서울 중구 을지로43길 38 2층 순미네행복게장",
         "tel": null,
@@ -69,7 +282,7 @@
       },
       {
         "id": 3,
-        "spot_id": 6,
+        "spotId": 6,
         "title": "청도미나리식당 동대문역사문화공원점",
         "addr": "서울 중구 을지로43길 7 지하1층",
         "tel": null,
@@ -77,7 +290,7 @@
       },
       {
         "id": 4,
-        "spot_id": 11,
+        "spotId": 11,
         "title": "계진상 동대문현대시티아울렛점",
         "addr": "서울 중구 장충단로13길 20 현대시티아울렛 지하 2층 계진상",
         "tel": null,
@@ -85,7 +298,7 @@
       },
       {
         "id": 5,
-        "spot_id": 45,
+        "spotId": 45,
         "title": "에베레스트레스토랑 동대문역사문화공원점",
         "addr": "서울 중구 장충단로 247 굿모닝시티 쇼핑몰 지하 3층",
         "tel": null,
@@ -94,13 +307,13 @@
     ]
   },
   {
-    "id": 3,
-    "title": "맛집3",
-    "imgUrl": "https://cdn.inhapress.com/news/photo/201806/7824_2702_353.jpg",
+    "id": 7,
+    "title": "현지인이 가는 부산 맛집",
+    "imgUrl": "https://img2.daumcdn.net/thumb/R658x0.q70/?fname=https://t1.daumcdn.net/news/202105/25/mango/20210525033940155ndeq.jpg",
     "spot": [
       {
         "id": 1,
-        "spot_id": 3,
+        "spotId": 3,
         "title": "탭샵바 동대문두타점",
         "addr": "서울 중구 장충단로 275 두타몰 B2 탭샵바",
         "tel": null,
@@ -108,7 +321,7 @@
       },
       {
         "id": 2,
-        "spot_id": 4,
+        "spotId": 4,
         "title": "순미네 행복게장 동대문점",
         "addr": "서울 중구 을지로43길 38 2층 순미네행복게장",
         "tel": null,
@@ -116,7 +329,7 @@
       },
       {
         "id": 3,
-        "spot_id": 6,
+        "spotId": 6,
         "title": "청도미나리식당 동대문역사문화공원점",
         "addr": "서울 중구 을지로43길 7 지하1층",
         "tel": null,
@@ -124,7 +337,7 @@
       },
       {
         "id": 4,
-        "spot_id": 11,
+        "spotId": 11,
         "title": "계진상 동대문현대시티아울렛점",
         "addr": "서울 중구 장충단로13길 20 현대시티아울렛 지하 2층 계진상",
         "tel": null,
@@ -132,7 +345,101 @@
       },
       {
         "id": 5,
-        "spot_id": 45,
+        "spotId": 45,
+        "title": "에베레스트레스토랑 동대문역사문화공원점",
+        "addr": "서울 중구 장충단로 247 굿모닝시티 쇼핑몰 지하 3층",
+        "tel": null,
+        "order": 5
+      } 
+    ]
+  },
+  {
+    "id": 8,
+    "title": "전국 야구장 먹거리 추천",
+    "imgUrl": "https://cdn.spotvnews.co.kr/news/photo/202407/691416_1070823_749.jpg",
+    "spot": [
+      {
+        "id": 1,
+        "spotId": 3,
+        "title": "탭샵바 동대문두타점",
+        "addr": "서울 중구 장충단로 275 두타몰 B2 탭샵바",
+        "tel": null,
+        "order": 1
+      },
+      {
+        "id": 2,
+        "spotId": 4,
+        "title": "순미네 행복게장 동대문점",
+        "addr": "서울 중구 을지로43길 38 2층 순미네행복게장",
+        "tel": null,
+        "order": 2
+      },
+      {
+        "id": 3,
+        "spotId": 6,
+        "title": "청도미나리식당 동대문역사문화공원점",
+        "addr": "서울 중구 을지로43길 7 지하1층",
+        "tel": null,
+        "order": 3
+      },
+      {
+        "id": 4,
+        "spotId": 11,
+        "title": "계진상 동대문현대시티아울렛점",
+        "addr": "서울 중구 장충단로13길 20 현대시티아울렛 지하 2층 계진상",
+        "tel": null,
+        "order": 4
+      },
+      {
+        "id": 5,
+        "spotId": 45,
+        "title": "에베레스트레스토랑 동대문역사문화공원점",
+        "addr": "서울 중구 장충단로 247 굿모닝시티 쇼핑몰 지하 3층",
+        "tel": null,
+        "order": 5
+      } 
+    ]
+  },
+  {
+    "id": 9,
+    "title": "서촌 카페 모음",
+    "imgUrl": "https://cafe5.co.kr/wp-content/uploads/2023/07/staffpicks_3.jpg",
+    "spot": [
+      {
+        "id": 1,
+        "spotId": 3,
+        "title": "탭샵바 동대문두타점",
+        "addr": "서울 중구 장충단로 275 두타몰 B2 탭샵바",
+        "tel": null,
+        "order": 1
+      },
+      {
+        "id": 2,
+        "spotId": 4,
+        "title": "순미네 행복게장 동대문점",
+        "addr": "서울 중구 을지로43길 38 2층 순미네행복게장",
+        "tel": null,
+        "order": 2
+      },
+      {
+        "id": 3,
+        "spotId": 6,
+        "title": "청도미나리식당 동대문역사문화공원점",
+        "addr": "서울 중구 을지로43길 7 지하1층",
+        "tel": null,
+        "order": 3
+      },
+      {
+        "id": 4,
+        "spotId": 11,
+        "title": "계진상 동대문현대시티아울렛점",
+        "addr": "서울 중구 장충단로13길 20 현대시티아울렛 지하 2층 계진상",
+        "tel": null,
+        "order": 4
+      },
+      {
+        "id": 5,
+        "spotId": 45,
         "title": "에베레스트레스토랑 동대문역사문화공원점",
         "addr": "서울 중구 장충단로 247 굿모닝시티 쇼핑몰 지하 3층",
         "tel": null,

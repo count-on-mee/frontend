@@ -23,7 +23,7 @@ export default function Curation({ curation,onClick }) {
           className="object-cover w-full px-2 py-2 mx-auto h-64 opacity-70 rounded-2xl"
           alt={curation.title}
         />
-        <div className="absolute text-xl text-white font-prompt bottom-3 left-7">
+        <div className="absolute text-lg text-[#FFFCF2] font-mixed font-extrabold bottom-3 left-7">
           {curation.title}
         </div>
         <BookmarkIcon
