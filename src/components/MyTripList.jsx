@@ -41,17 +41,16 @@ function MyTripList() {
         className="overflow-y-auto rounded-lg mb-10"
         style={{ maxHeight: '400px' }}
       >
-        {/* 확인 */}
         <table className="w-full">
           <tbody className="text-[#252422]">
-            {trips.map(dest => (
+            {trips.map((dest, idx) => (
               <tr key={dest.id}>
                 <td className="border-b border-[#252422] bg-[#FFFCF2] px-5 py-5 text-base">
                   <div className="flex items-center">
                     <div className="h-10 w-10 flex-shrink-0">
                       <img
                         className="h-full w-full rounded-full"
-                        src={`https://source.unsplash.com/100x100/?travel,${dest.name}`}
+                        src={`https://loremflickr.com/100/100?random=${5 * idx}`}
                         alt={dest.name}
                       />
                     </div>

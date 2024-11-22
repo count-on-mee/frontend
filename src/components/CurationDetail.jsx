@@ -1,29 +1,32 @@
 import { useState, useEffect } from 'react';
+import { useRecoilState } from 'recoil';
 import Curation from './Curation';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import curationData from '../dummydata/curation.json';
 import CurationSpot from './CurationSpot';
+import selectedCurationSpotAtom from '../recoil/selectedCurationSpot';
 
 export default function CurationDetail({
   selectedCuration,
   setSelectedCuration,
 }) {
   const [curations, setCurations] = useState([]);
-  const [selectedSpot, setSelectedSpot] = useState(null);
+  const [selectedCurationSpot, setSelectedCurationSpot] = useRecoilState(
+    selectedCurationSpotAtom,
+  );
 
   useEffect(() => {
     setCurations(curationData);
-  }, [])
+  }, []);
 
   const spots = curationData[0].spot;
-  
-  const handleSelectSpot = (spot) => {
-    console.log('Spot clicked:', spot);
-    setSelectedSpot(spot);
+
+  const handleSelectSpot = spot => {
+    setSelectedCurationSpot(spot);
   };
 
   return (
-    <div className="flex w-1/2">
+    <div className="flex w-full">
       <div className="bg-[#FFFCF2] w-1/2 border-r-2 border-[#403D39] overflow-y-auto">
         <div className="flex-wrap">
           <button>
@@ -45,17 +48,17 @@ export default function CurationDetail({
               className="inline border border-[#403D39] my-3 w-10 h-10 mx-3 opacity-70 object-cover rounded-full"
               alt={spot.title}
             />
-          <p className="inline text-xs font-mixed font-bold">{spot.title}</p>
-        </div>
-          ))}
-          
+            <p className="inline text-xs font-mixed font-bold">{spot.title}</p>
+          </div>
+        ))}
       </div>
-      {selectedSpot && (
-        <div className='w-1/2'>
+      {selectedCurationSpot && (
+        <div className="w-1/2">
           <CurationSpot
-            spot={selectedSpot}
-            setSelectedSpot={setSelectedSpot}
-            spots={spots}/>
+            spot={selectedCurationSpot}
+            setSelectedCurationSpot={setSelectedCurationSpot}
+            spots={spots}
+          />
         </div>
       )}
     </div>
