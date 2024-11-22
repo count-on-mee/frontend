@@ -13,6 +13,7 @@ import {
 import CalendarPage from '../pages/CalendarPage';
 import DestinationListPage from '../pages/DestinationListPage';
 import MyScrapListPage from '../pages/MyScrapListPage';
+import MyTripListPage from '../pages/MyTripListPage';
 
 const COMLayout = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -32,6 +33,7 @@ const COMLayout = () => {
   }, []);
 
   const isPopupRoute = [
+    '/com/my-trip-list',
     '/com/calendar',
     '/com/destination-list',
     '/com/my-scrap-list',
@@ -59,6 +61,9 @@ const COMLayout = () => {
                 <div className="bg-white rounded-lg shadow-xl w-full max-w-md relative z-10 flex flex-col">
                   <div className="flex-grow overflow-hidden">
                     <Suspense fallback={<div>Loading...</div>}>
+                      {location.pathname === '/com/my-trip-list' && (
+                        <MyTripListPage />
+                      )}
                       {location.pathname === '/com/calendar' && (
                         <CalendarPage />
                       )}
