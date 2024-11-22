@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
+import useInitializeUser from './hooks/useInitializeUser';
 import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
 import CalendarPage from './pages/CalendarPage';
@@ -14,6 +15,7 @@ import { RecoilRoot } from 'recoil';
 function App() {
   return (
     <RecoilRoot>
+      <InitializeUserWrapper />
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -30,6 +32,11 @@ function App() {
       </Routes>
     </RecoilRoot>
   );
+}
+
+function InitializeUserWrapper() {
+  useInitializeUser();
+  return null;
 }
 
 export default App;

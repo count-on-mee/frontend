@@ -1,11 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useRecoilValue } from 'recoil';
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
+import userAtom from '../recoil/user';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Header() {
+  const user = useRecoilValue(userAtom);
+  const { logout } = useAuth();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -61,12 +67,16 @@ export default function Header() {
           </Link>
         </div>
         <div className="hidden lg:flex lg:justify-end">
-          <Link
-            href="/"
-            className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
-          >
-            Log in
-          </Link>
+          {user ? (
+            <button onClick={logout}>Logout</button>
+          ) : (
+            <Link
+              to="/login"
+              className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
+            >
+              Log in
+            </Link>
+          )}
         </div>
       </nav>
       <Dialog
