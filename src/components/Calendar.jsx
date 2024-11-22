@@ -61,9 +61,11 @@ function Calendar() {
 
   function createEvent() {
     if (tripDates.startDate && tripDates.endDate) {
-      navigate(
-        `/destination?start=${format(tripDates.startDate, 'yyyy-MM-dd')}&end=${format(tripDates.endDate, 'yyyy-MM-dd')}`,
-      );
+      setTripDates({
+        startDate: tripDates.startDate,
+        endDate: tripDates.endDate,
+      });
+      navigate('/com/destination-list');
     }
   }
 

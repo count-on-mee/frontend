@@ -110,7 +110,7 @@ export default function Header() {
                   curation
                 </Link>
                 <Link
-                  to="/calendar"
+                  to="/com/calendar"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-[#403D39] hover:bg-[#EB5E28]/20"
                 >
                   count on me
