@@ -1,5 +1,3 @@
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import MyScrapList from '../components/MyScrapList';
 
 export default function DestinationListPage() {

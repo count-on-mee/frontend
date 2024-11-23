@@ -6,7 +6,6 @@ import {
   Marker,
   useNavermaps,
 } from 'react-naver-maps';
-import Header from '../components/Header';
 import MapPanel from '../components/map/MapPanel';
 import MapResearch from '../components/map/MapResearch';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
@@ -156,7 +155,6 @@ export default function MapLayout() {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header />
       <Outlet context={{ handleSearch }} />
       <div className="flex flex-grow">
         <div className="flex-grow" />
