@@ -208,10 +208,6 @@ const ExpensesSection = () => {
     return num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-  const formatDecimal = num => {
-    return num.toFixed(3).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  };
-
   return (
     <div className="bg-[#D6D6CB] font-mixed text-black p-6 rounded-lg shadow-lg ">
       <table className="w-full border-separate border-spacing-0">
@@ -283,7 +279,10 @@ const ExpensesSection = () => {
               />
             </td>
             <td className="p-3 text-right font-bold">
-              {formatDecimal(total / parseFloat(numberOfPeople || 1))} 원
+              {Math.floor(
+                total / parseFloat(numberOfPeople || 1),
+              ).toLocaleString()}{' '}
+              원
             </td>
           </tr>
         </tbody>
@@ -917,12 +916,7 @@ const Details = () => {
   };
 
   return (
-    <InfiniteScroll
-      dataLength={3}
-      next={() => {}}
-      hasMore={true}
-      // loader={<h4>Loading...</h4>}
-    >
+    <InfiniteScroll dataLength={3} next={() => {}} hasMore={true}>
       <div className="bg-[FFCF#F2] ">
         <AccordionItem
           title="경비"
