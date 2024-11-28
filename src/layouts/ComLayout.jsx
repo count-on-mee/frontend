@@ -1,7 +1,6 @@
-import { useState, useEffect, Suspense } from 'react';
+import { useRef, useState, useEffect, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import COMNavbar from '../components/COMNavbar';
-import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ErrorBoundary from '../components/ErrorBoundary';
 import {
@@ -19,17 +18,46 @@ const COMLayout = () => {
   const [scrollY, setScrollY] = useState(0);
   const location = useLocation();
   const navermaps = useNavermaps();
+  const contentRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
+    const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+  const calculateMapPosition = () => {
+    if (!contentRef.current) return 0;
+
+    const viewportHeight = window.innerHeight;
+    const mapHeight = viewportHeight * 0.7; // 70vh
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const headerHeight = document.querySelector('header').offsetHeight;
+    const footerHeight = document.querySelector('footer').offsetHeight;
+    const marginTopBottom = 20; // 헤더와 푸터와의 간격 (픽셀 단위)
+
+    const maxScroll = document.documentElement.scrollHeight - viewportHeight;
+    const scrollPercentage = Math.min(scrollTop / maxScroll, 1);
+    const availableSpace =
+      viewportHeight -
+      mapHeight -
+      headerHeight -
+      footerHeight -
+      2 * marginTopBottom;
+
+    return Math.max(
+      headerHeight + marginTopBottom,
+      Math.min(
+        scrollPercentage * availableSpace + headerHeight + marginTopBottom,
+        viewportHeight - mapHeight - footerHeight - marginTopBottom,
+      ),
+    );
+  };
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.pageYOffset);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const isPopupRoute = [
@@ -45,9 +73,11 @@ const COMLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
       <COMNavbar />
-      <div className="flex-grow bg-[#FFFCF2] flex">
+      <div
+        className="flex-grow bg-[#FFFCF2] flex overflow-hidden"
+        ref={contentRef}
+      >
         <ErrorBoundary>
           {isPopupRoute ? (
             <div className="fixed inset-0 z-50 overflow-hidden">
@@ -88,11 +118,13 @@ const COMLayout = () => {
               {isOutletRoute && (
                 <div className="w-1/2 pl-2 p-1 relative">
                   <div
-                    className="sticky"
+                    className="fixed"
                     style={{
-                      top: `${Math.max(0, scrollY)}px`,
+                      top: `${calculateMapPosition()}px`,
+                      right: '1rem',
                       height: '70vh',
-                      transition: 'top 0.1s ease-out',
+                      width: 'calc(50% - 2rem)',
+                      transition: 'top 0.3s ease-out',
                     }}
                   >
                     <ErrorBoundary>
