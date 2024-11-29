@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#FFFCF2]">
+      <div className="w-full flex flex-col items-center justify-center bg-[#FFFCF2]">
         <h1 className="text-5xl font-bold text-center text-gray-800 mb-10">
           <img src="src/assets/img/logo.png" alt="Logo" />
         </h1>
@@ -37,8 +37,10 @@ export default function LoginPage() {
         >
           구글 로그인
         </button>
+        <div className="w-full mt-10 fixed bottom-0">
+          <Footer />
+        </div>
       </div>
-      <Footer />
     </>
   );
 }
