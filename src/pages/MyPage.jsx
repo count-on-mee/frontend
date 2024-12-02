@@ -9,7 +9,8 @@ import userAtom from '../recoil/user';
 export default function MyPage () {  
   const user = useRecoilValue(userAtom);
   const setUser = useSetRecoilState(userAtom);
-  const [nickname, setNickname] = useState(user.nickname);
+
+  const [nickname, setNickname] = useState(user?.nickname);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
   const handleSave = () => {
@@ -43,7 +44,7 @@ export default function MyPage () {
             My page
             <div className="relative">
               <div className="w-1/3 h-1/3 mx-auto">
-                {user.profileImgUrl ? (
+                {user && user.profileImgUrl ? (
                   <img 
                     className="rounded-full my-10"
                     src={user.profileImgUrl}
@@ -62,7 +63,7 @@ export default function MyPage () {
             </div>
             <div className="flex flex-col justify-center w-full">
               <div className="inline-flex flex-row items-center mx-auto">
-                { isEditing ? (
+                { user && isEditing ? ( 
                   <>
                   <input
                     className="w-2/3 ml-10 border-b-2 bg-[#FFFCF2] border-[#403D39]"
@@ -72,7 +73,7 @@ export default function MyPage () {
                   />
                   </>
                 ) : (
-                  <div className="text-3xl font-mixed font-bold">{ user.nickname }</div>
+                  <div className="text-3xl font-mixed font-bold">{ user?.nickname }</div>
                   )
                 }
                 <button 
