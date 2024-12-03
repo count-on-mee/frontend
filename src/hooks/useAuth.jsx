@@ -20,7 +20,7 @@ export const useAuth = () => {
   };
 
   const logout = () => {
-    Cookies.remove('token');
+    Cookies.remove('accessToken');
     setUser(null);
   };
 

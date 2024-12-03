@@ -14,6 +14,7 @@ import Details from './components/Details';
 import MyScrapListPage from './pages/MyScrapListPage';
 import MyTripListPage from './pages/MyTripListPage';
 import { RecoilRoot } from 'recoil';
+import { Suspense } from 'react';
 
 function App() {
   return (
@@ -22,25 +23,27 @@ function App() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow flex">
-          <Routes>
-            <Route path="/" element={<MainPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/com" element={<COMLayout />}>
-              <Route path="my-trip-list" element={<MyTripListPage />} />
-              <Route path="calendar" element={<CalendarPage />} />
-              <Route
-                path="destination-list"
-                element={<DestinationListPage />}
-              />
-              <Route path="my-scrap-list" element={<MyScrapListPage />} />
-              <Route path="itinerary" element={<Itinerary />} />
-              <Route path="details" element={<Details />} />
-            </Route>
-            <Route path="/map" element={<MapLayout />}>
-              <Route path="spot" element={<SpotPage />} />
-              <Route path="curation" element={<CurationPage />} />
-            </Route>
-          </Routes>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/com" element={<COMLayout />}>
+                <Route path="my-trip-list" element={<MyTripListPage />} />
+                <Route path="calendar" element={<CalendarPage />} />
+                <Route
+                  path="destination-list"
+                  element={<DestinationListPage />}
+                />
+                <Route path="my-scrap-list" element={<MyScrapListPage />} />
+                <Route path="itinerary" element={<Itinerary />} />
+                <Route path="details" element={<Details />} />
+              </Route>
+              <Route path="/map" element={<MapLayout />}>
+                <Route path="spot" element={<SpotPage />} />
+                <Route path="curation" element={<CurationPage />} />
+              </Route>
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </RecoilRoot>

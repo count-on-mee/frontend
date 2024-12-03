@@ -17,9 +17,12 @@ import selectedCurationAtom from '../recoil/selectedCuration';
 import selectedCurationSpotAtom from '../recoil/selectedCurationSpot';
 import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 
+import Cookies from 'js-cookie';
+
 export default function MapLayout() {
   const naverMaps = useNavermaps();
   const [mapDivWidth, setMapDivWidth] = useState('100%');
+  const [isActive, setIsActive] = useState(null);
   const mapRef = useRef(null);
 
   const [markers, setMarkers] = useRecoilState(markersAtom);
@@ -32,28 +35,28 @@ export default function MapLayout() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const isSpot = location.pathname.includes('/map/spot');
-  const isCuration = location.pathname.includes('/map/curation');
 
   useEffect(() => {
-    handleLocateMe();
-  }, []);
+    if (location.pathname.includes('/map/spot')) {
+      setIsActive('spot');
+    } else if (location.pathname.includes('/map/curation')) {
+      setIsActive('curation');
+    } else {
+      setIsActive(null);
+    }
+  }, [isActive, location.pathname]);
 
   useEffect(() => {
-    const width = isSpot ? (selectedSpot ? '50%' : '75%') : '100%';
+    let width;
+    if (isActive === 'spot') {
+      width = selectedSpot ? '50%' : '75%';
+    } else if (isActive === 'curation') {
+      width = selectedCuration ? (selectedCurationSpot ? '50%' : '75%') : '50%';
+    } else {
+      width = '100%';
+    }
     setMapDivWidth(width);
-  }, [isSpot, selectedSpot]);
-
-  useEffect(() => {
-    const width = isCuration
-      ? selectedCuration
-        ? selectedCurationSpot
-          ? '50%'
-          : '75%'
-        : '50%'
-      : '100%';
-    setMapDivWidth(width);
-  }, [isCuration, selectedCuration, selectedCurationSpot, isSpot]);
+  }, [isActive, selectedSpot, selectedCuration, selectedCurationSpot]);
 
   const handleZoomIn = () => {
     if (mapRef.current) {
@@ -123,11 +126,17 @@ export default function MapLayout() {
     url.searchParams.append('lng', center.lng);
     url.searchParams.append('zoom', zoom);
 
+    const token = Cookies.get('accessToken');
+
     try {
       const response = await fetch(url, {
         method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       const data = await response.json();
+
       setMarkers(
         data.map(place => ({
           id: place.spotId,
