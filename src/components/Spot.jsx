@@ -1,13 +1,44 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 import Carousel from './Carousel';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import markersAtom from '../recoil/markers';
+import selectedSpotAtom from '../recoil/selectedSpot';
+import userAtom from '../recoil/user';
+import Cookies from 'js-cookie';
 
 export default function Spot({ spot, onClick }) {
-  const handleScrapClick = event => {
+  const setMarkers = useSetRecoilState(markersAtom);
+  const [selectedSpot, setSelectedSpot] = useRecoilState(selectedSpotAtom);
+  const user = useRecoilValue(userAtom);
+
+  const handleScrapClick = async event => {
     event.stopPropagation();
-    // setScrappedSpots(prev => ({
-    //   ...prev,
-    //   [spot.id]: !prev[spot.id],
-    // }));
+    if (!user) {
+      alert('로그인이 필요한 서비스입니다.');
+      return;
+    }
+
+    try {
+      const token = Cookies.get('accessToken');
+      const method = spot.isScraped ? 'DELETE' : 'POST';
+      await fetch(`http://localhost:8888/scraps/spots/${spot.id}`, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMarkers(prev => {
+        const updatedMarkers = Array.isArray(prev) ? prev : [];
+        return updatedMarkers.map(marker =>
+          marker.id === spot.id
+            ? { ...marker, isScraped: !marker.isScraped }
+            : marker,
+        );
+      });
+      if (selectedSpot && selectedSpot.id === spot.id) {
+        setSelectedSpot(prev => ({ ...prev, isScraped: !prev.isScraped }));
+      }
+    } catch (error) {
+      console.error('Failed to update scrap status', error);
+    }
   };
 
   return (

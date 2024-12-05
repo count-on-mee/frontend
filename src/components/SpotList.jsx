@@ -17,9 +17,11 @@ export default function SpotList() {
     setCurrentSpots(spots.slice(indexOfFirstSpot, indexOfLastSpot));
   }, [spots, currentPage]);
 
+  const spotIds = spots.map(spot => spot.id).join(',');
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [spots]);
+  }, [spotIds]);
 
   const paginate = pageNumber => setCurrentPage(pageNumber);
 
