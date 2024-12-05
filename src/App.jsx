@@ -33,8 +33,10 @@ function App() {
                 element={<DestinationListPage />}
               />
               <Route path="my-scrap-list" element={<MyScrapListPage />} />
-              <Route path="itinerary" element={<Itinerary />} />
-              <Route path="details" element={<Details />} />
+              <Route path=":tripId">
+                <Route path="itinerary" element={<Itinerary />} />
+                <Route path="details" element={<Details />} />
+              </Route>
             </Route>
             <Route path="/map" element={<MapLayout />}>
               <Route path="spot" element={<SpotPage />} />
