@@ -51,7 +51,7 @@ export default function MyPage () {
                   />
                 ) : (
                   <UserIcon 
-                    className="bg-[#CCC5B9] jusftify-center items-center p-10 my-10" 
+                    className="bg-[#CCC5B9] jusftify-center rounded-full items-center p-10 my-10" 
                   />
                 )}
               </div>
