@@ -1,4 +1,10 @@
-import React, { useState, forwardRef, useMemo, useEffect } from 'react';
+import React, {
+  useState,
+  forwardRef,
+  useMemo,
+  useEffect,
+  useContext,
+} from 'react';
 import DatePicker from 'react-datepicker';
 import { format, addDays, eachDayOfInterval } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -9,6 +15,7 @@ import { CalendarIcon } from '@heroicons/react/24/solid';
 import { useRecoilState } from 'recoil';
 import tripDatesAtom from '../recoil/tripDates';
 import selectedSpotsAtom from '../recoil/selectedSpots';
+import { SocketContext } from '../layouts/ComLayout';
 
 const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
   <button
@@ -23,92 +30,50 @@ const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
 
 CustomInput.displayName = 'CustomInput';
 
-const calculateDistances = async spots => {
-  const service = new google.maps.DistanceMatrixService();
-  const results = [];
-
-  for (let i = 0; i < spots.length - 1; i++) {
-    const origin = spots[i].name;
-    const destination = spots[i + 1].name;
-
-    try {
-      const response = await service.getDistanceMatrix({
-        origins: [origin],
-        destinations: [destination],
-        travelMode: 'DRIVING',
-      });
-
-      if (response.rows[0].elements[0].status === 'OK') {
-        results.push({
-          distance: response.rows[0].elements[0].distance.text,
-          duration: response.rows[0].elements[0].duration.text,
-        });
-      } else {
-        results.push({ distance: 'N/A', duration: 'N/A' });
-      }
-    } catch (error) {
-      console.error('Error calculating distance:', error);
-      results.push({ distance: 'Error', duration: 'Error' });
-    }
-  }
-
-  return results;
-};
-
-const Itinerary = () => {
+const Itinerary = ({ tripId }) => {
   const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
   const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDay, setSelectedDay] = useState(1);
-  const [distances, setDistances] = useState([]);
   const [tripPeriod, setTripPeriod] = useState(0);
   const [spotsByDay, setSpotsByDay] = useState([]);
-  const [filteredSpots, setFilteredSpots] = useState([]);
+  const socket = useContext(SocketContext);
 
+  // 소켓 이벤트 설정
   useEffect(() => {
-    const getDistances = async () => {
-      if (selectedSpots.length > 1) {
-        const distanceResults = await calculateDistances(selectedSpots);
-        setDistances(distanceResults);
-      } else {
-        setDistances([]);
-      }
-    };
+    if (socket && tripId) {
+      socket.emit('join_trip', tripId);
 
-    getDistances();
-  }, [selectedSpots]);
-
-  useEffect(() => {
-    if (tripDates.startDate && tripDates.endDate) {
-      const period = eachDayOfInterval({
-        start: tripDates.startDate,
-        end: tripDates.endDate,
-      });
-      setTripPeriod(period.length);
-
-      const updatedSpotsByDay = Array.from({ length: period.length }, () => []);
-
-      selectedSpots.forEach((spot, index) => {
-        const dayIndex = index % period.length;
-        updatedSpotsByDay[dayIndex].push(spot);
+      socket.on('selected_spots_updated', updatedSpots => {
+        setSelectedSpots(updatedSpots);
       });
 
-      setSpotsByDay(updatedSpotsByDay);
-    }
-  }, [tripDates, selectedSpots]);
+      socket.on('trip_dates_updated', updatedDates => {
+        setTripDates(updatedDates);
+      });
 
+      return () => {
+        socket.off('selected_spots_updated');
+        socket.off('trip_dates_updated');
+      };
+    }
+  }, [socket, tripId]);
+
+  // 여행 날짜 변경 시 서버에 전송
   useEffect(() => {
-    if (
-      !tripDates.startDate ||
-      isNaN(new Date(tripDates.startDate).getTime())
-    ) {
-      setTripDates(prev => ({ ...prev, startDate: new Date() }));
+    if (socket && tripDates) {
+      socket.emit('update_trip_dates', { tripId, dates: tripDates });
     }
-    if (!tripDates.endDate || isNaN(new Date(tripDates.endDate).getTime())) {
-      setTripDates(prev => ({ ...prev, endDate: addDays(new Date(), 7) }));
-    }
-  }, [tripDates, setTripDates]);
+  }, [socket, tripDates, tripId]);
 
+  // Spot 추가
+  const addSpot = spot => {
+    const updatedSpots = [...selectedSpots, spot];
+    setSelectedSpots(updatedSpots);
+    socket.emit('update_selected_spots', { tripId, spots: updatedSpots });
+  };
+
+  // Drag and Drop 핸들링
   const onDragEnd = result => {
     if (!result.destination) return;
 
@@ -120,8 +85,31 @@ const Itinerary = () => {
     const updatedSpotsByDay = [...spotsByDay];
     updatedSpotsByDay[dayIndex] = items;
     setSpotsByDay(updatedSpotsByDay);
+
+    // 서버로 업데이트된 데이터를 전송
+    socket.emit('update_selected_spots', { tripId, spots: updatedSpotsByDay });
   };
 
+  // 여행 날짜 계산 및 Spots 분배
+  useEffect(() => {
+    if (tripDates.startDate && tripDates.endDate) {
+      const period = eachDayOfInterval({
+        start: tripDates.startDate,
+        end: tripDates.endDate,
+      });
+      setTripPeriod(period.length);
+
+      const updatedSpotsByDay = Array.from({ length: period.length }, () => []);
+      selectedSpots.forEach((spot, index) => {
+        const dayIndex = index % period.length;
+        updatedSpotsByDay[dayIndex].push(spot);
+      });
+
+      setSpotsByDay(updatedSpotsByDay);
+    }
+  }, [tripDates, selectedSpots]);
+
+  // 날짜 변경 처리
   const handleDateChange = (date, isStart) => {
     setTripDates(prev => {
       const newDates = { ...prev };
@@ -140,6 +128,7 @@ const Itinerary = () => {
     });
   };
 
+  // 총 일수 계산
   const totalDays = useMemo(() => {
     if (!tripDates.startDate || !tripDates.endDate) return 0;
     return (
@@ -148,12 +137,6 @@ const Itinerary = () => {
       ) + 1
     );
   }, [tripDates]);
-
-  useEffect(() => {
-    if (selectedDay > 0 && selectedDay <= tripPeriod) {
-      setFilteredSpots(spotsByDay[selectedDay - 1] || []);
-    }
-  }, [selectedDay, spotsByDay, tripPeriod]);
 
   const dayButtons = useMemo(() => {
     return Array.from({ length: totalDays }, (_, i) => (
@@ -173,41 +156,25 @@ const Itinerary = () => {
 
   const draggableItems = useMemo(
     () =>
-      filteredSpots.map((spot, index) => (
-        <React.Fragment key={spot.id}>
-          <Draggable draggableId={String(spot.id)} index={index}>
-            {(provided, snapshot) => (
-              <li
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                className={`bg-transparent p-4 rounded-lg shadow-lg flex justify-between items-center transition duration-300 ${
-                  snapshot.isDragging
-                    ? 'bg-[#EB5E28] text-black'
-                    : 'text-gray-900'
-                }`}
-              >
-                <span className="font-semibold">{spot.name}</span>
-                <span className="text-sm text-gray-500">
-                  {format(
-                    addDays(
-                      new Date(tripDates.startDate),
-                      selectedSpots.indexOf(spot) % tripPeriod,
-                    ),
-                    'yyyy-MM-dd',
-                  )}
-                </span>
-              </li>
-            )}
-          </Draggable>
-          {index < filteredSpots.length - 1 && (
-            <li className="text-sm text-gray-500 pl-4 py-2">
-              Distance: 예상 거리 | Travel time: 예상 시간
+      spotsByDay[selectedDay - 1]?.map((spot, index) => (
+        <Draggable key={spot.id} draggableId={String(spot.id)} index={index}>
+          {(provided, snapshot) => (
+            <li
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              className={`bg-transparent p-4 rounded-lg shadow-lg flex justify-between items-center transition duration-300 ${
+                snapshot.isDragging
+                  ? 'bg-[#EB5E28] text-black'
+                  : 'text-gray-900'
+              }`}
+            >
+              <span className="font-semibold">{spot.name}</span>
             </li>
           )}
-        </React.Fragment>
+        </Draggable>
       )),
-    [filteredSpots, tripDates.startDate, selectedSpots, tripPeriod],
+    [spotsByDay, selectedDay],
   );
 
   return (
@@ -226,17 +193,6 @@ const Itinerary = () => {
             locale={ko}
             disabled={!isEditing}
             customInput={<CustomInput placeholder="시작 날짜" />}
-            popperPlacement="auto"
-            popperModifiers={[
-              {
-                name: 'preventOverflow',
-                options: {
-                  rootBoundary: 'viewport',
-                  tether: false,
-                  altAxis: true,
-                },
-              },
-            ]}
           />
           <DatePicker
             selected={tripDates.endDate}
@@ -256,7 +212,7 @@ const Itinerary = () => {
           onClick={() => setIsEditing(!isEditing)}
           className={`w-full sm:w-auto bg-transparent border-b border-black text-black px-3 py-3 rounded-full transition duration-300 ${
             isEditing ? 'hover:bg-[#D54E23]' : 'hover:bg-[#D54E23]'
-          } focus:outline-none focus:ring-2 focus:ring-[#EB5E28] focus:ring-opacity-50`}
+          }`}
         >
           {isEditing ? '저장' : '수정'}
         </button>
