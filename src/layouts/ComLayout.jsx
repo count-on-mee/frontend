@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import useSocket from '../hooks/useSocket';
 import { useRecoilState } from 'recoil';
-import { spotOrderState } from '../recoil/atoms';
+//import { spotOrderState } from '../recoil/atoms';
 import COMNavbar from '../components/COMNavbar';
 import Footer from '../components/Footer';
 import ErrorBoundary from '../components/ErrorBoundary';

@@ -15,7 +15,7 @@ import { CalendarIcon } from '@heroicons/react/24/solid';
 import { useRecoilState } from 'recoil';
 import tripDatesAtom from '../recoil/tripDates';
 import selectedSpotsAtom from '../recoil/selectedSpots';
-import { SocketContext } from '../layouts/ComLayout';
+//import { SocketContext } from '../layouts/ComLayout';
 
 const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
   <button

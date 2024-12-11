@@ -60,7 +60,7 @@ export default function Header() {
             count on me
           </Link>
           <Link
-            to="/#"
+            to="/support"
             className="font-prompt text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             support
@@ -124,12 +124,7 @@ export default function Header() {
                 >
                   curation
                 </Link>
-                <Link
-                  to="/com/calendar"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-[#403D39] hover:bg-[#EB5E28]/20"
-                >
-                  count on me
-                </Link>
+
                 <a
                   href="#"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-[#403D39] hover:bg-[#EB5E28]/20"

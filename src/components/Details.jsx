@@ -8,7 +8,7 @@ import React, {
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import selectedSpotsAtom from '../recoil/selectedSpots';
-import { SocketContext } from '../layouts/ComLayout';
+//import { SocketContext } from '../layouts/ComLayout';
 
 const AccordionItem = ({ title, content, isOpen, onToggle }) => {
   return (

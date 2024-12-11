@@ -14,6 +14,10 @@ import Details from './components/Details';
 import MyScrapListPage from './pages/MyScrapListPage';
 import MyTripListPage from './pages/MyTripListPage';
 import { RecoilRoot } from 'recoil';
+import SupportLayout from './layouts/SupportLayout';
+import Notice from './components/Notice';
+import FAQ from './components/FAQ';
+import Inquiry from './components/Inquiry';
 
 function App() {
   return (
@@ -39,6 +43,11 @@ function App() {
             <Route path="/map" element={<MapLayout />}>
               <Route path="spot" element={<SpotPage />} />
               <Route path="curation" element={<CurationPage />} />
+            </Route>
+            <Route path="/support" element={<SupportLayout />}>
+              <Route path="notice" element={<Notice />} />
+              <Route path="faq" element={<FAQ />} />
+              <Route path="inquiry" element={<Inquiry />} />
             </Route>
           </Routes>
         </main>
