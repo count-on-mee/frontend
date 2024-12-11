@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Container as MapDiv, NaverMap, useNavermaps } from 'react-naver-maps';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import axios from 'axios';
+import Cookies from 'js-cookie';
 import selectedSpotsAtom from '../recoil/selectedSpots';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import tripDatesAtom from '../recoil/tripDates';
@@ -79,21 +79,28 @@ function MyScriptList() {
     });
   };
 
-  const api = axios.create({
-    baseURL: 'http://localhost:8888',
-  });
-
   const handleStartTrip = async () => {
     if (selectedSpots.length > 0) {
       try {
-        const response = await api.post('/api/trips/create', {
-          title: '새로운 여행',
-          destination: selectedDestinations.map(d => d.name).join(', '),
-          start_date: tripDates.startDate,
-          end_date: tripDates.endDate,
+        const token = Cookies.get('accessToken');
+        const method = 'POST';
+        const response = await fetch(`http://localhost:8888/trips`, {
+          method,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '새로운 여행',
+            destination: selectedDestinations.map(d => d.name).join(', '),
+            startDate: tripDates.startDate,
+            endDate: tripDates.endDate,
+            spotIds: [1, 2, 3, 4, 5],
+          }),
         });
 
-        const newTripId = response.data.tripId;
+        const responseBody = await response.json();
+        const newTripId = responseBody.tripId;
         navigate(`/com/${newTripId}/itinerary`);
       } catch (error) {
         console.error('여행 저장 실패:', error);
