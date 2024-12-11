@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 
 const FAQ = () => {
   useEffect(() => {
-    // JavaScript for FAQ toggle functionality
     document.querySelectorAll('[data-toggle="faq"]').forEach(button => {
       button.addEventListener('click', () => {
         const answer = button.nextElementSibling;
@@ -20,11 +19,11 @@ const FAQ = () => {
   }, []);
 
   return (
-    <section className="py-10 bg-gray-50 sm:py-16 lg:py-24">
+    <section className="p-4 bg-[#FFFCF2] sm:py-8 lg:py-12">
       <div className="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl font-bold leading-tight text-black sm:text-4xl lg:text-5xl">
-            Explore Common Questions
+            Frequently Asked Questions
           </h2>
         </div>
         <div className="max-w-3xl mx-auto mt-8 space-y-4 md:mt-16">

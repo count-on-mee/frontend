@@ -5,7 +5,7 @@ const COMNavbar = () => {
 
   return (
     <nav className="bg-[#FFFCF2]">
-      <div className="max-w-screen-xl px-10 py-7 mx-auto">
+      <div className="max-w-screen-xl px-10 py-4 mx-auto">
         <div className="flex items-center">
           <ul className="flex flex-row font-mixed font-medium mt-0 space-x-40 rtl:space-x-reverse text-base">
             <li>

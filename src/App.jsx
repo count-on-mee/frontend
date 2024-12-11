@@ -16,8 +16,11 @@ import MyTripListPage from './pages/MyTripListPage';
 import { RecoilRoot } from 'recoil';
 import SupportLayout from './layouts/SupportLayout';
 import Notice from './components/Notice';
+import NoticeDetail from './pages/NoticeDetailsPage';
 import FAQ from './components/FAQ';
 import Inquiry from './components/Inquiry';
+import InquiryPage from './pages/InquiryPage';
+import InquiryDetail from './pages/InquiryDetailsPage';
 
 function App() {
   return (
@@ -45,9 +48,13 @@ function App() {
               <Route path="curation" element={<CurationPage />} />
             </Route>
             <Route path="/support" element={<SupportLayout />}>
+              <Route index element={<Notice />} />
               <Route path="notice" element={<Notice />} />
               <Route path="faq" element={<FAQ />} />
               <Route path="inquiry" element={<Inquiry />} />
+              <Route path="/notice/:id" element={<NoticeDetail />} />
+              <Route path="/inquiry/:id" element={<InquiryDetail />} />
+              <Route path="/inquirypage" element={<InquiryPage />} />
             </Route>
           </Routes>
         </main>

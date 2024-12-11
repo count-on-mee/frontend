@@ -4,7 +4,7 @@ import useSocket from '../hooks/useSocket';
 import { useRecoilState } from 'recoil';
 //import { spotOrderState } from '../recoil/atoms';
 import COMNavbar from '../components/COMNavbar';
-import Footer from '../components/Footer';
+
 import ErrorBoundary from '../components/ErrorBoundary';
 import {
   Container as MapDiv,
