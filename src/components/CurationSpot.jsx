@@ -1,5 +1,5 @@
 import { XMarkIcon, BookmarkIcon } from '@heroicons/react/24/outline';
-import scrappedSpotsAtom from '../recoil/scrappedspot';
+import scrappedSpotsAtom from '../recoil/scrappedSpot';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 export default function CurationSpot({ spot, setSelectedCurationSpot, spots }) {

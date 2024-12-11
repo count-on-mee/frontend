@@ -7,7 +7,7 @@ const useInitializeUser = () => {
   const setUser = useSetRecoilState(userAtom);
 
   useEffect(() => {
-    const token = Cookies.get('token');
+    const token = Cookies.get('accessToken');
     if (token) {
       fetchUser(token);
     }

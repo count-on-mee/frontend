@@ -21,14 +21,14 @@ export default function Header() {
         className="flex max-w-full items-center justify-between py-2 px-10 border-b-2 border-[#403D39]"
       >
         <div className="flex">
-          <a href="#" className="-m-1.5 p-1.5">
+          <Link to="/" className="-m-1.5 p-1.5">
             <span className="sr-only">Your Company</span>
             <img
               alt="logo"
               src="/src/assets/img/icon.png"
               className="w-24 h-15 border border-[#403D39]"
             />
-          </a>
+          </Link>
         </div>
         <div className="flex lg:hidden">
           <button
