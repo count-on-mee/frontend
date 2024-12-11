@@ -1,201 +1,93 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-const InquiryDetails = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-    dataConsent: false,
-    marketing: false,
-  });
-  const [errors, setErrors] = useState({});
-  const [showSuccess, setShowSuccess] = useState(false);
-
-  const validators = {
-    name: value => value.trim().length >= 2,
-    email: value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-    message: value => value.trim().length >= 10,
-  };
-
-  const validateField = (name, value) => {
-    if (validators[name]) {
-      return validators[name](value);
-    }
-    return true;
-  };
-
-  const handleChange = e => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
+const InquiryPage = () => {
+  const [name, setName] = useState('');
+  const [inquiryType, setInquiryType] = useState('');
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
   const handleSubmit = e => {
     e.preventDefault();
-    let newErrors = {};
-    let hasErrors = false;
 
-    Object.keys(validators).forEach(field => {
-      if (!validateField(field, formData[field])) {
-        newErrors[field] = true;
-        hasErrors = true;
-      }
-    });
-
-    if (!formData.dataConsent) {
-      newErrors.dataConsent = true;
-      hasErrors = true;
-    }
-
-    setErrors(newErrors);
-
-    if (!hasErrors) {
-      console.log('Form data:', formData);
-      setShowSuccess(true);
-      setFormData({
-        name: '',
-        email: '',
-        message: '',
-        dataConsent: false,
-        marketing: false,
-      });
-      setTimeout(() => setShowSuccess(false), 5000);
-    }
+    alert('Inquiry submitted!');
   };
 
-  useEffect(() => {
-    const debounce = setTimeout(() => {
-      const newErrors = {};
-      Object.keys(validators).forEach(field => {
-        if (formData[field] && !validateField(field, formData[field])) {
-          newErrors[field] = true;
-        }
-      });
-      setErrors(newErrors);
-    }, 300);
-
-    return () => clearTimeout(debounce);
-  }, [formData]);
-
   return (
-    <div className="bg-[#FFFCF2] flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        {showSuccess && (
-          <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md">
-            Thank you! Your form has been submitted successfully.
-          </div>
-        )}
-
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">Contact Form</h1>
-
-        <form onSubmit={handleSubmit}>
+    <div className="min-h-screen bg-[#FFFCF2] py-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-bold text-center mb-4">문의하기</h2>
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-lg mx-auto bg-white p-6 rounded-md shadow-md"
+        >
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Name
+            <label htmlFor="name" className="block font-semibold">
+              이름
             </label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.name ? 'border-red-500' : ''
-              }`}
+              id="name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              required
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">
-                Name must be at least 2 characters long.
-              </p>
-            )}
           </div>
-
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Email
+            <label htmlFor="inquiryType" className="block font-semibold">
+              문의 유형
+            </label>
+            <select
+              id="inquiryType"
+              value={inquiryType}
+              onChange={e => setInquiryType(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              required
+            >
+              <option value="">--선택하세요--</option>
+              <option value="General">일반 문의</option>
+              <option value="Technical">기술 지원</option>
+              <option value="Billing">청구 관련</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label htmlFor="title" className="block font-semibold">
+              제목
             </label>
             <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.email ? 'border-red-500' : ''
-              }`}
+              type="text"
+              id="title"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              required
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                Invalid email address.
-              </p>
-            )}
           </div>
-
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Message
+            <label htmlFor="content" className="block font-semibold">
+              내용
             </label>
             <textarea
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              rows={4}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.message ? 'border-red-500' : ''
-              }`}
+              id="content"
+              value={content}
+              onChange={e => setContent(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
+              rows="4"
+              required
             ></textarea>
-            {errors.message && (
-              <p className="text-red-500 text-sm mt-1">
-                Message must be at least 10 characters long.
-              </p>
-            )}
           </div>
-
-          <div className="mb-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="dataConsent"
-                checked={formData.dataConsent}
-                onChange={handleChange}
-                className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-              />
-              <label className="ml-2 block text-sm text-gray-900">
-                I consent to data processing.
-              </label>
-            </div>
-            {errors.dataConsent && (
-              <p className="text-red-500 text-sm mt-1">
-                You must consent to data processing.
-              </p>
-            )}
+          <div className="text-center">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-6 py-2 rounded-md"
+            >
+              제출하기
+            </button>
           </div>
-
-          <div className="mb-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="marketing"
-                checked={formData.marketing}
-                onChange={handleChange}
-                className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-              />
-              <label className="ml-2 block text-sm text-gray-900">
-                I want to receive marketing emails.
-              </label>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Submit
-          </button>
         </form>
       </div>
     </div>
   );
 };
 
-export default InquiryDetails;
+export default InquiryPage;

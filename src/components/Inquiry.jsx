@@ -29,13 +29,13 @@ const InquiryList = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 ">
         <div className="flex justify-end mb-2">
           <Link
-            to="/inquirypage"
+            to="inquirypage"
             className="bg-white py-3  text-[#403D39] border border-[#403D39] rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
             문의하기
           </Link>
         </div>
-        <hr className="h-0.5 my-4 bg-black border-0"></hr>
+        <hr className="h-0.5 my-2 bg-black border-0"></hr>
         <div className="text-center py-4"></div>
         <table className="w-full bg-transparent rounded-lg overflow-hidden">
           <thead>
