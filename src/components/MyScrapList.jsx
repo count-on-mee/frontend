@@ -2,7 +2,8 @@ import React, { Suspense, useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Container as MapDiv, NaverMap, useNavermaps } from 'react-naver-maps';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import Cookies from 'js-cookie';
 import selectedSpotsAtom from '../recoil/selectedSpots';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import tripDatesAtom from '../recoil/tripDates';
@@ -78,9 +79,33 @@ function MyScriptList() {
     });
   };
 
-  const handleStartTrip = () => {
+  const handleStartTrip = async () => {
     if (selectedSpots.length > 0) {
-      navigate('/com/itinerary');
+      try {
+        const token = Cookies.get('accessToken');
+        const method = 'POST';
+        const response = await fetch(`http://localhost:8888/trips`, {
+          method,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '새로운 여행',
+            destination: selectedDestinations.map(d => d.name).join(', '),
+            startDate: tripDates.startDate,
+            endDate: tripDates.endDate,
+            spotIds: [1, 2, 3, 4, 5],
+          }),
+        });
+
+        const responseBody = await response.json();
+        const newTripId = responseBody.tripId;
+        navigate(`/com/${newTripId}/itinerary`);
+      } catch (error) {
+        console.error('여행 저장 실패:', error);
+        alert('여행 저장에 실패했습니다. 다시 시도해주세요.');
+      }
     } else {
       alert('스팟을 선택해주세요.');
     }
@@ -192,9 +217,6 @@ function MyScriptList() {
                 key={list.id}
                 className="bg-white rounded-lg shadow-md overflow-hidden"
               >
-                {/* Assuming there's a URL for the list image */}
-                {/* This should be corrected based on actual data structure */}
-                {/*<img src={list.url} alt={list.name} className="w-full h-32 object-cover" loading="lazy" />*/}
                 <div className="p-4">
                   <h4 className="text-lg font-semibold">{list.name}</h4>
                 </div>
