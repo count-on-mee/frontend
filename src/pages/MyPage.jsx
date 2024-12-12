@@ -1,4 +1,3 @@
-import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useState } from 'react';
 import { PencilSquareIcon, PlusCircleIcon, UserIcon, CheckIcon } from '@heroicons/react/24/outline';
@@ -56,22 +55,11 @@ export default function MyPage () {
     }
   }
 
-  // const hanldeUpdateProfile = async () => {
-  //   try {
-  //     await updateUser({ nickname, profileImgUrl });
-  //   } catch (error) {
-  //     console.error(error);
-
-  //   }
-  // }
-
   return(
-    <>
-      <Header />
-        
-        <div className="flex flex-nowrap bg-[#FFFCF2]">
-          <div className="font-mixed w-1/4 border-[#403D39] border-r-2 text-center text-2xl pt-5">
-            My page
+    <div className="w-full">
+      <div className="flex flex-nowrap bg-[#FFFCF2]">
+        <div className="font-mixed w-1/4 border-[#403D39] border-r-2 text-center text-2xl pt-5">
+          My page
             <div className="relative">
               <div className="w-1/2 h-1/2 mx-auto">
                 <ProfileImage  
@@ -130,6 +118,6 @@ export default function MyPage () {
           </div>
         </div>
       <Footer />
-    </>
+    </div>
     );
 }
