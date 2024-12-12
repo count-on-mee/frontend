@@ -2,8 +2,7 @@ import { useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 import userAtom from '../recoil/user';
 
-
-const useInitializeUser = () => {
+const useInitializeUser = async() => {
   const setUser = useSetRecoilState(userAtom);
 
   useEffect(() => {
@@ -24,6 +23,7 @@ const useInitializeUser = () => {
       }
     };
     fetchUser();
+    console.log("유저정보확인:", userAtom);
   }, [setUser]);
 };
 

@@ -3,6 +3,7 @@ import Cookies from 'js-cookie';
 import userAtom from '../recoil/user';
 import authAtom from '../recoil/auth';
 import { useEffect } from 'react';
+import useInitializeUser from './useInitializeUser';
 
 const useAuth = () => {
   const setUser = useSetRecoilState(userAtom);
@@ -20,28 +21,20 @@ const useAuth = () => {
   }
       
   useEffect(() => {
-    const accessToken = getCookie('accessToken');
+    const accessToken = getCookie('accessToken') || localStorage.getItem('accessToken');
     if (accessToken) {
       login(accessToken);
     }
-    const storedAuth = localStorage.getItem('auth');
-    if (storedAuth) {
-      setAuth(JSON.parse(storedAuth));
-    }
-}, [auth]);
+}, []);
   
 const login = (accessToken) => {
   if(accessToken){
+    setAuth({ token: accessToken,isAuthenticated: true });
     localStorage.setItem('accessToken', accessToken);
     Cookies.remove('accessToken');
-    setAuth({ isAuthenticated: true });
-    // setUser({ accessToken });
+    console.log("로그인 완료");
   }
 }
-
-useEffect(() => {
-  console.log('현재 auth 상태:', auth); // 최신 값 확인
-}, [auth]);
 
 const logout = async() => {
   const response = await fetch('http://localhost:8888/auth/logout', {
@@ -49,13 +42,18 @@ const logout = async() => {
     credentials: 'include',
   });
   if(response.ok) {
+    setAuth({ token: null, isAuthenticated: false });
     localStorage.removeItem('accessToken');
-    setAuth({ isAuthenticated: false });
     setUser(null);
+    console.log("로그아웃 완료");
   } else {
   console.error('Failed to logout');
   };
 }
+
+useEffect(() => {
+  console.log("Auth 상태 변경:", auth);
+}, [auth]);
 
 const refreshAccessToken = async () => {
   try {

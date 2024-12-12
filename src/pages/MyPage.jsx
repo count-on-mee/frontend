@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { PencilSquareIcon, PlusCircleIcon, UserIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import userAtom from '../recoil/user';
+import ProfileImage from '../components/ProfileImage';
+import UploadImages from '../components/UploadImages';
+import { updateUser } from '../services/userService';
 
 
 export default function MyPage () {  
@@ -13,27 +16,54 @@ export default function MyPage () {
   const [nickname, setNickname] = useState(user?.nickname);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
-  const handleSave = () => {
+
+  const validateNickname = () => {
     if (nickname.length > 30){
-      setError('닉네임은 30글자를 초과할 수 없습니다.');
+      return '닉네임을 30글자를 초과할 수 없습니다.';
+    }
+    return '';
+  };
+
+  const handleSave = () => {
+    const errorMessage = validateNickname(nickname);
+    if(errorMessage) {
+      setError(errorMessage);
       return;
     }
-    setUser ({...user, nickname });
+    updateUser({nickname});
+    setUser( {...user, nickname });
     setIsEditing(false);
-  };
-  const handleChange = (e) => {
+  }
+
+  const handleNicknameChange = (e) => {
     const value = e.target.value;
     setNickname(value);
+    setError(validateNickname(value));
+  };
 
-    if (value.length > 30 ) {
-      setError('닉네임은 30글자를 초과할 수 없습니다.');
-    } else {
-      setError('');
-    }
-  }
   const handleEdit = () => {
     setIsEditing(true);
   };
+  
+  const handleImageChange = (uploadImage) => { 
+    if (uploadImage) {
+    const uploadImageUrl = URL.createObjectURL(uploadImage[0]);
+    setUser((prevUSer) => ({
+      ...prevUSer,
+      profileImgUrl: uploadImageUrl,
+    }))
+    updateUser({ uploadImage: uploadImage[0]});
+    }
+  }
+
+  // const hanldeUpdateProfile = async () => {
+  //   try {
+  //     await updateUser({ nickname, profileImgUrl });
+  //   } catch (error) {
+  //     console.error(error);
+
+  //   }
+  // }
 
   return(
     <>
@@ -43,23 +73,14 @@ export default function MyPage () {
           <div className="font-mixed w-1/4 border-[#403D39] border-r-2 text-center text-2xl pt-5">
             My page
             <div className="relative">
-              <div className="w-1/3 h-1/3 mx-auto">
-                {user && user.profileImgUrl ? (
-                  <img 
-                    className="rounded-full my-10"
-                    src={user.profileImgUrl}
-                  />
-                ) : (
-                  <UserIcon 
-                    className="bg-[#CCC5B9] jusftify-center rounded-full items-center p-10 my-10" 
-                  />
-                )}
+              <div className="w-1/2 h-1/2 mx-auto">
+                <ProfileImage  
+                user={user} />
               </div>
-              <button className="absolute top-14 left-52">
-                <PlusCircleIcon 
-                  className="w-1/5 h-1/5"  
-                />
-              </button>
+                <UploadImages
+                  className="absolute top-24 left-52"
+                  mode="single" 
+                  onUpload={handleImageChange}/>
             </div>
             <div className="flex flex-col justify-center w-full">
               <div className="inline-flex flex-row items-center mx-auto">
@@ -68,8 +89,9 @@ export default function MyPage () {
                   <input
                     className="w-2/3 ml-10 border-b-2 bg-[#FFFCF2] border-[#403D39]"
                     type="text"
+                    name="nickname"
                     value={nickname}
-                    onChange={handleChange} 
+                    onChange={handleNicknameChange} 
                   />
                   </>
                 ) : (
