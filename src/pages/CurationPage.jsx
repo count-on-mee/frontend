@@ -15,7 +15,7 @@ function CurationPage() {
 
   return (
     <div>
-      <div className="flex fixed w-1/2 h-svh z-10 pb-[86px] overflow-y-auto">
+      <div className="flex fixed w-1/2 h-svh z-10 pb-[86px]">
         <CurationList
           curations={curations}
           searchTerm={searchTerm}
