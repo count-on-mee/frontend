@@ -6,7 +6,7 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import userAtom from '../recoil/user';
-import { useAuth } from '../hooks/useAuth';
+import useAuth  from '../hooks/useAuth';
 
 export default function Header() {
   const user = useRecoilValue(userAtom);
@@ -68,12 +68,29 @@ export default function Header() {
         </div>
         <div className="hidden lg:flex lg:justify-end">
           {user ? (
-            <button
-              className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
-              onClick={logout}
-            >
-              Logout
-            </button>
+            <div className="flex">
+              <Link
+                to="/me"
+                className="text-[#403D39]">
+                  <div className="flex mx-3">
+                    <div className="w-12 h-12">
+                      <img
+                        className="border border-slate-500 h-12 w-12 rounded-full object-cover m-auto hover:border-black hover:border-2" 
+                        src={user.profileImgUrl}
+                      />
+                    </div>
+                    
+                    <div
+                     className="self-center ml-5 font-thin hover:font-medium">안녕하세요, {user.nickname}님</div>
+                  </div>
+              </Link>
+              <button
+                className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
+                onClick={logout}
+              >
+                Log out
+              </button>
+            </div>
           ) : (
             <Link
               to="/login"

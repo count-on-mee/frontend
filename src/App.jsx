@@ -3,6 +3,7 @@ import Header from './components/Header';
 import useInitializeUser from './hooks/useInitializeUser';
 import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
+import MyPage from './pages/MyPage';
 import CalendarPage from './pages/CalendarPage';
 import DestinationListPage from './pages/DestinationListPage';
 import SpotPage from './pages/SpotPage';
@@ -25,7 +26,8 @@ function App() {
           <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/com" element={<COMLayout />}>
+            <Route path="/me" element={<MyPage />} />
+        <Route path="/com" element={<COMLayout />}>
               <Route path="my-trip-list" element={<MyTripListPage />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route
