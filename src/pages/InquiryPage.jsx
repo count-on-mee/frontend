@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-const InquiryDetails = () => {
+const InquiryPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: '',
+    inquiryType: '',
+    title: '',
+    content: '',
     dataConsent: false,
-    marketing: false,
   });
   const [errors, setErrors] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
@@ -14,7 +15,9 @@ const InquiryDetails = () => {
   const validators = {
     name: value => value.trim().length >= 2,
     email: value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-    message: value => value.trim().length >= 10,
+    inquiryType: value => value !== '',
+    title: value => value.trim().length >= 5,
+    content: value => value.trim().length >= 10,
   };
 
   const validateField = (name, value) => {
@@ -57,12 +60,25 @@ const InquiryDetails = () => {
       setFormData({
         name: '',
         email: '',
-        message: '',
+        inquiryType: '',
+        title: '',
+        content: '',
         dataConsent: false,
-        marketing: false,
       });
       setTimeout(() => setShowSuccess(false), 5000);
     }
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      name: '',
+      email: '',
+      inquiryType: '',
+      title: '',
+      content: '',
+      dataConsent: false,
+    });
+    setErrors({});
   };
 
   useEffect(() => {
@@ -80,122 +96,176 @@ const InquiryDetails = () => {
   }, [formData]);
 
   return (
-    <div className="bg-[#FFFCF2] flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+    <div className="min-h-screen bg-[#FFFCF2] py-1">
+      <div className="container mx-auto px-4 py-20 sm:px-6 lg:px-8">
         {showSuccess && (
-          <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md">
-            Thank you! Your form has been submitted successfully.
+          <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md max-w-2xl mx-auto">
+            문의가 성공적으로 제출되었습니다. 감사합니다!
           </div>
         )}
-
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">Contact Form</h1>
-
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-2xl mx-auto bg-white p-6 border border-[#403D39]"
+        >
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Name
+            <label htmlFor="name" className="block font-semibold">
+              이름
             </label>
             <input
               type="text"
+              id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+              className={`w-full p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500 ${
                 errors.name ? 'border-red-500' : ''
               }`}
+              required
+              placeholder="홍길동"
             />
             {errors.name && (
               <p className="text-red-500 text-sm mt-1">
-                Name must be at least 2 characters long.
+                이름은 2글자 이상이어야 합니다.
               </p>
             )}
           </div>
-
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Email
+            <label htmlFor="email" className="block font-semibold">
+              이메일
             </label>
             <input
               type="email"
+              id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+              className={`w-full p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500 ${
                 errors.email ? 'border-red-500' : ''
               }`}
+              required
+              placeholder="example@email.com"
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">
-                Invalid email address.
+                유효한 이메일 주소를 입력해주세요.
               </p>
             )}
           </div>
-
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Message
+            <label htmlFor="inquiryType" className="block font-semibold">
+              문의 유형
+            </label>
+            <select
+              id="inquiryType"
+              name="inquiryType"
+              value={formData.inquiryType}
+              onChange={handleChange}
+              className={`w-full p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500 ${
+                errors.inquiryType ? 'border-red-500' : ''
+              }`}
+              required
+            >
+              <option value="" disabled>
+                --선택하세요--
+              </option>
+              <option value="SpotRecommendation">Spot 추천</option>
+              <option value="SpotDeletion">Spot 삭제</option>
+              <option value="AccountManagement">계정 관리</option>
+            </select>
+            {errors.inquiryType && (
+              <p className="text-red-500 text-sm mt-1">
+                문의 유형을 선택해주세요.
+              </p>
+            )}
+          </div>
+          <div className="mb-4">
+            <label htmlFor="title" className="block font-semibold">
+              제목
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className={`w-full p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500 ${
+                errors.title ? 'border-red-500' : ''
+              }`}
+              required
+              placeholder="문의 제목을 입력해주세요"
+            />
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">
+                제목은 5글자 이상이어야 합니다.
+              </p>
+            )}
+          </div>
+          <div className="mb-4">
+            <label htmlFor="content" className="block font-semibold">
+              내용
             </label>
             <textarea
-              name="message"
-              value={formData.message}
+              id="content"
+              name="content"
+              value={formData.content}
               onChange={handleChange}
-              rows={4}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
-                errors.message ? 'border-red-500' : ''
+              className={`w-full p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500 ${
+                errors.content ? 'border-red-500' : ''
               }`}
+              rows="4"
+              required
+              placeholder="문의 내용을 상세히 적어주세요"
             ></textarea>
-            {errors.message && (
+            {errors.content && (
               <p className="text-red-500 text-sm mt-1">
-                Message must be at least 10 characters long.
+                내용은 10글자 이상이어야 합니다.
               </p>
             )}
           </div>
-
           <div className="mb-4">
             <div className="flex items-center">
               <input
                 type="checkbox"
+                id="dataConsent"
                 name="dataConsent"
                 checked={formData.dataConsent}
                 onChange={handleChange}
                 className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
               />
-              <label className="ml-2 block text-sm text-gray-900">
-                I consent to data processing.
+              <label
+                htmlFor="dataConsent"
+                className="ml-2 block text-sm text-gray-900"
+              >
+                개인정보 처리에 동의합니다.
               </label>
             </div>
             {errors.dataConsent && (
               <p className="text-red-500 text-sm mt-1">
-                You must consent to data processing.
+                개인정보 처리에 동의해주세요.
               </p>
             )}
           </div>
-
-          <div className="mb-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="marketing"
-                checked={formData.marketing}
-                onChange={handleChange}
-                className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-              />
-              <label className="ml-2 block text-sm text-gray-900">
-                I want to receive marketing emails.
-              </label>
-            </div>
-          </div>
-
+        </form>
+        <div className="flex justify-center space-x-8 mt-6">
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="bg-white text-2xl font-light leading-6 text-[#403D39] border border-[#403D39]
+      rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
           >
-            Submit
+            제출하기
           </button>
-        </form>
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="bg-white text-2xl font-light leading-6 text-[#403D39] border border-[#403D39]
+      rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
+          >
+            취소하기
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default InquiryDetails;
+export default InquiryPage;

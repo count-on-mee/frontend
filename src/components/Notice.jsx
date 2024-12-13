@@ -1,28 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
-const notices = [
-  {
-    id: 1,
-    title: 'Website Maintenance Announcement',
-    date: 'December 10, 2024',
-  },
-  {
-    id: 2,
-    title: 'New Feature Release: Dark Mode',
-    date: 'December 8, 2024',
-  },
-  {
-    id: 3,
-    title: 'Holiday Support Hours',
-    date: 'December 5, 2024',
-  },
-];
-
 const NoticeList = () => {
+  const [notices, setNotices] = useState([]);
+
+  const fetchNotices = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8888/support/notices`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch notices:', error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    const loadNotices = async () => {
+      try {
+        const data = await fetchNotices();
+        setNotices(data);
+      } catch (error) {
+        console.error('Failed to load notices:', error);
+      }
+    };
+
+    loadNotices();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#FFFCF2] py-1">
+    <div className="min-h-screen bg-[#FFFCF2] py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <hr className="h-0.5 my-1 bg-black border-0"></hr>
         <table className="w-full bg-transparent rounded-lg overflow-hidden">
@@ -35,15 +43,17 @@ const NoticeList = () => {
           </thead>
           <tbody>
             {notices.map((notice, index) => (
-              <tr key={notice.id} className=" text-center">
+              <tr key={notice.noticeId} className="text-center">
                 <td className="px-4 py-3 text-[#252422] text-xl">
                   {index + 1}
                 </td>
                 <td className="px-4 py-3 text-[#252422] text-xl hover:underline text-left">
-                  <Link to={`/notice/${notice.id}`}>{notice.title}</Link>
+                  <Link to={`/support/notice/${notice.noticeId}`}>
+                    {notice.title}
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-[#252422] text-center text-xl">
-                  {format(new Date(notice.date), 'yyyy-MM-dd')}
+                  {format(new Date(notice.createdAt), 'yyyy-MM-dd')}
                 </td>
               </tr>
             ))}

@@ -1,22 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const FAQ = () => {
-  useEffect(() => {
-    document.querySelectorAll('[data-toggle="faq"]').forEach(button => {
-      button.addEventListener('click', () => {
-        const answer = button.nextElementSibling;
-        const svg = button.querySelector('svg');
+  const [faqItems, setFaqItems] = useState([]);
+  const [openIndex, setOpenIndex] = useState(null);
 
-        if (answer.classList.contains('hidden')) {
-          answer.classList.remove('hidden');
-          svg.classList.add('rotate-180');
-        } else {
-          answer.classList.add('hidden');
-          svg.classList.remove('rotate-180');
-        }
-      });
-    });
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const response = await axios.get('http://localhost:8888/support/faqs');
+        setFaqItems(response.data || []); // data 필드가 존재하는지 확인
+      } catch (error) {
+        console.error('Error fetching FAQs:', error);
+      }
+    };
+    fetchFaqs();
   }, []);
+
+  const toggleFAQ = index => {
+    setOpenIndex(prevIndex => (prevIndex === index ? null : index));
+  };
 
   return (
     <section className="p-4 bg-[#FFFCF2] sm:py-8 lg:py-12">
@@ -27,60 +30,41 @@ const FAQ = () => {
           </h2>
         </div>
         <div className="max-w-3xl mx-auto mt-8 space-y-4 md:mt-16">
-          {[
-            {
-              question: 'How can I get started?',
-              answer:
-                "Getting started is easy! Sign up for an account, and you'll have access to our platform's features. No credit card required for the initial signup.",
-            },
-            {
-              question: 'What is the pricing structure?',
-              answer:
-                'Our pricing structure is flexible. We offer both free and paid plans. You can choose the one that suits your needs and budget.',
-            },
-            {
-              question: 'What kind of support do you provide?',
-              answer:
-                'We offer comprehensive customer support. You can reach out to our support team through various channels, including email, chat, and a knowledge base.',
-            },
-            {
-              question: 'Can I cancel my subscription anytime?',
-              answer:
-                'Yes, you can cancel your subscription at any time without any hidden fees. We believe in providing a hassle-free experience for our users.',
-            },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="bg-white border border-gray-200 shadow-lg cursor-pointer transition-all duration-200 hover:bg-gray-50"
-            >
-              <button
-                type="button"
-                className="flex items-center justify-between w-full px-4 py-5 sm:p-6"
-                data-toggle="faq"
+          {Array.isArray(faqItems) && faqItems.length > 0 ? (
+            faqItems.map((item, index) => (
+              <div
+                key={item.faqId}
+                className={`text-2xl font-light leading-6 text-[#403D39] border border-[#403D39] px-4 py-3 transition-all duration-300 ease-in-out ${
+                  openIndex === index ? 'bg-gray-50' : ''
+                }`}
+                style={{
+                  borderRadius: openIndex === index ? '1.5rem' : '9999px',
+                  transition:
+                    'border-radius 0.3s ease-in-out, background-color 0.3s ease-in-out',
+                }}
               >
-                <span className="text-lg font-semibold text-black">
-                  {item.question}
-                </span>
-                <svg
-                  className="w-6 h-6 text-gray-400 transform transition-transform duration-200"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+                <button
+                  type="button"
+                  className="flex items-center justify-between w-full"
+                  onClick={() => toggleFAQ(index)}
                 >
-                  <path
-                    d="M19 9l-7 7-7-7"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              <div className="hidden px-4 pb-5 sm:px-6 sm:pb-6">
-                <p>{item.answer}</p>
+                  <span className="text-lg font-semibold text-black">
+                    {item.question}
+                  </span>
+                  <span className="text-[#252422] text-lg font-bold">
+                    {openIndex === index ? 'X' : '+'}
+                  </span>
+                </button>
+                {openIndex === index && (
+                  <div className="mt-2 text-sm text-black">
+                    <p>{item.answer}</p>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center text-lg text-black">No FAQ available.</p>
+          )}
         </div>
         <p className="mt-9 text-base text-center text-gray-600">
           Still have questions?{' '}

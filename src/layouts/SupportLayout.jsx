@@ -5,9 +5,9 @@ import Footer from '../components/Footer';
 
 const SupportLayout = () => {
   return (
-    <div>
+    <div className="w-screen min-h-screen bg-[#FFFCF2]">
       <SupportNavbar />
-      <div className=" mx-auto">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Outlet />
       </div>
       <Footer />

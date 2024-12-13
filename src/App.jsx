@@ -54,9 +54,9 @@ function App() {
             <Route path="/support" element={<SupportLayout />}>
               <Route index element={<Notice />} />
               <Route path="notice" element={<Notice />} />
+              <Route path="notice/:id" element={<NoticeDetail />} />
               <Route path="faq" element={<FAQ />} />
               <Route path="inquiry" element={<Inquiry />} />
-              <Route path="notice/:id" element={<NoticeDetail />} />
               <Route path="inquiry/:id" element={<InquiryDetail />} />
               <Route path="inquirypage" element={<InquiryPage />} />
             </Route>

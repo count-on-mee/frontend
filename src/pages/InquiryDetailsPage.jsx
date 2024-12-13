@@ -1,93 +1,77 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { format } from 'date-fns';
 
-const InquiryPage = () => {
-  const [name, setName] = useState('');
-  const [inquiryType, setInquiryType] = useState('');
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+const InquiryDetailsPage = () => {
+  const { id: inquiryId } = useParams();
+  const [inquiry, setInquiry] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = e => {
-    e.preventDefault();
+  useEffect(() => {
+    if (!inquiryId) {
+      setError('Invalid inquiry ID');
+      setLoading(false);
+      return;
+    }
 
-    alert('Inquiry submitted!');
-  };
+    const fetchInquiryDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `http://localhost:8888/support/inquiries/${inquiryId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            },
+          },
+        );
+        setInquiry(response.data);
+      } catch (err) {
+        setError('Failed to load inquiry details');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInquiryDetails();
+  }, [inquiryId]);
+
+  if (loading) {
+    return <div className="text-center py-20">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-20 text-red-600">{error}</div>;
+  }
+
+  if (!inquiry) {
+    return <div className="text-center py-20">No inquiry found</div>;
+  }
+
+  const formattedDate = format(new Date(inquiry.date), 'yyyy-MM-dd');
 
   return (
-    <div className="min-h-screen bg-[#FFFCF2] py-6">
+    <div className="min-h-screen bg-[#FFFCF2] py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-center mb-4">문의하기</h2>
-        <form
-          onSubmit={handleSubmit}
-          className="max-w-lg mx-auto bg-white p-6 rounded-md shadow-md"
-        >
+        <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="mb-4">
-            <label htmlFor="name" className="block font-semibold">
-              이름
-            </label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            />
+            <h1 className="text-3xl font-bold text-[#252422]">
+              {inquiry.title}
+            </h1>
+            <p className="text-sm text-gray-500 mt-2">
+              등록일: {formattedDate}
+            </p>
+            <p className="text-sm text-gray-500">진행 상태: {inquiry.status}</p>
           </div>
-          <div className="mb-4">
-            <label htmlFor="inquiryType" className="block font-semibold">
-              문의 유형
-            </label>
-            <select
-              id="inquiryType"
-              value={inquiryType}
-              onChange={e => setInquiryType(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            >
-              <option value="">--선택하세요--</option>
-              <option value="General">일반 문의</option>
-              <option value="Technical">기술 지원</option>
-              <option value="Billing">청구 관련</option>
-            </select>
-          </div>
-          <div className="mb-4">
-            <label htmlFor="title" className="block font-semibold">
-              제목
-            </label>
-            <input
-              type="text"
-              id="title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="content" className="block font-semibold">
-              내용
-            </label>
-            <textarea
-              id="content"
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              rows="4"
-              required
-            ></textarea>
-          </div>
-          <div className="text-center">
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-6 py-2 rounded-md"
-            >
-              제출하기
-            </button>
-          </div>
-        </form>
+          <hr className="my-4" />
+          <div className="text-lg text-[#252422]">{inquiry.content}</div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default InquiryPage;
+export default InquiryDetailsPage;

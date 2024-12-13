@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const SupportNavbar = () => {
   return (
-    <nav className="flex justify-center items-center py-20  bg-[#FFFCF2]">
+    <nav className="flex justify-center items-center pt-28  bg-[#FFFCF2]">
       <div className="bg-[#CCC5B9] rounded-full px-10 py-5">
         <ul className="flex justify-center space-x-20">
           <li>
