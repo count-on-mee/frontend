@@ -1,24 +1,30 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
-import tripDatesAtom from '../recoil/tripDates';
 
 function DestinationList() {
   const navigate = useNavigate();
   const [selectedDestinations, setSelectedDestinations] = useRecoilState(
     selectedDestinationsAtom,
   );
-  const tripDates = useRecoilValue(tripDatesAtom);
+
   const [searchTerm, setSearchTerm] = useState('');
 
   const destinations = useMemo(
-    () =>
-      Array.from({ length: 100 }, (_, i) => ({
-        id: i + 1,
-        name: `Destination ${i + 1}`,
-      })),
+    () => [
+      { id: 1, name: '서울' },
+      { id: 2, name: '부산' },
+      { id: 3, name: '제주도' },
+      { id: 4, name: '경주' },
+      { id: 5, name: '강릉' },
+      { id: 6, name: '전주' },
+      { id: 7, name: '속초' },
+      { id: 8, name: '여수' },
+      { id: 9, name: '대구' },
+      { id: 10, name: '광주' },
+    ],
     [],
   );
 

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { format } from 'date-fns';
 
 const NoticeDetailsPage = () => {
@@ -20,11 +19,11 @@ const NoticeDetailsPage = () => {
     const fetchNoticeDetails = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
+        const response = await fetch(
           `http://localhost:8888/support/notices/${noticeId}`,
         );
-        console.log('Fetched notice:', response.data); // 추가된 로그
-        setNotice(response.data);
+        const data = await response.json();
+        setNotice(data);
       } catch (err) {
         setError('Failed to load notice details');
         console.error(err);

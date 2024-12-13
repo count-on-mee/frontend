@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
 const FAQ = () => {
   const [faqItems, setFaqItems] = useState([]);
@@ -8,8 +7,9 @@ const FAQ = () => {
   useEffect(() => {
     const fetchFaqs = async () => {
       try {
-        const response = await axios.get('http://localhost:8888/support/faqs');
-        setFaqItems(response.data || []); // data 필드가 존재하는지 확인
+        const response = await fetch('http://localhost:8888/support/faqs');
+        const data = await response.json();
+        setFaqItems(data || []);
       } catch (error) {
         console.error('Error fetching FAQs:', error);
       }

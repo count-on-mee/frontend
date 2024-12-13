@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { format } from 'date-fns';
 
 const InquiryDetailsPage = () => {
-  const { id: inquiryId } = useParams();
+  const { inquiryId } = useParams();
   const [inquiry, setInquiry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,15 +18,15 @@ const InquiryDetailsPage = () => {
     const fetchInquiryDetails = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(
           `http://localhost:8888/support/inquiries/${inquiryId}`,
           {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           },
         );
-        setInquiry(response.data);
+        const data = await response.json();
+        setInquiry(data);
       } catch (err) {
         setError('Failed to load inquiry details');
         console.error(err);
@@ -51,7 +50,9 @@ const InquiryDetailsPage = () => {
     return <div className="text-center py-20">No inquiry found</div>;
   }
 
-  const formattedDate = format(new Date(inquiry.date), 'yyyy-MM-dd');
+  const formattedDate = inquiry.createdAt
+    ? format(new Date(inquiry.createdAt), 'yyyy-MM-dd')
+    : 'No date available';
 
   return (
     <div className="min-h-screen bg-[#FFFCF2] py-20">
@@ -62,12 +63,21 @@ const InquiryDetailsPage = () => {
               {inquiry.title}
             </h1>
             <p className="text-sm text-gray-500 mt-2">
-              등록일: {formattedDate}
+              작성일자: {formattedDate}
             </p>
             <p className="text-sm text-gray-500">진행 상태: {inquiry.status}</p>
           </div>
           <hr className="my-4" />
-          <div className="text-lg text-[#252422]">{inquiry.content}</div>
+          <div className="text-lg text-[#252422]">
+            <p className="font-semibold">문의 내용:</p>
+            <p>{inquiry.content}</p>
+          </div>
+          {inquiry.reply && (
+            <div className="mt-6 bg-gray-100 p-4 rounded-lg">
+              <p className="font-semibold text-[#252422]">답변:</p>
+              <p>{inquiry.reply}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
