@@ -66,7 +66,7 @@ export default function MyPage () {
                 user={user} />
               </div>
                 <UploadImages
-                  className="absolute top-24 left-52"
+                  className="absolute top-24 left-60"
                   mode="single" 
                   onUpload={handleImageChange}/>
             </div>

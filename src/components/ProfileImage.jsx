@@ -6,7 +6,7 @@ const ProfileImage = ({ user }) => {
     <div>
       { user && user.profileImgUrl ? (
         <img
-          className="h-36 w-36 rounded-full my-10 object-cover"
+          className="h-36 w-36 rounded-full my-10 object-cover mx-auto"
           src={user.profileImgUrl}
           alt="Profile"
         />
