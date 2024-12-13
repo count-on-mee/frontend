@@ -1,78 +1,83 @@
-import React, { Suspense, useMemo, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Container as MapDiv, NaverMap, useNavermaps } from 'react-naver-maps';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState } from 'recoil';
 import Cookies from 'js-cookie';
 import selectedSpotsAtom from '../recoil/selectedSpots';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import tripDatesAtom from '../recoil/tripDates';
-import scrapListAtom from '../recoil/scrapList';
+import defaultImage from '../assets/img/icon.png';
 
 function MyScriptList() {
   const navigate = useNavigate();
   const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
-  const selectedDestinations = useRecoilValue(selectedDestinationsAtom);
-  const tripDates = useRecoilValue(tripDatesAtom);
-  const [scrapList, setScrapList] = useRecoilState(scrapListAtom);
-  const [displayList, setDisplayList] = useState([]);
+  const [selectedDestinations, setSelectedDestinations] = useRecoilState(
+    selectedDestinationsAtom,
+  );
+  const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
+  const [scrapedSpots, setScrapedSpots] = useState([]);
+  const [scrapedCurations, setScrapedCurations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const goBack = () => navigate('/com/destination');
 
-  const recommendedList = useMemo(() => {
-    return Array.from({ length: 20 }, (_, i) => ({
-      id: i + 1,
-      name: `Recommended List ${i + 1}`,
-      places: Array.from({ length: 5 }, (_, j) => ({
-        id: `${i + 1}-${j + 1}`,
-        name: `Place ${j + 1} in Recommended List ${i + 1}`,
-        url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
-      })),
-    }));
-  }, []);
+  //TODO: 기본 추천 spot, curation
 
   useEffect(() => {
-    if (scrapList.length === 0) {
-      const initialScrapList = [
-        ...Array.from({ length: 20 }, (_, i) => ({
-          id: i + 1,
-          name: `My List ${i + 1}`,
-          places: Array.from({ length: 5 }, (_, j) => ({
-            id: `${i + 1}-${j + 1}`,
-            name: `Place ${j + 1} in List ${i + 1}`,
-            url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
-          })),
-        })),
-      ];
-      setScrapList(initialScrapList);
-    }
-    setDisplayList(scrapList.length > 0 ? scrapList : recommendedList);
-  }, [scrapList, recommendedList, setScrapList]);
+    const fetchScrapedSpots = async () => {
+      try {
+        const token = Cookies.get('accessToken');
+        const response = await fetch('http://localhost:8888/scraps/spots', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  const allPlaces = useMemo(() => {
-    const places = [];
-    displayList.forEach(list => {
-      places.push(...list.places);
-    });
-    return places;
-  }, [displayList]);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
 
-  const filteredPlaces = useMemo(
-    () =>
-      allPlaces.filter(place =>
-        place.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-    [allPlaces, searchTerm],
-  );
+        const data = await response.json();
+        setScrapedSpots(data);
+      } catch (error) {
+        console.error('Failed to fetch scraped spots:', error);
+      }
+    };
+
+    const fetchScrapedCurations = async () => {
+      try {
+        const token = Cookies.get('accessToken');
+        const response = await fetch('http://localhost:8888/scraps/curations', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        setScrapedCurations(data);
+      } catch (error) {
+        console.error('Failed to fetch scraped curations:', error);
+      }
+    };
+
+    fetchScrapedSpots();
+    fetchScrapedCurations();
+  }, []);
 
   const handleSearch = e => setSearchTerm(e.target.value);
 
   const toggleSelection = place => {
     setSelectedSpots(prev => {
-      const isSelected = prev.some(spot => spot.id === place.id);
+      const isSelected = prev.some(spot => spot.spotId === place.spotId);
       if (isSelected) {
-        return prev.filter(spot => spot.id !== place.id);
+        return prev.filter(spot => spot.spotId !== place.spotId);
       } else {
         return [...prev, place];
       }
@@ -81,6 +86,7 @@ function MyScriptList() {
 
   const handleStartTrip = async () => {
     if (selectedSpots.length > 0) {
+      const spotIds = selectedSpots.map(spot => spot.spotId);
       try {
         const token = Cookies.get('accessToken');
         const method = 'POST';
@@ -91,14 +97,17 @@ function MyScriptList() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            title: '새로운 여행',
+            title: `${selectedDestinations.map(d => d.name).join(', ')} 여행`,
             destination: selectedDestinations.map(d => d.name).join(', '),
             startDate: tripDates.startDate,
             endDate: tripDates.endDate,
-            spotIds: [1, 2, 3, 4, 5],
+            spotIds,
           }),
         });
 
+        setSelectedDestinations([]);
+        setTripDates(null);
+        setSelectedSpots([]);
         const responseBody = await response.json();
         const newTripId = responseBody.tripId;
         navigate(`/com/${newTripId}/itinerary`);
@@ -169,9 +178,9 @@ function MyScriptList() {
           >
             <table className="w-full">
               <tbody className="text-[#252422]">
-                {filteredPlaces.map(place => (
+                {scrapedSpots.map(spot => (
                   <tr
-                    key={place.id}
+                    key={spot.spotId}
                     className="flex flex-wrap items-center border-b border-[#252422] bg-[#FFFCF2]"
                   >
                     <td className="px-5 py-3 text-sm flex-grow">
@@ -179,26 +188,30 @@ function MyScriptList() {
                         <div className="h-10 w-10 flex-shrink-0">
                           <img
                             className="h-full w-full rounded-full"
-                            src={place.url}
-                            alt={place.name}
+                            src={spot.imgUrl || defaultImage}
+                            alt={spot.title}
                             loading="lazy"
                           />
                         </div>
                         <div className="ml-3">
-                          <p className="whitespace-normal">{place.name}</p>
+                          <p className="whitespace-normal">{spot.title}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => toggleSelection(place)}
+                        onClick={() => toggleSelection(spot)}
                         className={`rounded-full px-3 py-1 text-sm font-semibold transition-colors duration-200 ease-in-out w-full sm:w-auto ${
-                          selectedSpots.some(spot => spot.id === place.id)
+                          selectedSpots.some(
+                            selectedSpot => selectedSpot.spotId === spot.spotId,
+                          )
                             ? 'bg-[#EB5E28] text-white hover:bg-[#D64E1E]'
                             : 'bg-[#FFFCF2] border border-[#252422] text-[#252422] hover:bg-gray-200'
                         }`}
                       >
-                        {selectedSpots.some(spot => spot.id === place.id)
+                        {selectedSpots.some(
+                          selectedSpot => selectedSpot.spotId === spot.spotId,
+                        )
                           ? '선택'
                           : '선택'}
                       </button>
@@ -212,13 +225,19 @@ function MyScriptList() {
             Curations
           </h3>
           <div className="grid grid-cols-2 gap-4">
-            {recommendedList.slice(0, 4).map(list => (
+            {scrapedCurations.slice(0, 4).map(curation => (
               <div
-                key={list.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
+                key={curation.curationId}
+                className="bg-white rounded-lg shadow-md overflow-hidden text-wh"
+                style={{
+                  backgroundImage: `url(${curation.imgUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                }}
               >
                 <div className="p-4">
-                  <h4 className="text-lg font-semibold">{list.name}</h4>
+                  <h4 className="text-lg font-semibold">{curation.title}</h4>
                 </div>
               </div>
             ))}

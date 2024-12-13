@@ -1,19 +1,35 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 function MyTripList() {
   const navigate = useNavigate();
   const goBack = () => navigate('/map');
   const handleNext = () => navigate('/com/calendar');
+  const [myTrips, setMyTrips] = useState([]);
 
-  const trips = useMemo(
-    () =>
-      Array.from({ length: 3 }, (_, i) => ({
-        id: i + 1,
-        name: `Trip ${i + 1}`,
-      })),
-    [],
-  );
+  useEffect(() => {
+    const fetchTrips = async () => {
+      try {
+        const token = Cookies.get('accessToken');
+        const response = await fetch('http://localhost:8888/trips', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        setMyTrips(data);
+      } catch (error) {
+        console.error('Failed to fetch trips:', error);
+      }
+    };
+
+    fetchTrips();
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-[#FFFCF2] font-mixed px-10 py-7">
@@ -41,41 +57,51 @@ function MyTripList() {
         className="overflow-y-auto rounded-lg mb-10"
         style={{ maxHeight: '400px' }}
       >
-        <table className="w-full">
-          <tbody className="text-[#252422]">
-            {trips.map((dest, idx) => (
-              <tr key={dest.id}>
-                <td className="border-b border-[#252422] bg-[#FFFCF2] px-5 py-5 text-base">
-                  <div className="flex items-center">
-                    <div className="h-10 w-10 flex-shrink-0">
-                      <img
-                        className="h-full w-full rounded-full"
-                        src={`https://loremflickr.com/100/100?random=${5 * idx}`}
-                        alt={dest.name}
-                      />
+        {myTrips.length === 0 ? (
+          <p className="text-center text-[#252422]">
+            아직 생성된 여행이 없어요
+          </p>
+        ) : (
+          <table className="w-full">
+            <tbody className="text-[#252422]">
+              {myTrips.map((myTrip, idx) => (
+                <tr key={myTrip.tripId}>
+                  <td className="border-b border-[#252422] bg-[#FFFCF2] px-5 py-5 text-base">
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 flex-shrink-0">
+                        <img
+                          className="h-full w-full rounded-full"
+                          src={`https://loremflickr.com/100/100?random=${5 * idx}`}
+                          alt={myTrip.title}
+                        />
+                      </div>
+                      <div className="ml-3">
+                        <p className="whitespace-no-wrap">{myTrip.title}</p>
+                        <p className="text-sm text-gray-500">
+                          {myTrip.startDate} ~ {myTrip.endDate}
+                        </p>
+                      </div>
                     </div>
-                    <div className="ml-3">
-                      <p className="whitespace-no-wrap">{dest.name}</p>
+                  </td>
+                  <td className="border-b border-[#252422] bg-[#FFFCF2] px-5 py-5">
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() =>
+                          navigate(`/com/${myTrip.tripId}/itinerary`)
+                        }
+                        className={
+                          'rounded-full px-5 py-2 text-base font-semibold transition-colors duration-200 ease-in-out bg-[#FFFCF2] border border-[#252422] text-[#252422] hover:bg-gray-200'
+                        }
+                      >
+                        바로가기
+                      </button>
                     </div>
-                  </div>
-                </td>
-                <td className="border-b border-[#252422] bg-[#FFFCF2] px-5 py-5">
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => navigate('/com/itinerary')}
-                      className={
-                        'rounded-full px-5 py-2 text-base font-semibold transition-colors duration-200 ease-in-out bg-[#FFFCF2] border border-[#252422] text-[#252422] hover:bg-gray-200'
-                      }
-                    >
-                      바로가기
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {/* 확인 */}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
       <div className="flex justify-center">
         <button

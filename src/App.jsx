@@ -25,6 +25,10 @@ function App() {
           <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/map" element={<MapLayout />}>
+              <Route path="spot" element={<SpotPage />} />
+              <Route path="curation" element={<CurationPage />} />
+            </Route>
             <Route path="/com" element={<COMLayout />}>
               <Route path="my-trip-list" element={<MyTripListPage />} />
               <Route path="calendar" element={<CalendarPage />} />
@@ -37,10 +41,6 @@ function App() {
                 <Route path="itinerary" element={<Itinerary />} />
                 <Route path="details" element={<Details />} />
               </Route>
-            </Route>
-            <Route path="/map" element={<MapLayout />}>
-              <Route path="spot" element={<SpotPage />} />
-              <Route path="curation" element={<CurationPage />} />
             </Route>
           </Routes>
         </main>
