@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const InquiryPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
     inquiryType: '',
     title: '',
     content: '',
-    dataConsent: false,
   });
   const [errors, setErrors] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
@@ -28,44 +27,32 @@ const InquiryPage = () => {
   };
 
   const handleChange = e => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    let newErrors = {};
-    let hasErrors = false;
 
-    Object.keys(validators).forEach(field => {
-      if (!validateField(field, formData[field])) {
-        newErrors[field] = true;
-        hasErrors = true;
-      }
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch('http://localhost:8888/support/inquiries', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        inquiryCategoryType: formData.inquiryType,
+        title: formData.title,
+        content: formData.content,
+      }),
     });
 
-    if (!formData.dataConsent) {
-      newErrors.dataConsent = true;
-      hasErrors = true;
-    }
-
-    setErrors(newErrors);
-
-    if (!hasErrors) {
-      console.log('Form data:', formData);
-      setShowSuccess(true);
-      setFormData({
-        name: '',
-        email: '',
-        inquiryType: '',
-        title: '',
-        content: '',
-        dataConsent: false,
-      });
-      setTimeout(() => setShowSuccess(false), 5000);
+    if (response.ok) {
+      navigate('/support/inquiry');
     }
   };
 
@@ -108,50 +95,6 @@ const InquiryPage = () => {
           className="max-w-2xl mx-auto bg-white p-6 border border-[#403D39]"
         >
           <div className="mb-4">
-            <label htmlFor="name" className="block font-semibold">
-              이름
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={`w-full p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500 ${
-                errors.name ? 'border-red-500' : ''
-              }`}
-              required
-              placeholder="홍길동"
-            />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">
-                이름은 2글자 이상이어야 합니다.
-              </p>
-            )}
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block font-semibold">
-              이메일
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500 ${
-                errors.email ? 'border-red-500' : ''
-              }`}
-              required
-              placeholder="example@email.com"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                유효한 이메일 주소를 입력해주세요.
-              </p>
-            )}
-          </div>
-          <div className="mb-4">
             <label htmlFor="inquiryType" className="block font-semibold">
               문의 유형
             </label>
@@ -168,9 +111,9 @@ const InquiryPage = () => {
               <option value="" disabled>
                 --선택하세요--
               </option>
-              <option value="SpotRecommendation">Spot 추천</option>
-              <option value="SpotDeletion">Spot 삭제</option>
-              <option value="AccountManagement">계정 관리</option>
+              <option value="Spot 추천">Spot 추천</option>
+              <option value="Spot 삭제">Spot 삭제</option>
+              <option value="계정 관리">계정 관리</option>
             </select>
             {errors.inquiryType && (
               <p className="text-red-500 text-sm mt-1">
@@ -212,10 +155,9 @@ const InquiryPage = () => {
               className={`w-full p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500 ${
                 errors.content ? 'border-red-500' : ''
               }`}
-              rows="4"
               required
               placeholder="문의 내용을 상세히 적어주세요"
-            ></textarea>
+            />
             {errors.content && (
               <p className="text-red-500 text-sm mt-1">
                 내용은 10글자 이상이어야 합니다.
@@ -245,24 +187,24 @@ const InquiryPage = () => {
               </p>
             )}
           </div>
+          <div className="flex justify-center space-x-8 mt-6">
+            <button
+              type="submit"
+              className="bg-white text-2xl font-light leading-6 text-[#403D39] border border-[#403D39]
+    rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
+            >
+              제출하기
+            </button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="bg-white text-2xl font-light leading-6 text-[#403D39] border border-[#403D39]
+    rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
+            >
+              취소하기
+            </button>
+          </div>
         </form>
-        <div className="flex justify-center space-x-8 mt-6">
-          <button
-            type="submit"
-            className="bg-white text-2xl font-light leading-6 text-[#403D39] border border-[#403D39]
-      rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
-          >
-            제출하기
-          </button>
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="bg-white text-2xl font-light leading-6 text-[#403D39] border border-[#403D39]
-      rounded-3xl px-6 pt-2 pb-3 hover:bg-[#EB5E28]"
-          >
-            취소하기
-          </button>
-        </div>
       </div>
     </div>
   );
