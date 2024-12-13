@@ -4,7 +4,6 @@ import CurationList from '../components/CurationList';
 import CurationDetail from '../components/CurationDetail';
 import selectedCurationAtom from '../recoil/selectedCuration';
 import curationsAtom from '../recoil/curations';
-import Cookies from 'js-cookie';
 
 function CurationPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,7 +15,7 @@ function CurationPage() {
 
   useEffect(() => {
     if (curations.length === 0) {
-      const token = Cookies.get('accessToken');
+      const token = localStorage.getItem('accessToken');
       fetch('http://localhost:8888/curations', {
         headers: { Authorization: `Bearer ${token}` },
       })

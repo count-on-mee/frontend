@@ -3,7 +3,6 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import userAtom from '../recoil/user';
 import curationsAtom from '../recoil/curations';
 import selectedCurationAtom from '../recoil/selectedCuration';
-import Cookies from 'js-cookie';
 
 export default function Curation({ curation, onClick }) {
   const user = useRecoilValue(userAtom);
@@ -19,7 +18,7 @@ export default function Curation({ curation, onClick }) {
     }
 
     try {
-      const token = Cookies.get('accessToken');
+      const token = localStorage.getItem('accessToken');
       const method = curation.isScraped ? 'DELETE' : 'POST';
       await fetch(
         `http://localhost:8888/scraps/curations/${curation.curationId}`,

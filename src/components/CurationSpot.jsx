@@ -1,6 +1,5 @@
 import { XMarkIcon, BookmarkIcon } from '@heroicons/react/24/outline';
 import defaultImage from '../assets/img/icon.png';
-import Cookies from 'js-cookie';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import selectedCurationSpotAtom from '../recoil/selectedCurationSpot';
 import markersAtom from '../recoil/markers';
@@ -17,7 +16,7 @@ export default function CurationSpot({ spot }) {
   const handleScrapClick = async event => {
     event.stopPropagation();
     try {
-      const token = Cookies.get('accessToken');
+      const token = localStorage.getItem('accessToken');
       const method = spot.isScraped ? 'DELETE' : 'POST';
       await fetch(`http://localhost:8888/scraps/spots/${spot.spotId}`, {
         method,

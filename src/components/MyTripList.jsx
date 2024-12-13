@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
 
 function MyTripList() {
   const navigate = useNavigate();
@@ -11,7 +10,7 @@ function MyTripList() {
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const token = Cookies.get('accessToken');
+        const token = localStorage.getItem('accessToken');
         const response = await fetch('http://localhost:8888/trips', {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },

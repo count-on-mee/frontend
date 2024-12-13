@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Container as MapDiv, NaverMap, useNavermaps } from 'react-naver-maps';
 import { useRecoilState } from 'recoil';
-import Cookies from 'js-cookie';
 import selectedSpotsAtom from '../recoil/selectedSpots';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import tripDatesAtom from '../recoil/tripDates';
@@ -27,7 +26,7 @@ function MyScriptList() {
   useEffect(() => {
     const fetchScrapedSpots = async () => {
       try {
-        const token = Cookies.get('accessToken');
+        const token = localStorage.getItem('accessToken');
         const response = await fetch('http://localhost:8888/scraps/spots', {
           method: 'GET',
           headers: {
@@ -48,7 +47,7 @@ function MyScriptList() {
 
     const fetchScrapedCurations = async () => {
       try {
-        const token = Cookies.get('accessToken');
+        const token = localStorage.getItem('accessToken');
         const response = await fetch('http://localhost:8888/scraps/curations', {
           method: 'GET',
           headers: {
@@ -88,7 +87,7 @@ function MyScriptList() {
     if (selectedSpots.length > 0) {
       const spotIds = selectedSpots.map(spot => spot.spotId);
       try {
-        const token = Cookies.get('accessToken');
+        const token = localStorage.getItem('accessToken');
         const method = 'POST';
         const response = await fetch(`http://localhost:8888/trips`, {
           method,
