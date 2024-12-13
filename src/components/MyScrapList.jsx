@@ -85,7 +85,9 @@ function MyScriptList() {
 
   const handleStartTrip = async () => {
     if (selectedSpots.length > 0) {
-      const spotIds = selectedSpots.map(spot => spot.spotId);
+      const spotIds = selectedSpots
+        .map(spot => spot.spotId)
+        .filter(spotId => spotId !== null && spotId !== undefined);
       try {
         const token = localStorage.getItem('accessToken');
         const method = 'POST';
@@ -105,7 +107,10 @@ function MyScriptList() {
         });
 
         setSelectedDestinations([]);
-        setTripDates(null);
+        setTripDates({
+          startDate: null,
+          endDate: null,
+        });
         setSelectedSpots([]);
         const responseBody = await response.json();
         const newTripId = responseBody.tripId;
