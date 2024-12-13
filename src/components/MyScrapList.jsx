@@ -227,7 +227,7 @@ function MyScriptList() {
             {scrapedCurations.slice(0, 4).map(curation => (
               <div
                 key={curation.curationId}
-                className="bg-white rounded-lg shadow-md overflow-hidden text-wh"
+                className="bg-white rounded-lg shadow-md overflow-hidden text-white"
                 style={{
                   backgroundImage: `url(${curation.imgUrl})`,
                   backgroundSize: 'cover',
