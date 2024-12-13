@@ -8,7 +8,7 @@ export default function Searchbar() {
         <input
           className="w-full h-8 rounded-3xl border border-[#403D39] font-prompt p-5 "
           type="text"
-          placeholder="   Search"
+          placeholder="Search"
         />
       </div>
     </form>

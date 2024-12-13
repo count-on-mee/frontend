@@ -3,6 +3,7 @@ import Header from './components/Header';
 import useInitializeUser from './hooks/useInitializeUser';
 import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
+import MyPage from './pages/MyPage';
 import CalendarPage from './pages/CalendarPage';
 import DestinationListPage from './pages/DestinationListPage';
 import SpotPage from './pages/SpotPage';
@@ -28,11 +29,12 @@ function App() {
       <InitializeUserWrapper />
       <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="flex-grow">
+        <main className="flex-grow flex">
           <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/com" element={<COMLayout />}>
+            <Route path="/me" element={<MyPage />} />
+        <Route path="/com" element={<COMLayout />}>
               <Route path="my-trip-list" element={<MyTripListPage />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route
@@ -40,8 +42,10 @@ function App() {
                 element={<DestinationListPage />}
               />
               <Route path="my-scrap-list" element={<MyScrapListPage />} />
-              <Route path="itinerary" element={<Itinerary />} />
-              <Route path="details" element={<Details />} />
+              <Route path=":tripId">
+                <Route path="itinerary" element={<Itinerary />} />
+                <Route path="details" element={<Details />} />
+              </Route>
             </Route>
             <Route path="/map" element={<MapLayout />}>
               <Route path="spot" element={<SpotPage />} />
