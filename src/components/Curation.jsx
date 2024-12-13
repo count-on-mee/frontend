@@ -1,18 +1,49 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import scrappedCurationsAtom from '../recoil/scrappedcuration';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import userAtom from '../recoil/user';
+import curationsAtom from '../recoil/curations';
+import selectedCurationAtom from '../recoil/selectedCuration';
 
-export default function Curation({ curation,onClick }) {
+export default function Curation({ curation, onClick }) {
+  const user = useRecoilValue(userAtom);
+  const setCurations = useSetRecoilState(curationsAtom);
+  const [selectedCuration, setSelectedCuration] =
+    useRecoilState(selectedCurationAtom);
 
-  const scrappedCurations = useRecoilValue(scrappedCurationsAtom);
-  const setScrappedCuration = useSetRecoilState(scrappedCurationsAtom);
-
-  const handleScrapClick = (event) => {
+  const handleScrapClick = async event => {
     event.stopPropagation();
-    setScrappedCuration(prev => ({
-      ...prev,
-      [curation.id]: !prev[curation.id],
-    }));
+    if (!user) {
+      alert('로그인이 필요한 서비스입니다.');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      const method = curation.isScraped ? 'DELETE' : 'POST';
+      await fetch(
+        `http://localhost:8888/scraps/curations/${curation.curationId}`,
+        {
+          method,
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      setCurations(prev => {
+        const updatedCurations = Array.isArray(prev) ? prev : [];
+        return updatedCurations.map(updatedCuration =>
+          updatedCuration.curationId === curation.curationId
+            ? { ...updatedCuration, isScraped: !curation.isScraped }
+            : updatedCuration,
+        );
+      });
+      if (
+        selectedCuration &&
+        selectedCuration.curationId === curation.curationId
+      ) {
+        setSelectedCuration(prev => ({ ...prev, isScraped: !prev.isScraped }));
+      }
+    } catch (error) {
+      console.error('Failed to update scrap status', error);
+    }
   };
 
   return (
@@ -27,8 +58,8 @@ export default function Curation({ curation,onClick }) {
           {curation.title}
         </div>
         <BookmarkIcon
-          className={`absolute top-5 right-5 w-5 h-5 stroke-white ${scrappedCurations[curation.id] ? 'fill-[#EB5E28] stroke-[#EB5E28]' : ''}`}
-          onClick={e => handleScrapClick(e, curation.id)}
+          className={`absolute top-5 right-5 w-5 h-5 stroke-white ${curation.isScraped ? 'fill-[#EB5E28] stroke-[#EB5E28]' : ''}`}
+          onClick={handleScrapClick}
         />
       </div>
     </div>

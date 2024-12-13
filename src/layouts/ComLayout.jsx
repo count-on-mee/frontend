@@ -67,12 +67,10 @@ const COMLayout = () => {
     '/com/my-scrap-list',
   ].includes(location.pathname);
 
-  const isOutletRoute = ['/com/itinerary', '/com/details'].includes(
-    location.pathname,
-  );
+  const isOutletRoute = location.pathname.includes('/com/') && !isPopupRoute;
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen w-full">
       <COMNavbar />
       <div
         className="flex-grow bg-[#FFFCF2] flex overflow-hidden"

@@ -7,6 +7,7 @@ import StrictModeDroppable from '../components/StrictModeDroppable';
 import 'react-datepicker/dist/react-datepicker.css';
 import { CalendarIcon } from '@heroicons/react/24/solid';
 import { useRecoilState } from 'recoil';
+import { useParams } from 'react-router-dom';
 import tripDatesAtom from '../recoil/tripDates';
 import selectedSpotsAtom from '../recoil/selectedSpots';
 
@@ -56,6 +57,7 @@ const calculateDistances = async spots => {
 };
 
 const Itinerary = () => {
+  const { tripId } = useParams();
   const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
   const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
   const [isEditing, setIsEditing] = useState(false);
@@ -64,6 +66,38 @@ const Itinerary = () => {
   const [tripPeriod, setTripPeriod] = useState(0);
   const [spotsByDay, setSpotsByDay] = useState([]);
   const [filteredSpots, setFilteredSpots] = useState([]);
+
+  useEffect(() => {
+    const fetchTripData = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(`http://localhost:8888/trips/${tripId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const tripData = await response.json();
+
+        setTripDates({
+          startDate: new Date(tripData.startDate),
+          endDate: new Date(tripData.endDate),
+        });
+
+        const spots = tripData.tripItineraries.flatMap(day =>
+          day.itineraries.map(itinerary => ({
+            id: itinerary.spotId,
+            name: itinerary.title,
+            address: itinerary.address,
+            location: itinerary.location,
+          })),
+        );
+
+        setSelectedSpots(spots);
+      } catch (error) {
+        console.error('Error fetching trip data:', error);
+      }
+    };
+
+    fetchTripData();
+  }, [tripId, setTripDates, setSelectedSpots]);
 
   useEffect(() => {
     const getDistances = async () => {
