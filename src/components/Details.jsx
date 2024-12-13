@@ -1,10 +1,14 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, {
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import tripDatesAtom from '../recoil/tripDates';
-import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import selectedSpotsAtom from '../recoil/selectedSpots';
-import scrapListAtom from '../recoil/scrapList';
+//import { SocketContext } from '../layouts/ComLayout';
 
 const AccordionItem = ({ title, content, isOpen, onToggle }) => {
   return (
@@ -901,12 +905,31 @@ const TodoList = () => {
   );
 };
 
-const Details = () => {
+const Details = ({ tripId }) => {
+  const [details, setDetails] = useState({});
+  const socket = useContext(SocketContext);
+
   const [openSections, setOpenSections] = useState({
     expenses: false,
     accommodation: false,
     spot: false,
   });
+
+  useEffect(() => {
+    socket.emit('join_trip', tripId);
+
+    socket.on('details_updated', updatedDetails => {
+      setDetails(updatedDetails);
+    });
+
+    return () => {
+      socket.off('details_updated');
+    };
+  }, [socket, tripId]);
+
+  const updateDetails = newDetails => {
+    socket.emit('update_details', { tripId, details: newDetails });
+  };
 
   const toggleSection = section => {
     setOpenSections(prev => ({

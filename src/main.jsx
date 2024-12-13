@@ -7,13 +7,13 @@ import './index.css';
 import { RecoilRoot } from 'recoil';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <RecoilRoot>
-      <NavermapsProvider ncpClientId="eguhhsxcco">
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </NavermapsProvider>
-    </RecoilRoot>
-  </StrictMode>,
+  //<StrictMode>
+  <RecoilRoot>
+    <NavermapsProvider ncpClientId="eguhhsxcco">
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </NavermapsProvider>
+  </RecoilRoot>,
+  //</StrictMode>,
 );
