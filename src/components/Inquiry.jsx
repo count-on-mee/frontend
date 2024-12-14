@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
 const InquiryList = () => {
-  const [inquiries, setInqiuries] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
 
   const fetchInquiries = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8888/support/inquiries`,
-      );
-      return response.data;
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(`http://localhost:8888/support/inquiries`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Failed to fetch inquiries:', error);
       throw error;
@@ -27,10 +28,10 @@ const InquiryList = () => {
         console.error('Failed to load inquiries:', error);
       }
     };
-
     loadInquiries();
   }, []);
 
+  console.log('🚀 ~ InquiryList ~ inquiries:', inquiries);
   return (
     <div className="min-h-screen bg-[#FFFCF2] py-9">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 ">
@@ -53,13 +54,15 @@ const InquiryList = () => {
             </tr>
           </thead>
           <tbody>
-            {inquiries.map((inquiry, index) => (
-              <tr key={inquiry.id} className="text-center">
+            {inquiries.map(inquiry => (
+              <tr key={inquiry.inquiryId} className="text-center">
                 <td className="px-4 py-3 text-[#252422] text-xl hover:underline text-left">
-                  <Link to={`/inquiry/${inquiry.id}`}>{inquiry.title}</Link>
+                  <Link to={`/support/inquiry/${inquiry.inquiryId}`}>
+                    {inquiry.title}
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-[#252422] text-center text-xl">
-                  {format(new Date(inquiry.date), 'yyyy-MM-dd')}
+                  {format(new Date(inquiry.createdAt), 'yyyy-MM-dd')}
                 </td>
                 <td className="px-4 py-3 text-[#252422] text-center text-xl">
                   {inquiry.status}

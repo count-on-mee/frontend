@@ -46,6 +46,7 @@ function App() {
                 <Route path="itinerary" element={<Itinerary />} />
                 <Route path="details" element={<Details />} />
               </Route>
+<<<<<<< HEAD
             </Route>
             <Route path="/map" element={<MapLayout />}>
               <Route path="spot" element={<SpotPage />} />
@@ -64,6 +65,35 @@ function App() {
         </main>
       </div>
     </RecoilRoot>
+=======
+              <Route path="/com" element={<COMLayout />}>
+                <Route path="my-trip-list" element={<MyTripListPage />} />
+                <Route path="calendar" element={<CalendarPage />} />
+                <Route
+                  path="destination-list"
+                  element={<DestinationListPage />}
+                />
+                <Route path="my-scrap-list" element={<MyScrapListPage />} />
+                <Route path=":tripId">
+                  <Route path="itinerary" element={<Itinerary />} />
+                  <Route path="details" element={<Details />} />
+                </Route>
+              </Route>
+              <Route path="/support" element={<SupportLayout />}>
+                <Route index element={<Notice />} />
+                <Route path="notice" element={<Notice />} />
+                <Route path="notice/:id" element={<NoticeDetail />} />
+                <Route path="faq" element={<FAQ />} />
+                <Route path="inquiry" element={<Inquiry />} />
+                <Route path="inquiry/:inquiryId" element={<InquiryDetail />} />
+                <Route path="inquirypage" element={<InquiryPage />} />
+              </Route>
+            </Routes>
+          </main>
+        </div>
+      </RecoilRoot>
+    </React.StrictMode>
+>>>>>>> 54af3b7325a8e17e35936cc090d850eb936f1940
   );
 }
 

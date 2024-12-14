@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
@@ -8,8 +7,9 @@ const NoticeList = () => {
 
   const fetchNotices = async () => {
     try {
-      const response = await axios.get(`http://localhost:8888/support/notices`);
-      return response.data;
+      const response = await fetch(`http://localhost:8888/support/notices`);
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Failed to fetch notices:', error);
       throw error;
