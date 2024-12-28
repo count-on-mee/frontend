@@ -56,8 +56,8 @@ export default function MyPage () {
   }
 
   return(
-    <div className="w-full flex flex-col bg-[#FFFCF2]">
-      <div className="flex flex-nowrap flex-grow">
+    <div className="w-full">
+      <div className="flex flex-nowrap bg-[#FFFCF2]">
         <div className="font-mixed w-1/4 border-[#403D39] border-r-2 text-center text-2xl pt-5">
           My page
             <div className="relative">
@@ -66,7 +66,7 @@ export default function MyPage () {
                 user={user} />
               </div>
                 <UploadImages
-                  className="absolute top-24 left-60"
+                  className="absolute top-24 left-52"
                   mode="single" 
                   onUpload={handleImageChange}/>
             </div>
@@ -106,7 +106,7 @@ export default function MyPage () {
                 className="inline-block px-3 py-2 mt-5 ml-10 font-mixed rounded-tl-lg rounded-br-lg bg-[#CCC5B9]">
                 spot      
               </div>
-              <div className="h-1 bg-black rounded-lg mx-10 mb-52"></div>
+              <div className="h-1 bg-black rounded-lg mx-10"></div>
             </div>
             <div className="inline">
               <div 

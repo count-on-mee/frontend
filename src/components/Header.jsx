@@ -6,7 +6,7 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import userAtom from '../recoil/user';
-import useAuth from '../hooks/useAuth';
+import useAuth  from '../hooks/useAuth';
 
 export default function Header() {
   const user = useRecoilValue(userAtom);
@@ -69,19 +69,20 @@ export default function Header() {
         <div className="hidden lg:flex lg:justify-end">
           {user ? (
             <div className="flex">
-              <Link to="/me" className="text-[#403D39]">
-                <div className="flex mx-3">
-                  <div className="w-12 h-12">
-                    <img
-                      className="border border-slate-500 h-12 w-12 rounded-full object-cover m-auto hover:border-black hover:border-2"
-                      src={user.profileImgUrl}
-                    />
+              <Link
+                to="/me"
+                className="text-[#403D39]">
+                  <div className="flex mx-3">
+                    <div className="w-12 h-12">
+                      <img
+                        className="border border-slate-500 h-12 w-12 rounded-full object-cover m-auto hover:border-black hover:border-2" 
+                        src={user.profileImgUrl}
+                      />
+                    </div>
+                    
+                    <div
+                     className="self-center ml-5 font-thin hover:font-medium">안녕하세요, {user.nickname}님</div>
                   </div>
-
-                  <div className="self-center ml-5 font-thin hover:font-medium">
-                    안녕하세요, {user.nickname}님
-                  </div>
-                </div>
               </Link>
               <button
                 className="font-prompt font-thin leading-6 text-[#403D39] mx-3 hover:font-light"
@@ -140,12 +141,7 @@ export default function Header() {
                 >
                   curation
                 </Link>
-                <Link
-                  to="/com/calendar"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-[#403D39] hover:bg-[#EB5E28]/20"
-                >
-                  count on me
-                </Link>
+
                 <a
                   href="#"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-[#403D39] hover:bg-[#EB5E28]/20"

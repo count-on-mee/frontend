@@ -7,7 +7,6 @@ import StrictModeDroppable from '../components/StrictModeDroppable';
 import 'react-datepicker/dist/react-datepicker.css';
 import { CalendarIcon } from '@heroicons/react/24/solid';
 import { useRecoilState } from 'recoil';
-import { useParams } from 'react-router-dom';
 import tripDatesAtom from '../recoil/tripDates';
 import selectedSpotsAtom from '../recoil/selectedSpots';
 
@@ -24,6 +23,9 @@ const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
 
 CustomInput.displayName = 'CustomInput';
 
+<<<<<<< HEAD
+const Itinerary = ({ tripId }) => {
+=======
 const calculateDistances = async spots => {
   const service = new google.maps.DistanceMatrixService();
   const results = [];
@@ -58,6 +60,7 @@ const calculateDistances = async spots => {
 
 const Itinerary = () => {
   const { tripId } = useParams();
+>>>>>>> 54af3b7325a8e17e35936cc090d850eb936f1940
   const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
   const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
   const [isEditing, setIsEditing] = useState(false);
@@ -68,6 +71,10 @@ const Itinerary = () => {
   const [filteredSpots, setFilteredSpots] = useState([]);
 
   useEffect(() => {
+<<<<<<< HEAD
+    if (socket && tripId) {
+      socket.emit('join_trip', tripId);
+=======
     const fetchTripData = async () => {
       try {
         const token = localStorage.getItem('accessToken');
@@ -108,6 +115,7 @@ const Itinerary = () => {
         setDistances([]);
       }
     };
+>>>>>>> 54af3b7325a8e17e35936cc090d850eb936f1940
 
     getDistances();
   }, [selectedSpots]);

@@ -31,6 +31,7 @@ const InquiryList = () => {
     loadInquiries();
   }, []);
 
+  console.log('🚀 ~ InquiryList ~ inquiries:', inquiries);
   return (
     <div className="min-h-screen bg-[#FFFCF2] py-9">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 ">

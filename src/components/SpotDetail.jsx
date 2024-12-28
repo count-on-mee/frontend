@@ -1,7 +1,6 @@
 import Spot from './Spot';
 import { XMarkIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import UploadImages from './UploadImages';
-import Photodump from './Photodump';
 
 export default function SpotDetail({ selectedSpot, setSelectedSpot }) {
   const handleClose = () => {
@@ -61,17 +60,15 @@ export default function SpotDetail({ selectedSpot, setSelectedSpot }) {
             </div>
           </>
         )}
-        { selectedSpot.photos &&
-          // <div key={index}>
-          //   <img
-          //     src={photo}
-          //     alt={`Spot ${index}`}
-          //     className="w-full h-52 object-cover border border-[#403D39] rounded-md" 
-          //   />
-          // </div>
-          <Photodump selectedSpot={selectedSpot} photos={selectedSpot.photos} />
-        }
-        
+        {selectedSpot.photos?.map((photo, index) => (
+          <div key={index}>
+            <img
+              src={photo}
+              alt={`Spot ${index}`}
+              className="w-full h-52 object-cover border border-[#403D39] rounded-md" 
+            />
+          </div>
+        ))}
        
 
        

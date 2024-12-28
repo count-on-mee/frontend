@@ -17,6 +17,8 @@ import selectedCurationAtom from '../recoil/selectedCuration';
 import selectedCurationSpotAtom from '../recoil/selectedCurationSpot';
 import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 
+import Cookies from 'js-cookie';
+
 export default function MapLayout() {
   const naverMaps = useNavermaps();
   const [mapDivWidth, setMapDivWidth] = useState('100%');
@@ -124,7 +126,7 @@ export default function MapLayout() {
     url.searchParams.append('lng', center.lng);
     url.searchParams.append('zoom', zoom);
 
-    const token = localStorage.getItem('accessToken');
+    const token = Cookies.get('accessToken');
 
     try {
       const response = await fetch(url, {

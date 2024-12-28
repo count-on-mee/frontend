@@ -4,6 +4,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import markersAtom from '../recoil/markers';
 import selectedSpotAtom from '../recoil/selectedSpot';
 import userAtom from '../recoil/user';
+import Cookies from 'js-cookie';
 
 export default function Spot({ spot, onClick }) {
   const setMarkers = useSetRecoilState(markersAtom);
@@ -18,7 +19,7 @@ export default function Spot({ spot, onClick }) {
     }
 
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = Cookies.get('accessToken');
       const method = spot.isScraped ? 'DELETE' : 'POST';
       await fetch(`http://localhost:8888/scraps/spots/${spot.id}`, {
         method,

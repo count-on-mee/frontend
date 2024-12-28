@@ -1,28 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import CurationList from '../components/CurationList';
 import CurationDetail from '../components/CurationDetail';
+import curationData from '../dummydata/curation.json';
 import selectedCurationAtom from '../recoil/selectedCuration';
-import curationsAtom from '../recoil/curations';
 
 function CurationPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCuration, setSelectedCuration] =
     useRecoilState(selectedCurationAtom);
-  const [curations, setCurations] = useRecoilState(curationsAtom);
+  const curations = curationData;
   const handleSearch = e => setSearchTerm(e.target.value);
   const handleSelectCuration = curation => setSelectedCuration(curation);
-
-  useEffect(() => {
-    if (curations.length === 0) {
-      const token = localStorage.getItem('accessToken');
-      fetch('http://localhost:8888/curations', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.json())
-        .then(data => setCurations(data));
-    }
-  }, []);
 
   return (
     <div>

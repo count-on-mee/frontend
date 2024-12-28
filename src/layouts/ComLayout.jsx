@@ -1,7 +1,10 @@
-import { useRef, useState, useEffect, Suspense } from 'react';
+import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import useSocket from '../hooks/useSocket';
+import { useRecoilState } from 'recoil';
+//import { spotOrderState } from '../recoil/atoms';
 import COMNavbar from '../components/COMNavbar';
-import Footer from '../components/Footer';
+
 import ErrorBoundary from '../components/ErrorBoundary';
 import {
   Container as MapDiv,
@@ -19,6 +22,21 @@ const COMLayout = () => {
   const location = useLocation();
   const navermaps = useNavermaps();
   const contentRef = useRef(null);
+  const tripId = extractTripIdFromLocation(location.pathname);
+
+  const [spotOrder, setSpotOrder] = useRecoilState(spotOrderState);
+  const socket = useSocket(tripId);
+
+  useEffect(() => {
+    // 소켓 이벤트로 순서 데이터 업데이트
+    socket.on('update-spot-order', newOrder => {
+      setSpotOrder(newOrder);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [socket, setSpotOrder]);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -30,11 +48,11 @@ const COMLayout = () => {
     if (!contentRef.current) return 0;
 
     const viewportHeight = window.innerHeight;
-    const mapHeight = viewportHeight * 0.7; // 70vh
+    const mapHeight = viewportHeight * 0.7; // 지도 크기 설정 (70vh)
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const headerHeight = document.querySelector('header').offsetHeight;
-    const footerHeight = document.querySelector('footer').offsetHeight;
-    const marginTopBottom = 20; // 헤더와 푸터와의 간격 (픽셀 단위)
+    const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+    const footerHeight = document.querySelector('footer')?.offsetHeight || 0;
+    const marginTopBottom = 20; // 헤더와 푸터 간의 간격
 
     const maxScroll = document.documentElement.scrollHeight - viewportHeight;
     const scrollPercentage = Math.min(scrollTop / maxScroll, 1);
@@ -54,12 +72,6 @@ const COMLayout = () => {
     );
   };
 
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.pageYOffset);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const isPopupRoute = [
     '/com/my-trip-list',
     '/com/calendar',
@@ -67,10 +79,12 @@ const COMLayout = () => {
     '/com/my-scrap-list',
   ].includes(location.pathname);
 
-  const isOutletRoute = location.pathname.includes('/com/') && !isPopupRoute;
+  const isOutletRoute = ['/com/itinerary', '/com/details'].includes(
+    location.pathname,
+  );
 
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex flex-col min-h-screen">
       <COMNavbar />
       <div
         className="flex-grow bg-[#FFFCF2] flex overflow-hidden"
@@ -131,15 +145,24 @@ const COMLayout = () => {
                           {navermaps && (
                             <NaverMap
                               defaultCenter={
-                                new navermaps.LatLng(37.3595704, 127.105399)
+                                spotOrder.length > 0
+                                  ? new navermaps.LatLng(
+                                      spotOrder[0].lat,
+                                      spotOrder[0].lng,
+                                    )
+                                  : new navermaps.LatLng(37.3595704, 127.105399)
                               }
                               defaultZoom={15}
                             >
-                              <Marker
-                                position={
-                                  new navermaps.LatLng(37.3595704, 127.105399)
-                                }
-                              />
+                              {spotOrder.map((spot, index) => (
+                                <Marker
+                                  key={spot.id}
+                                  position={
+                                    new navermaps.LatLng(spot.lat, spot.lng)
+                                  }
+                                  title={`Spot ${index + 1}: ${spot.name}`}
+                                />
+                              ))}
                             </NaverMap>
                           )}
                         </MapDiv>
