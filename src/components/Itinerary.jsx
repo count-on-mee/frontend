@@ -10,6 +10,8 @@ import { useRecoilState } from 'recoil';
 import { useParams } from 'react-router-dom';
 import tripDatesAtom from '../recoil/tripDates';
 import selectedSpotsAtom from '../recoil/selectedSpots';
+import ItineraryModal from '../components/ItineraryModal';
+import scrapListAtom from '../recoil/scrapList';
 
 const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
   <button
@@ -59,6 +61,7 @@ const calculateDistances = async spots => {
 const Itinerary = () => {
   const { tripId } = useParams();
   const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
+  const [scrapList, setScrapList] = useRecoilState(scrapListAtom);
   const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDay, setSelectedDay] = useState(1);
@@ -66,6 +69,7 @@ const Itinerary = () => {
   const [tripPeriod, setTripPeriod] = useState(0);
   const [spotsByDay, setSpotsByDay] = useState([]);
   const [filteredSpots, setFilteredSpots] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchTripData = async () => {
@@ -174,6 +178,26 @@ const Itinerary = () => {
     });
   };
 
+  const handleAddSpot = newSpot => {
+    setSelectedSpots(prev => [...prev, newSpot]);
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    const unselectedSpots = scrapList.filter(
+      spot => !selectedSpots.some(selected => selected.spotId === spot.spotId),
+    );
+    setFilteredSpots(unselectedSpots);
+  }, [scrapList, selectedSpots]);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   const totalDays = useMemo(() => {
     if (!tripDates.startDate || !tripDates.endDate) return 0;
     return (
@@ -234,11 +258,6 @@ const Itinerary = () => {
               </li>
             )}
           </Draggable>
-          {index < filteredSpots.length - 1 && (
-            <li className="text-sm text-gray-500 pl-4 py-2">
-              Distance: 예상 거리 | Travel time: 예상 시간
-            </li>
-          )}
         </React.Fragment>
       )),
     [filteredSpots, tripDates.startDate, selectedSpots, tripPeriod],
@@ -260,17 +279,6 @@ const Itinerary = () => {
             locale={ko}
             disabled={!isEditing}
             customInput={<CustomInput placeholder="시작 날짜" />}
-            popperPlacement="auto"
-            popperModifiers={[
-              {
-                name: 'preventOverflow',
-                options: {
-                  rootBoundary: 'viewport',
-                  tether: false,
-                  altAxis: true,
-                },
-              },
-            ]}
           />
           <DatePicker
             selected={tripDates.endDate}
@@ -288,11 +296,16 @@ const Itinerary = () => {
         </div>
         <button
           onClick={() => setIsEditing(!isEditing)}
-          className={`w-full sm:w-auto bg-transparent border-b border-black text-black px-3 py-3 rounded-full transition duration-300 ${
+          className={`w-full sm:w-auto bg-transparent border border-black text-black px-3 py-3 rounded-full transition duration-300 ${
             isEditing ? 'hover:bg-[#D54E23]' : 'hover:bg-[#D54E23]'
           } focus:outline-none focus:ring-2 focus:ring-[#EB5E28] focus:ring-opacity-50`}
         >
           {isEditing ? '저장' : '수정'}
+        </button>
+      </div>
+      <div className="flex  my-4">
+        <button className="bg-[#CCC5B9] text-[#2E2F35] border border-black px-4 py-2 rounded-full hover:bg-[#EB5E28] hover:text-white transition duration-300">
+          친구 초대하기
         </button>
       </div>
       <div className="mb-4 flex flex-wrap gap-2">{dayButtons}</div>
@@ -309,6 +322,19 @@ const Itinerary = () => {
             </ul>
           )}
         </StrictModeDroppable>
+        <button
+          onClick={handleOpenModal}
+          className="w-full bg-[#D54E23] text-white px-3 py-2 mt-6 rounded-lg hover:bg-[#EB5E28] transition duration-300"
+        >
+          Spot 추가하기
+        </button>
+        {isModalOpen && (
+          <ItineraryModal
+            filteredSpots={filteredSpots}
+            onClose={handleCloseModal}
+            onAddSpot={handleAddSpot}
+          />
+        )}
       </DragDropContext>
     </div>
   );
