@@ -30,6 +30,28 @@ function MyTripList() {
     fetchTrips();
   }, []);
 
+  const handleDelete = async tripId => {
+    const confirmDelete = window.confirm('해당 여행을 삭제하시겠습니까?');
+    if (!confirmDelete) return;
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(`http://localhost:8888/trips/${tripId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete trip');
+      }
+
+      setMyTrips(prevTrips => prevTrips.filter(trip => trip.tripId !== tripId));
+    } catch (error) {
+      console.error('Error deleting trip:', error);
+      alert('삭제하는 중 문제가 발생했습니다.');
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-[#FFFCF2] font-mixed px-10 py-7">
       <div className="flex items-center justify-between p-10">
@@ -83,7 +105,7 @@ function MyTripList() {
                     </div>
                   </td>
                   <td className="border-b border-[#252422] bg-[#FFFCF2] px-5 py-5">
-                    <div className="flex justify-end">
+                    <div className="flex justify-end space-x-2">
                       <button
                         onClick={() =>
                           navigate(`/com/${myTrip.tripId}/itinerary`)
@@ -93,6 +115,14 @@ function MyTripList() {
                         }
                       >
                         바로가기
+                      </button>
+                      <button
+                        onClick={() => handleDelete(myTrip.tripId)}
+                        className={
+                          'rounded-full px-5 py-2 text-base font-semibold transition-colors duration-200 ease-in-out bg-[#FFFCF2] border border-[#D64E1E] text-[#D64E1E] hover:bg-red-200'
+                        }
+                      >
+                        삭제
                       </button>
                     </div>
                   </td>
