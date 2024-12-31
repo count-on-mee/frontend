@@ -1,7 +1,7 @@
 import { atom } from 'recoil';
 
 const scrapListAtom = atom({
-  key: 'scrapList',
+  key: 'scrapListAtom',
   default: [],
 });
 

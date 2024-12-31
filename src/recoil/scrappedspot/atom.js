@@ -2,7 +2,7 @@ import { atom } from 'recoil';
 
 const scrappedSpotsAtom = atom({
   key: 'scrappedSpotsAtom',
-  default: {},
+  default: [],
 });
 
 export default scrappedSpotsAtom;
