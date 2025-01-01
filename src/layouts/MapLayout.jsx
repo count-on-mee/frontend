@@ -7,6 +7,7 @@ import {
   useNavermaps,
 } from 'react-naver-maps';
 import MapPanel from '../components/map/MapPanel';
+import MapMarker from '../components/map/MapMarker';
 import MapResearch from '../components/map/MapResearch';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import centerAtom from '../recoil/center';
@@ -197,14 +198,15 @@ export default function MapLayout() {
             maxZoom={21}
             scaleControl={true}
           >
-            {markers.map(marker => (
+            <MapMarker markers={markers} handleMarkerClick={handleMarkerClick} />
+            {/* {markers.map(marker => (
               <Marker
                 key={marker.id}
                 position={marker.position}
                 title={marker.title}
                 onClick={() => handleMarkerClick(marker)}
               />
-            ))}
+            ))} */}
           </NaverMap>
           <MapResearch onSearch={handleSearch} />
         </MapDiv>
