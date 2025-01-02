@@ -6,6 +6,8 @@ function MyTripList() {
   const goBack = () => navigate('/map');
   const handleNext = () => navigate('/com/calendar');
   const [myTrips, setMyTrips] = useState([]);
+  const [isInvitePopupOpen, setIsInvitePopupOpen] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -49,6 +51,34 @@ function MyTripList() {
     } catch (error) {
       console.error('Error deleting trip:', error);
       alert('삭제하는 중 문제가 발생했습니다.');
+    }
+  };
+
+  const handleJoinTrip = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(
+        `http://localhost:8888/trips/invite/${inviteCode}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to join trip');
+      }
+
+      const data = await response.json();
+      setIsInvitePopupOpen(false);
+      setInviteCode('');
+      navigate(`/com/${data.tripId}/itinerary`);
+    } catch (error) {
+      console.error('Error joining trip:', error);
+      alert('참여하는 중 문제가 발생했습니다.');
     }
   };
 
@@ -132,14 +162,59 @@ function MyTripList() {
           </table>
         )}
       </div>
-      <div className="flex justify-center">
+      <div className="flex justify-center space-x-4">
         <button
           onClick={handleNext}
           className="bg-[#EB5E28] text-white font-semibold py-3 px-8 rounded-full hover:bg-[#D64E1E] transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
         >
           새 여행 일정 만들기
         </button>
+        <button
+          onClick={() => setIsInvitePopupOpen(true)}
+          className="bg-[#EB5E28] text-white font-semibold py-3 px-8 rounded-full hover:bg-[#D64E1E] transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+        >
+          여행 초대 코드로 참여하기
+        </button>
       </div>
+      {isInvitePopupOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
+              <div className="absolute inset-0 bg-[#FFFCF2] opacity-70 backdrop-filter backdrop-blur-xl"></div>
+            </div>
+
+            <div className="bg-[#FFFCF2] rounded-lg shadow-xl w-full max-w-md p-6 relative z-10">
+              <h2 className="text-2xl font-semibold mb-4">
+                여행 초대 코드 입력
+              </h2>
+              <input
+                type="text"
+                value={inviteCode}
+                onChange={e => setInviteCode(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                placeholder="초대 코드를 입력하세요"
+              />
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => setIsInvitePopupOpen(false)}
+                  className="bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors duration-300"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleJoinTrip}
+                  className="bg-[#EB5E28] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#D64E1E] transition-colors duration-300"
+                >
+                  참여하기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

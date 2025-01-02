@@ -70,6 +70,7 @@ const Itinerary = () => {
   const [spotsByDay, setSpotsByDay] = useState([]);
   const [filteredSpots, setFilteredSpots] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
 
   useEffect(() => {
     const fetchTripData = async () => {
@@ -263,6 +264,34 @@ const Itinerary = () => {
     [filteredSpots, tripDates.startDate, selectedSpots, tripPeriod],
   );
 
+  const handleCopyInviteCode = () => {
+    navigator.clipboard.writeText(inviteCode).then(() => {
+      alert('여행코드가 클립보드에 복사되었습니다.');
+    });
+  };
+
+  const handleInviteFriends = async () => {
+    if (inviteCode) {
+      setInviteCode('');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(
+        `http://localhost:8888/trips/${tripId}/invite`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      const data = await response.json();
+      setInviteCode(data.inviteCode);
+    } catch (error) {
+      console.error('Error inviting friends:', error);
+    }
+  };
+
   return (
     <div className="bg-transparent p-3 sm:p-3 rounded-lg font-mixed">
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -303,10 +332,19 @@ const Itinerary = () => {
           {isEditing ? '저장' : '수정'}
         </button>
       </div>
-      <div className="flex  my-4">
-        <button className="bg-[#CCC5B9] text-[#2E2F35] border border-black px-4 py-2 rounded-full hover:bg-[#EB5E28] hover:text-white transition duration-300">
+      <div className="flex my-4 items-center">
+        <button
+          onClick={handleInviteFriends}
+          className="bg-[#CCC5B9] text-[#2E2F35] border border-black px-4 py-2 rounded-full hover:bg-[#EB5E28] hover:text-white transition duration-300"
+        >
           친구 초대하기
         </button>
+        <div
+          onClick={handleCopyInviteCode}
+          className={`text-sm ml-4 p-4 bg-[#CCC5B9] border border-gray-300 rounded-lg ${inviteCode ? '' : 'hidden'}`}
+        >
+          여행코드: {inviteCode}
+        </div>
       </div>
       <div className="mb-4 flex flex-wrap gap-2">{dayButtons}</div>
       <DragDropContext onDragEnd={onDragEnd}>
