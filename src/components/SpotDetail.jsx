@@ -1,18 +1,16 @@
+import { useState } from 'react';
 import Spot from './Spot';
-import { XMarkIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChevronLeftIcon, PlusIcon } from '@heroicons/react/24/outline';
 import UploadImages from './UploadImages';
 import Photodump from './Photodump';
+import PhotodumpModal from './PhotodumpModal';
 
 export default function SpotDetail({ selectedSpot, setSelectedSpot }) {
   const handleClose = () => {
     setSelectedSpot(null);
   };
 
-  const handleUpload = (files) => {
-    const newPhotoURLs = Array.from(files).map(file => URL.createObjectURL(file));
-    const updatedPhotos = selectedSpot.photos ? [...selectedSpot.photos, newPhotoURLs] : newPhotoURLs;
-    setSelectedSpot({...selectedSpot, photos: updatedPhotos});
-  }
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="bg-[#FFFCF2] w-full h-screen border-r-2 border-[#403D39] overflow-y-auto pb-[88px]">
@@ -38,11 +36,13 @@ export default function SpotDetail({ selectedSpot, setSelectedSpot }) {
   
       <div className="flex justify-between items-center p-5">
         <div className="font-prompt text-xl mr-5">Photos</div>
-        <UploadImages
+        <PlusIcon className="w-6 h-6" onClick={() => setIsModalOpen(true)}/>
+        <PhotodumpModal isOpen={isModalOpen} selectedSpot={selectedSpot} setSelectedSpot={setSelectedSpot}onClose={() => setIsModalOpen(false)} />
+        {/* <UploadImages
           mode = 'multiple' 
           className="mx-auto"
           onUpload={handleUpload}
-        />
+        /> */}
       </div>  
       <div className="grid grid-cols-2 p-2 gap-2">
         {(!selectedSpot.photos || selectedSpot.photos.length === 0) && (
