@@ -149,6 +149,7 @@ export default function MapLayout() {
           businessHours: place.businessHours,
           isOpen: place.isOpen,
           isScraped: place.isScraped,
+          category: place.categories,
         })),
       );
     } catch (error) {
