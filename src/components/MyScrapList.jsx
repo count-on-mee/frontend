@@ -7,8 +7,9 @@ import selectedSpotsAtom from '../recoil/selectedSpots';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import tripDatesAtom from '../recoil/tripDates';
 import defaultImage from '../assets/img/icon.png';
+import CurationModal from './CurationModal';
 
-function MyScriptList() {
+function MyScrapList() {
   const navigate = useNavigate();
   const [selectedSpots, setSelectedSpots] = useRecoilState(selectedSpotsAtom);
   const [selectedDestinations, setSelectedDestinations] = useRecoilState(
@@ -18,10 +19,31 @@ function MyScriptList() {
   const [scrapedSpots, setScrapedSpots] = useState([]);
   const [scrapedCurations, setScrapedCurations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCurationId, setSelectedCurationId] = useState(null);
+  const [showCurationModal, setShowCurationModal] = useState(false);
+  const [curationSpots, setCurationSpots] = useState([]);
+
+  const handleCurationClick = async curationId => {
+    try {
+      setSelectedCurationId(curationId); // Ensure curationId is set
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(
+        `http://localhost:8888/curations/${curationId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      if (!response.ok) throw new Error('spot 데이터 fetch 실패.');
+
+      const curationData = await response.json();
+      setCurationSpots(curationData.spots);
+      setShowCurationModal(true);
+    } catch (error) {
+      console.error('Error fetching curation data:', error);
+    }
+  };
 
   const goBack = () => navigate('/com/destination');
-
-  //TODO: 기본 추천 spot, curation
 
   useEffect(() => {
     const fetchScrapedSpots = async () => {
@@ -60,9 +82,10 @@ function MyScriptList() {
         }
 
         const data = await response.json();
+        console.log('큐레이션 데이터:', data);
         setScrapedCurations(data);
       } catch (error) {
-        console.error('Failed to fetch scraped curations:', error);
+        console.error('큐레이션 데이터를 가져오지 못했습니다:', error);
       }
     };
 
@@ -81,6 +104,11 @@ function MyScriptList() {
         return [...prev, place];
       }
     });
+  };
+
+  const closeCurationModal = () => {
+    setShowCurationModal(false);
+    setSelectedCurationId(null);
   };
 
   const handleStartTrip = async () => {
@@ -229,22 +257,36 @@ function MyScriptList() {
             Curations
           </h3>
           <div className="grid grid-cols-2 gap-4">
-            {scrapedCurations.slice(0, 4).map(curation => (
-              <div
-                key={curation.curationId}
-                className="bg-white rounded-lg shadow-md overflow-hidden text-white"
-                style={{
-                  backgroundImage: `url(${curation.imgUrl})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                }}
-              >
-                <div className="p-4">
-                  <h4 className="text-lg font-semibold">{curation.title}</h4>
+            {scrapedCurations.length === 0 ? (
+              <p>큐레이션이 없습니다.</p>
+            ) : (
+              scrapedCurations.map(curation => (
+                <div
+                  key={curation.curationId}
+                  className="bg-white rounded-lg shadow-md overflow-hidden text-white"
+                  style={{
+                    backgroundImage: `url(${curation.imgUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                  }}
+                  onClick={() => {
+                    handleCurationClick(curation.curationId);
+                  }}
+                >
+                  <div className="p-4">
+                    <h4 className="text-lg font-semibold">{curation.title}</h4>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
+
+            {showCurationModal && (
+              <CurationModal
+                selectedCurationId={selectedCurationId}
+                setShowCurationModal={setShowCurationModal}
+              />
+            )}
           </div>
         </div>
         <Suspense fallback={<div>Loading...</div>}>
@@ -272,7 +314,7 @@ function MyScrapListPopup() {
         </div>
         <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[90vh] relative z-10 overflow-hidden">
           <div className="h-full overflow-y-auto">
-            <MyScriptList />
+            <MyScrapList />
           </div>
         </div>
       </div>
