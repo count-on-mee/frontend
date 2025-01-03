@@ -132,6 +132,7 @@ const Itinerary = () => {
       selectedSpots.forEach(spot => {
         const dayIndex = spot.day - 1;
         updatedSpotsByDay[dayIndex].push(spot);
+        updatedSpotsByDay[dayIndex].sort((a, b) => a.order - b.order);
       });
 
       setSpotsByDay(updatedSpotsByDay);
@@ -251,10 +252,7 @@ const Itinerary = () => {
                 <span className="font-semibold">{spot.name}</span>
                 <span className="text-sm text-gray-500">
                   {format(
-                    addDays(
-                      new Date(tripDates.startDate),
-                      selectedSpots.indexOf(spot) % tripPeriod,
-                    ),
+                    addDays(new Date(tripDates.startDate), spot.day - 1),
                     'yyyy-MM-dd',
                   )}
                 </span>
@@ -263,7 +261,7 @@ const Itinerary = () => {
           </Draggable>
         </React.Fragment>
       )),
-    [filteredSpots, tripDates.startDate, selectedSpots, tripPeriod],
+    [filteredSpots, tripDates.startDate],
   );
 
   const handleCopyInviteCode = () => {
@@ -373,6 +371,7 @@ const Itinerary = () => {
             // filteredSpots={filteredSpots}
             onClose={handleCloseModal}
             onAddSpot={handleAddSpot}
+            selectedDay={selectedDay}
           />
         )}
       </DragDropContext>

@@ -1,37 +1,90 @@
-import { useRecoilValue } from 'recoil';
 import { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import selectedSpotsAtom from '../recoil/selectedSpots';
-import scrappedSpotsAtom from '../recoil/scrappedspot';
+import { useParams } from 'react-router-dom';
 import NewPlace from '../components/NewPlace';
 
-const ItineraryModal = ({ onClose, onAddSpot, details = [] }) => {
-  const selectedSpots = useRecoilValue(selectedSpotsAtom);
-  const scrappedSpots = useRecoilValue(scrappedSpotsAtom);
-
+const ItineraryModal = ({ onClose, onAddSpot, selectedDay }) => {
+  const { tripId } = useParams();
   const [activeTab, setActiveTab] = useState('전체');
   const [filteredSpots, setFilteredSpots] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isNewPlaceOpen, setIsNewPlaceOpen] = useState(false);
+  const [allCandidate, setAllCandidate] = useState([]);
+  const [myScrapedCandidate, setMyScrapedCandidate] = useState([]);
+  const [spotCandidates, setSpotCandidates] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleSearch = e => setSearchTerm(e.target.value);
 
   useEffect(() => {
-    console.log('Search Term:', searchTerm);
+    const fetchAllCandidate = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(
+          `http://localhost:8888/spots/search/trips/${tripId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        const data = await response.json();
+        setAllCandidate(data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching all candidates:', error);
+        setIsLoading(false);
+      }
+    };
+
+    const fetchMyScrapedCandidate = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(`http://localhost:8888/scraps/spots`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        setMyScrapedCandidate(data);
+      } catch (error) {
+        console.error('Error fetching my scraped candidates:', error);
+      }
+    };
+
+    const fetchSpotCandidates = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(
+          `http://localhost:8888/trips/${tripId}/documents/spot-candidates`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        const data = await response.json();
+        const spots = data.map(item => item.spot);
+        setSpotCandidates(spots);
+      } catch (error) {
+        console.error('Error fetching spot candidates:', error);
+      }
+    };
+
+    fetchAllCandidate();
+    fetchMyScrapedCandidate();
+    fetchSpotCandidates();
+  }, [tripId]);
+
+  useEffect(() => {
     filterSpots();
-  }, [searchTerm, activeTab, selectedSpots, scrappedSpots, details]);
+  }, [searchTerm, activeTab, allCandidate, myScrapedCandidate, spotCandidates]);
 
   const filterSpots = () => {
     let spots =
       activeTab === '전체'
-        ? selectedSpots
+        ? allCandidate
         : activeTab === '내 스크랩'
-          ? scrappedSpots
-          : details;
+          ? myScrapedCandidate
+          : spotCandidates;
 
     if (searchTerm.trim() !== '') {
       spots = spots.filter(spot =>
-        spot.name.toLowerCase().includes(searchTerm.toLowerCase()),
+        spot.title.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
@@ -44,6 +97,37 @@ const ItineraryModal = ({ onClose, onAddSpot, details = [] }) => {
 
   const closeNewPlaceModal = () => {
     setIsNewPlaceOpen(false);
+  };
+
+  const handleAddSpot = async spot => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(
+        `http://localhost:8888/trips/${tripId}/itineraries`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            spotId: spot.spotId,
+            day: selectedDay,
+          }),
+        },
+      );
+      const data = await response.json();
+      onAddSpot({
+        id: spot.spotId,
+        name: spot.title,
+        address: spot.address,
+        location: spot.location,
+        day: selectedDay,
+        order: data.order,
+      });
+    } catch (error) {
+      console.error('Error adding spot:', error);
+    }
   };
 
   return (
@@ -69,7 +153,7 @@ const ItineraryModal = ({ onClose, onAddSpot, details = [] }) => {
             />
           </svg>
           <h2 className="text-2xl font-bold text-[#252422]">
-            추가할 스팟 선택
+            추가할 스팟 선택 (Day {selectedDay})
           </h2>
           <div className="size-10"></div>
         </div>
@@ -106,42 +190,40 @@ const ItineraryModal = ({ onClose, onAddSpot, details = [] }) => {
           className="overflow-y-auto rounded-lg mb-4"
           style={{ maxHeight: 'calc(100vh - 350px)' }}
         >
-          <table className="w-full">
-            <tbody className="text-[#252422]">
-              {filteredSpots.map((spot, index) => (
-                <tr
-                  key={spot.spotId || index}
-                  className="flex items-center border-b border-gray-300"
-                >
-                  <td className="px-5 py-3 text-sm flex-grow">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        <img
-                          className="h-full w-full rounded-full"
-                          src={spot.imgUrl || 'defaultImage.jpg'}
-                          alt={spot.name || 'Untitled Spot'}
-                          loading="lazy"
-                        />
+          {isLoading ? (
+            <div className="flex justify-center items-center h-full">
+              <p>Loading...</p>
+            </div>
+          ) : (
+            <table className="w-full">
+              <tbody className="text-[#252422]">
+                {filteredSpots.map((spot, index) => (
+                  <tr
+                    key={spot.spotId || index}
+                    className="flex items-center border-b border-gray-300"
+                  >
+                    <td className="px-5 py-3 text-sm flex-grow">
+                      <div className="flex items-center">
+                        <div className="ml-3">
+                          <p className="whitespace-normal">
+                            {spot?.title || 'Untitled Spot'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="ml-3">
-                        <p className="whitespace-normal">
-                          {spot?.name || 'Untitled Spot'}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => onAddSpot(spot)}
-                      className="rounded-full px-3 py-1 text-sm font-semibold bg-[#D54E23] text-white hover:bg-[#EB5E28]"
-                    >
-                      추가
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleAddSpot(spot)}
+                        className="rounded-full px-3 py-1 text-sm font-semibold bg-[#D54E23] text-white hover:bg-[#EB5E28]"
+                      >
+                        추가
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {searchTerm?.trim() && filteredSpots.length === 0 && (
