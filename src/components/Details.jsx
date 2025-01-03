@@ -5,6 +5,7 @@ import tripDatesAtom from '../recoil/tripDates';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import selectedSpotsAtom from '../recoil/selectedSpots';
 import scrapListAtom from '../recoil/scrapList';
+import { useParams } from 'react-router-dom';
 
 const AccordionItem = ({ title, content, isOpen, onToggle }) => {
   return (
@@ -496,18 +497,54 @@ const SpotSection = () => {
   const [editingComment, setEditingComment] = useState(null);
   const [showInput, setShowInput] = useState({});
   const [insertIndex, setInsertIndex] = useState(null);
+  const { tripId } = useParams();
+
+  const fetchUpdatedSpots = async token => {
+    const getUrl = `http://localhost:8888/trips/${tripId}/documents/spot-candidates`;
+    const getResponse = await fetch(getUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (getResponse.ok) {
+      const data = await getResponse.json();
+      const spots = data.map(item => item.spot); // spot 객체만 추출
+      setLocalSelectedSpots(spots);
+    } else {
+      console.error('Failed to fetch updated spots');
+    }
+  };
 
   useEffect(() => {
-    const initialDummySpots = Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      name: `My List ${i + 1}`,
-      places: Array.from({ length: 5 }, (_, j) => ({
-        id: `${i + 1}-${j + 1}`,
-        name: `Place ${j + 1} in List ${i + 1}`,
-        url: `https://loremflickr.com/100/100?random=${5 * i + j}`,
-      })),
-    }));
-    setDummySpots(initialDummySpots);
+    const token = localStorage.getItem('accessToken');
+    fetchUpdatedSpots(token);
+  }, []);
+
+  useEffect(() => {
+    const fetchSpots = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch('http://localhost:8888/scraps/spots', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setDummySpots(data);
+        } else {
+          console.error('Failed to fetch spots');
+        }
+      } catch (error) {
+        console.error('Error fetching spots:', error);
+      }
+    };
+
+    fetchSpots();
   }, []);
 
   const openPopup = (index = null) => {
@@ -567,24 +604,12 @@ const SpotSection = () => {
         <>
           <ul className="space-y-2">
             {localSelectedSpots.map((spot, spotIndex) => (
-              <React.Fragment key={spot.id}>
+              <React.Fragment key={spot.spotId}>
                 <li>
                   <div className="flex justify-between items-center">
                     <div className="relative">
                       <span className="text-lg font-semibold cursor-pointer inline-block group">
-                        {spot.name}
-                        <div className="absolute left-0 top-full mt-2 bg-white p-2 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pointer-events-none">
-                          <div className="flex space-x-2">
-                            {spot.places.map(place => (
-                              <img
-                                key={place.id}
-                                src={place.url}
-                                alt={place.name}
-                                className="w-16 h-16 object-cover rounded"
-                              />
-                            ))}
-                          </div>
-                        </div>
+                        {spot.title}
                       </span>
                     </div>
                     <div className="flex items-center">
@@ -726,31 +751,18 @@ const SpotSection = () => {
         <AddSpotSection
           onClose={closePopup}
           onSelect={newSpots => {
-            setLocalSelectedSpots(prevSpots => {
-              const updatedSpots = [...prevSpots];
-              if (insertIndex !== null) {
-                updatedSpots.splice(insertIndex, 0, ...newSpots);
-              } else {
-                updatedSpots.push(...newSpots);
-              }
-              return updatedSpots;
-            });
+            setLocalSelectedSpots(newSpots);
             closePopup();
           }}
           dummySpots={dummySpots}
-          localSelectedSpots={localSelectedSpots}
         />
       )}
     </div>
   );
 };
 
-const AddSpotSection = ({
-  onClose,
-  onSelect,
-  dummySpots,
-  localSelectedSpots,
-}) => {
+const AddSpotSection = ({ onClose, onSelect, dummySpots }) => {
+  const { tripId } = useParams();
   const [tempSelectedSpots, setTempSelectedSpots] = useState([]);
 
   const handleSpotToggle = spot => {
@@ -761,9 +773,47 @@ const AddSpotSection = ({
     );
   };
 
-  const handleConfirm = () => {
-    onSelect(tempSelectedSpots);
-    onClose();
+  const fetchUpdatedSpots = async token => {
+    const getUrl = `http://localhost:8888/trips/${tripId}/documents/spot-candidates`;
+    const getResponse = await fetch(getUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (getResponse.ok) {
+      const data = await getResponse.json();
+      const spots = data.map(item => item.spot); // spot 객체만 추출
+      onSelect(spots);
+      onClose();
+    } else {
+      console.error('Failed to fetch updated spots');
+    }
+  };
+
+  const handleConfirm = async () => {
+    const spotIds = tempSelectedSpots.map(spot => spot.spotId).join(',');
+    const url = `http://localhost:8888/trips/${tripId}/documents/spot-candidates?spotIds=${spotIds}`;
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        await fetchUpdatedSpots(token);
+      } else {
+        console.error('Failed to submit spots');
+      }
+    } catch (error) {
+      console.error('Error submitting spots:', error);
+    }
   };
 
   return (
@@ -800,18 +850,18 @@ const AddSpotSection = ({
             </div>
             <ul className="space-y-[16px]">
               {dummySpots.map(spot => (
-                <li key={spot.id} className="hr">
+                <li key={spot.spotId} className="hr">
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold">{spot.name}</span>
+                    <span className="text-lg font-semibold">{spot.title}</span>
                     <button
                       onClick={() => handleSpotToggle(spot)}
                       className={`px-4 py-2 rounded-full transition-colors ${
-                        tempSelectedSpots.some(s => s.id === spot.id)
+                        tempSelectedSpots.some(s => s.spotId === spot.spotId)
                           ? 'bg-[#EB5E28] text-black border border-black'
                           : 'bg-transparent text-gray-800 hover:bg-gray-500 border border-black'
                       }`}
                     >
-                      {tempSelectedSpots.some(s => s.id === spot.id)
+                      {tempSelectedSpots.some(s => s.spotId === spot.spotId)
                         ? '선택'
                         : '선택'}
                     </button>
