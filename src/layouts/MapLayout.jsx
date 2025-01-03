@@ -8,6 +8,7 @@ import {
 } from 'react-naver-maps';
 import MapPanel from '../components/map/MapPanel';
 import MapMarker from '../components/map/MapMarker';
+import MarkerCluster from '../components/map/MarkerCluster';
 import MapResearch from '../components/map/MapResearch';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import centerAtom from '../recoil/center';
@@ -183,6 +184,11 @@ export default function MapLayout() {
             ref={mapRef}
             mapTypeId={naverMaps.MapTypeId.NORMAL}
             zoomControl={false}
+            // zoomControl={true}
+            // zoomControlOptions={{
+            //   position: naverMaps.Position.TOP_LEFT,
+            //   style: naverMaps.ZoomControlStyle.SMALL,
+            // }}
             center={new naverMaps.LatLng(center.lat, center.lng)}
             onCenterChanged={handleCenterChanged}
             defaultZoom={zoom}
@@ -200,14 +206,7 @@ export default function MapLayout() {
             scaleControl={true}
           >
             <MapMarker markers={markers} handleMarkerClick={handleMarkerClick} />
-            {/* {markers.map(marker => (
-              <Marker
-                key={marker.id}
-                position={marker.position}
-                title={marker.title}
-                onClick={() => handleMarkerClick(marker)}
-              />
-            ))} */}
+            {/* <MarkerCluster /> */}
           </NaverMap>
           <MapResearch onSearch={handleSearch} />
         </MapDiv>
