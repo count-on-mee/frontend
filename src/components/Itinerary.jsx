@@ -92,6 +92,8 @@ const Itinerary = () => {
             name: itinerary.title,
             address: itinerary.address,
             location: itinerary.location,
+            day: day.day,
+            order: itinerary.order,
           })),
         );
 
@@ -127,8 +129,8 @@ const Itinerary = () => {
 
       const updatedSpotsByDay = Array.from({ length: period.length }, () => []);
 
-      selectedSpots.forEach((spot, index) => {
-        const dayIndex = index % period.length;
+      selectedSpots.forEach(spot => {
+        const dayIndex = spot.day - 1;
         updatedSpotsByDay[dayIndex].push(spot);
       });
 
@@ -368,7 +370,7 @@ const Itinerary = () => {
         </button>
         {isModalOpen && (
           <ItineraryModal
-            filteredSpots={filteredSpots}
+            // filteredSpots={filteredSpots}
             onClose={handleCloseModal}
             onAddSpot={handleAddSpot}
           />
