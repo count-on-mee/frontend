@@ -107,12 +107,6 @@ export default function MyPage () {
         console.error('스크랩 취소 에러:', error);
       }
     }
-  
-  // const handleSpotNavigate = (spot) => {
-  //   setSelectedSpot(spot);
-  //   console.log(selectedSpotAtom);
-  //   navigate('/map/spot');
-  // }
 
   const validateNickname = () => {
     if (nickname.length > 30){
@@ -155,11 +149,11 @@ export default function MyPage () {
 
   return(
     <div className="w-full flex flex-col bg-[#FFFCF2]">
-      <div className="flex flex-nowrap flex-grow">
+      <div className="flex flex-grow flex-nowrap">
         <div className="font-mixed box-content w-1/4 border-[#403D39] border-r-2 text-center text-2xl pt-5">
           My page
             <div className="relative">
-              <div className="w-1/2 h-1/2 mx-auto">
+              <div className="w-1/2 mx-auto h-1/2">
                 <ProfileImage  
                 user={user} />
               </div>
@@ -181,11 +175,11 @@ export default function MyPage () {
                   />
                   </>
                 ) : (
-                  <div className="text-3xl font-mixed font-bold">{ user?.nickname }</div>
+                  <div className="text-3xl font-bold font-mixed">{ user?.nickname }</div>
                   )
                 }
                 <button 
-                  className="ml-2 flex-shrink-0"
+                  className="flex-shrink-0 ml-2"
                   onClick={isEditing ? handleSave : handleEdit}
                 >
                   { isEditing ? (<CheckIcon 
@@ -194,7 +188,7 @@ export default function MyPage () {
                 </button>
                </div>
                {error && (
-                    <p className="block text-red-500 text-sm mt-3">{error}</p>
+                    <p className="block mt-3 text-sm text-red-500">{error}</p>
                   )}
             </div>
           </div>
@@ -204,9 +198,9 @@ export default function MyPage () {
                 className="inline-block px-3 py-2 mt-5 ml-10 font-mixed rounded-tl-lg rounded-br-lg bg-[#CCC5B9]">
                 spot      
               </div>
-              <div className="h-1 bg-black rounded-lg mx-10"></div>
+              <div className="h-1 mx-10 bg-black rounded-lg"></div>
               {scrapedSpots.length > 0 && (
-                <div className="flex h-52 mx-10 overflow-x-auto">
+                <div className="flex mx-10 overflow-x-auto h-52">
                 {scrapedSpots.map(spot => (
                   <div 
                     key={spot.spotScrapId} onClick={() => handleSpotNavigate(spot)} className="mx-3 cursor-pointer"
@@ -215,13 +209,13 @@ export default function MyPage () {
                       <img 
                         src={spot.imgUrl}
                         alt={spot.title}
-                        className="flex relative h-36 w-60 rounded-md mt-2"
+                        className="relative flex mt-2 rounded-md h-36 w-60"
                       />
                       <BookmarkIcon
                         className={`absolute top-3 right-3 w-5 h-5 ${spot.isDeleted ? '' : 'fill-[#EB5E28] stroke-[#EB5E28]'}`} onClick={(event) => handleSpotScrap(event, spot.spotId)}
                       />
                     </div>
-                    <div className="font-mixed truncate w-56 font-light text-md">{spot.title}</div>
+                    <div className="w-56 font-light truncate font-mixed text-md">{spot.title}</div>
 
                   </div>  
                 ))}
@@ -233,21 +227,21 @@ export default function MyPage () {
                 className="inline-block px-3 py-2 mt-5 ml-10 font-mixed rounded-tl-lg rounded-br-lg bg-[#CCC5B9]">
                 curation     
               </div>
-              <div className="h-1 bg-black rounded-lg mx-10"></div>
+              <div className="h-1 mx-10 bg-black rounded-lg"></div>
               {scrapedCurations.length > 0 && (
-                <div className="flex h-72 mx-10 overflow-x-auto">
+                <div className="flex mx-10 overflow-x-auto h-72">
                 {scrapedCurations.map(curation => (
-                  <div key={curation.curationScrapId} className="mx-3 cursor-pointer w-40">
+                  <div key={curation.curationScrapId} className="w-40 mx-3 cursor-pointer">
                     <div className="relative w-40">
                       <img 
                         src={curation.imgUrl}
                         alt={curation.title}
-                        className="flex h-60 w-40 rounded-md mt-2 object-cover"
+                        className="flex object-cover w-40 mt-2 rounded-md h-60"
                       />
                       <BookmarkIcon
                         className={`absolute top-3 right-3 w-5 h-5 ${curation.isDeleted ? '' : 'fill-[#EB5E28] stroke-[#EB5E28]'}`} onClick={(event) => handleCurationScrap(event, curation.curationId)}
                       />
-                      <div className="absolute font-mixed text-white truncate w-40 left-1 bottom-1 text-md font-bold">{curation.title}</div>
+                      <div className="absolute w-40 font-bold text-white truncate font-mixed left-1 bottom-1 text-md">{curation.title}</div>
                     </div>
                     
 
