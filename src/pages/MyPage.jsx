@@ -6,14 +6,11 @@ import userAtom from '../recoil/user';
 import ProfileImage from '../components/ProfileImage';
 import UploadImages from '../components/UploadImages';
 import { updateUser } from '../services/userService';
-import selectedSpotAtom from '../recoil/selectedSpot';
 
 
 export default function MyPage () {  
   const user = useRecoilValue(userAtom);
   const setUser = useSetRecoilState(userAtom);
-  const setSelectedSpot = useSetRecoilState(selectedSpotAtom);
-
   const [nickname, setNickname] = useState(user?.nickname);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
