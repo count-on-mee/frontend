@@ -237,7 +237,7 @@ const ItineraryModal = ({ onClose, onAddSpot, selectedDay }) => {
           </div>
         )}
 
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center">
           <button
             onClick={onClose}
             className="bg-gray-300 text-black font-semibold py-3 px-8 rounded-full hover:bg-gray-400"
