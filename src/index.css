@@ -4,21 +4,20 @@
   font-family: 'Goorm';
   src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/goorm-sans-code.woff2')
     format('woff2');
-    unicode-range: U+AC00-D7AF;
+  unicode-range: U+AC00-D7AF;
 }
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
+@theme {
+  --color-background-light: #fafafa;
+  --color-background-gray: #ebeae9;
+  --color-primary: #eb5e28;
+}
 
 body {
   font-family: 'Goorm', 'Prompt', sans-serif;
 }
-
-
-
-
-
-
 
 /* ::-webkit-scrollbar {
   width: 5px;
