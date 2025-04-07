@@ -14,7 +14,7 @@ function PlanLayout() {
         </div>
 
         <div
-          className="bg-[#EBEAE9] rounded-lg shadow-xl w-full max-w-3xl aspect-square relative z-10 flex flex-col"
+          className="bg-background-gray rounded-lg shadow-xl w-full max-w-3xl aspect-square relative z-10 flex flex-col"
           id="plan-layout-title"
         >
           <div className="flex-grow overflow-hidden p-6">

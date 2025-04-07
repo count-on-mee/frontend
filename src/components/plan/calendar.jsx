@@ -17,10 +17,42 @@ import {
   isAfter,
 } from 'date-fns';
 import { useCallback } from 'react';
+import clsx from 'clsx';
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
+// 기본 스타일
+const baseButtonStyles =
+  'flex h-14 w-14 items-center justify-center rounded-full transition-all duration-200 text-2xl';
+const baseShadowStyles = 'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]';
+const hoverShadowStyles =
+  'hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]';
+
+// 선택된 날짜 스타일
+const selectedDateStyles =
+  'bg-primary text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]';
+
+// 날짜 범위 내 스타일
+const dateRangeStyles = 'bg-primary/30 text-primary';
+
+// 비활성화된 날짜 스타일
+const disabledDateStyles = 'text-gray-400 cursor-not-allowed shadow-none';
+
+// 오늘 날짜 스타일
+const todayDateStyles = 'text-red-500';
+
+// 현재 월의 날짜 스타일
+const currentMonthDateStyles =
+  'text-gray-900 hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]';
+
+// 다른 월의 날짜 스타일
+const otherMonthDateStyles = 'text-gray-400';
+
+// 네비게이션 버튼 스타일
+const navButtonStyles =
+  'flex items-center justify-center p-3 text-gray-400 hover:text-gray-500 transition-all duration-200 rounded-full';
+
+// 완료 버튼 스타일
+const completeButtonStyles =
+  'w-full py-4 px-6 bg-primary text-white rounded-full hover:bg-[#D54E23] transition-all duration-200 text-xl shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31] hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]';
 
 function Calendar() {
   const navigate = useNavigate();
@@ -75,44 +107,6 @@ function Calendar() {
     }
   }, [tripDates, navigate]);
 
-  const getDateButtonClassName = useCallback(
-    (day) => {
-      const isSelected =
-        isEqual(day, tripDates.startDate) || isEqual(day, tripDates.endDate);
-      const isInRange =
-        tripDates.startDate &&
-        tripDates.endDate &&
-        isWithinInterval(day, {
-          start: tripDates.startDate,
-          end: tripDates.endDate,
-        });
-      const isDisabled = isAfter(today, day);
-      const isCurrentDay = isToday(day);
-      const isCurrentMonth = isSameMonth(day, firstDayCurrentMonth);
-
-      return classNames(
-        'flex h-14 w-14 items-center justify-center rounded-full transition-all duration-200 text-2xl',
-        'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]',
-        isSelected &&
-          'bg-[#EB5E28] text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
-        isInRange && !isSelected && 'bg-[#EB5E28]/30 text-[#EB5E28]',
-        isDisabled && 'text-gray-400 cursor-not-allowed shadow-none',
-        !isDisabled && isCurrentDay && 'text-red-500',
-        !isSelected &&
-          !isInRange &&
-          !isCurrentDay &&
-          isCurrentMonth &&
-          'text-gray-900 hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
-        !isSelected &&
-          !isInRange &&
-          !isCurrentDay &&
-          !isCurrentMonth &&
-          'text-gray-400',
-      );
-    },
-    [tripDates, today, firstDayCurrentMonth],
-  );
-
   return (
     <div className="bg-[#EBEAE9] font-prompt h-full flex flex-col">
       <div className="flex-grow overflow-y-auto">
@@ -120,7 +114,11 @@ function Calendar() {
           <button
             type="button"
             onClick={() => changeMonth(-1)}
-            className="flex items-center justify-center p-3 text-gray-400 hover:text-gray-500 transition-all duration-200 rounded-full shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]"
+            className={clsx(
+              navButtonStyles,
+              baseShadowStyles,
+              hoverShadowStyles,
+            )}
           >
             <span className="sr-only">Previous month</span>
             <ChevronLeftIcon className="w-8 h-8" aria-hidden="true" />
@@ -136,7 +134,11 @@ function Calendar() {
           <button
             onClick={() => changeMonth(1)}
             type="button"
-            className="flex items-center justify-center p-3 text-gray-400 hover:text-gray-500 transition-all duration-200 rounded-full shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]"
+            className={clsx(
+              navButtonStyles,
+              baseShadowStyles,
+              hoverShadowStyles,
+            )}
           >
             <span className="sr-only">Next month</span>
             <ChevronRightIcon className="w-8 h-8" aria-hidden="true" />
@@ -170,7 +172,7 @@ function Calendar() {
           {days.map((day, dayIdx) => (
             <div
               key={day.toString()}
-              className={classNames(
+              className={clsx(
                 dayIdx === 0 && colStartClasses[getDay(day)],
                 'flex justify-center',
               )}
@@ -179,7 +181,54 @@ function Calendar() {
                 type="button"
                 onClick={() => handleDateClick(day)}
                 disabled={isAfter(today, day)}
-                className={getDateButtonClassName(day)}
+                className={clsx(baseButtonStyles, baseShadowStyles, {
+                  [selectedDateStyles]:
+                    isEqual(day, tripDates.startDate) ||
+                    isEqual(day, tripDates.endDate),
+                  [dateRangeStyles]:
+                    tripDates.startDate &&
+                    tripDates.endDate &&
+                    isWithinInterval(day, {
+                      start: tripDates.startDate,
+                      end: tripDates.endDate,
+                    }) &&
+                    !(
+                      isEqual(day, tripDates.startDate) ||
+                      isEqual(day, tripDates.endDate)
+                    ),
+                  [disabledDateStyles]: isAfter(today, day),
+                  [todayDateStyles]: !isAfter(today, day) && isToday(day),
+                  [currentMonthDateStyles]:
+                    !(
+                      isEqual(day, tripDates.startDate) ||
+                      isEqual(day, tripDates.endDate)
+                    ) &&
+                    !(
+                      tripDates.startDate &&
+                      tripDates.endDate &&
+                      isWithinInterval(day, {
+                        start: tripDates.startDate,
+                        end: tripDates.endDate,
+                      })
+                    ) &&
+                    !isToday(day) &&
+                    isSameMonth(day, firstDayCurrentMonth),
+                  [otherMonthDateStyles]:
+                    !(
+                      isEqual(day, tripDates.startDate) ||
+                      isEqual(day, tripDates.endDate)
+                    ) &&
+                    !(
+                      tripDates.startDate &&
+                      tripDates.endDate &&
+                      isWithinInterval(day, {
+                        start: tripDates.startDate,
+                        end: tripDates.endDate,
+                      })
+                    ) &&
+                    !isToday(day) &&
+                    !isSameMonth(day, firstDayCurrentMonth),
+                })}
               >
                 <time dateTime={format(day, 'yyyy-MM-dd')}>
                   {format(day, 'd')}
@@ -194,7 +243,7 @@ function Calendar() {
           <button
             onClick={createEvent}
             type="button"
-            className="w-full py-4 px-6 bg-[#EB5E28] text-white rounded-full hover:bg-[#D54E23] transition-all duration-200 text-xl shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31] hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]"
+            className={completeButtonStyles}
           >
             완료
           </button>
