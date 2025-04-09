@@ -5,6 +5,7 @@
   src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/goorm-sans-code.woff2')
     format('woff2');
   unicode-range: U+AC00-D7AF;
+  unicode-range: U+AC00-D7AF;
 }
 
 @import 'tailwindcss';
@@ -13,6 +14,23 @@
   --color-background-light: #fafafa;
   --color-background-gray: #ebeae9;
   --color-primary: #eb5e28;
+}
+
+@layer utilities {
+  .text-shadow-header {
+    text-shadow:
+      2px 2px 2px rgba(0, 0, 0, 0.25),
+      -2px -2px 2px rgba(255, 255, 255, 0.35);
+  }
+}
+
+@layer components {
+  .navlink {
+    @apply px-2 underline-offset-8 hover:underline hover:font-bold;
+  }
+  .navlink-active {
+    @apply underline underline-offset-8 font-bold;
+  }
 }
 
 body {
