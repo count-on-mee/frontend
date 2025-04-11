@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 import PlanLayout from './layouts/PlanLayout';
 import Calendar from './components/plan/Calendar';
+import Destination from './components/plan/Destination';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
             <Routes>
               <Route path="/com" element={<PlanLayout />}>
                 <Route path="calendar" element={<Calendar />} />
+                <Route path="destination" element={<Destination />} />
               </Route>
             </Routes>
           </main>
