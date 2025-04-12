@@ -10,7 +10,7 @@ const useDestinations = () => {
       try {
         const accessToken = localStorage.getItem('accessToken');
         const response = await fetch(
-          'http://localhost:8080/trips/destination',
+          'http://localhost:8888/trips/destinations',
           {
             method: 'GET',
             headers: {
@@ -28,7 +28,7 @@ const useDestinations = () => {
         }
 
         const data = await response.json();
-        setDestinations(data.destinations || []);
+        setDestinations(data || []);
       } catch (err) {
         console.error('목적지 데이터 가져오기 실패:', err);
         setError(err.message || '목적지 데이터를 가져오는데 실패했습니다.');

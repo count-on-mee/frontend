@@ -92,9 +92,13 @@ function Destination() {
 
   const toggleSelection = (dest) => {
     setSelectedDestinations((prev) => {
-      const isSelected = prev.some((d) => d.id === dest.id);
+      const isSelected = prev.some(
+        (d) => d.tripDestinationId === dest.tripDestinationId,
+      );
       if (isSelected) {
-        return prev.filter((d) => d.id !== dest.id);
+        return prev.filter(
+          (d) => d.tripDestinationId !== dest.tripDestinationId,
+        );
       } else {
         return [...prev, dest];
       }
@@ -181,7 +185,7 @@ function Destination() {
         <table className="w-full">
           <tbody className="text-[#252422]">
             {filteredDestinations.map((dest, idx) => (
-              <tr key={dest.id}>
+              <tr key={dest.tripDestinationId}>
                 <td className={destinationItemStyles}>
                   <div className="flex items-center">
                     <div className={imageContainerStyles}>
@@ -214,10 +218,14 @@ function Destination() {
                     <button
                       onClick={() => toggleSelection(dest)}
                       className={selectionButtonStyles(
-                        selectedDestinations.some((d) => d.id === dest.id),
+                        selectedDestinations.some(
+                          (d) => d.tripDestinationId === dest.tripDestinationId,
+                        ),
                       )}
                     >
-                      {selectedDestinations.some((d) => d.id === dest.id)
+                      {selectedDestinations.some(
+                        (d) => d.tripDestinationId === dest.tripDestinationId,
+                      )
                         ? '선택'
                         : '선택'}
                     </button>
