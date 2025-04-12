@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 import PlanLayout from './layouts/PlanLayout';
 import Calendar from './components/plan/Calendar';
+import Destination from './components/plan/Destination';
 import Header from './components/Header';
 import SpotPage from './pages/SpotPage';
 
@@ -17,6 +18,7 @@ function App() {
               <Route path="/spot" element={<SpotPage />} />
               <Route path="/com" element={<PlanLayout />}>
                 <Route path="calendar" element={<Calendar />} />
+                <Route path="destination" element={<Destination />} />
               </Route>
             </Routes>
           </main>
