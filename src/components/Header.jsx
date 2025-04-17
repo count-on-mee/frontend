@@ -20,7 +20,7 @@ export default function Header() {
           <img
             alt="logo"
             src="/src/assets/icon.png"
-            className="w-24 h-15 border-2 ml-10 lg:ml-20 border-[#403D39]"
+            className="w-24 h-15 border-2 ml-10 lg:ml-20 border-charcoal"
           />
         </NavLink>
         <nav className="hidden lg:flex justify-center text-shadow-header text-background-light font-medium text-2xl">

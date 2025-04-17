@@ -6,6 +6,7 @@ import Calendar from './components/plan/Calendar';
 import Destination from './components/plan/Destination';
 import Header from './components/Header';
 import SpotPage from './pages/SpotPage';
+import CurationPage from './pages/CurationPage';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <main className="flex-grow flex">
             <Routes>
               <Route path="/spot" element={<SpotPage />} />
+              <Route path="/curation" element={<CurationPage />} />
               <Route path="/com" element={<PlanLayout />}>
                 <Route path="calendar" element={<Calendar />} />
                 <Route path="destination" element={<Destination />} />
