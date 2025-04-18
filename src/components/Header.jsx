@@ -1,6 +1,9 @@
 import { NavLink, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
+import userAtom from '../recoil/user';
+import useAuth from '../hooks/useAuth';
+import { useRecoilValue } from 'recoil';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,6 +15,12 @@ export default function Header() {
   ];
   const mobileMenuClass =
     'flex flex-col items-center text-background-light text-shadow-header font-medium text-2xl';
+  
+  const user = useRecoilValue(userAtom);
+  const { logout } = useAuth();
+  const handleLogout = async () => {
+    await logout();
+  }
   return (
     <>
       <header className="h-[80px] w-full items-center grid grid-cols-[1fr_2fr_1fr] py-1 bg-primary">
@@ -36,12 +45,21 @@ export default function Header() {
             </NavLink>
           ))}
         </nav>
-        <NavLink
+        {user? (
+          <div>
+            <div>
+              {user.nickname}
+            </div>
+            <button onClick={handleLogout}>logout</button>
+          </div>
+        ):( <NavLink
           to="/login"
           className="hidden lg:flex text-background-light text-shadow-header font-light hover:font-normal justify-end pr-20"
         >
           Log in
         </NavLink>
+        )}
+       
         <div></div>
         <button
           onClick={() => setMobileMenuOpen(true)}
