@@ -2,10 +2,12 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 import PlanLayout from './layouts/PlanLayout';
+import TripLayout from './layouts/TripLayout';
 import Calendar from './components/plan/Calendar';
 import Destination from './components/plan/Destination';
 import Header from './components/Header';
 import SpotPage from './pages/SpotPage';
+import TripDetails from './pages/trip/tripDetails';
 
 function App() {
   return (
@@ -19,6 +21,9 @@ function App() {
               <Route path="/com" element={<PlanLayout />}>
                 <Route path="calendar" element={<Calendar />} />
                 <Route path="destination" element={<Destination />} />
+              </Route>
+              <Route path="/com/:tripId" element={<TripLayout />}>
+                <Route path="details" element={<TripDetails />} />
               </Route>
             </Routes>
           </main>
