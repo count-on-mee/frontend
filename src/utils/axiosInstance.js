@@ -17,8 +17,9 @@ function onRefreshed(token) {
 
 api.interceptors.request.use(
   async (config) => {
-    // /auth/reissue 요청은 토큰 갱신 로직을 타지 않게 예외 처리
-    if (config.url === '/auth/reissue') return config;
+    // /auth/reissue, /auth/logout 요청은 토큰 갱신 로직을 타지 않게 예외 처리
+    if (config.url === '/auth/reissue' || config.url === '/auth/logout')
+      return config;
 
     let token = getRecoil(authAtom).accessToken;
 
@@ -26,7 +27,9 @@ api.interceptors.request.use(
       if (!isRefreshing) {
         isRefreshing = true;
         try {
-          const res = await api.post('/auth/reissue', null, { withCredentials: true });
+          const res = await api.post('/auth/reissue', null, {
+            withCredentials: true,
+          });
           token = res.data.accessToken;
           setRecoil(authAtom, { accessToken: token });
           onRefreshed(token);
@@ -52,7 +55,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (err) => Promise.reject(err)
+  (err) => Promise.reject(err),
 );
 
 export default api;

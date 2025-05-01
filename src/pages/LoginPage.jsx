@@ -1,4 +1,3 @@
-
 export default function LoginPage() {
   const handleNaverLogin = async () => {
     window.location.href = 'http://localhost:8888/auth/naver';
@@ -36,8 +35,7 @@ export default function LoginPage() {
         >
           구글 로그인
         </button>
-        <div className="w-full mt-10 fixed bottom-0">
-        </div>
+        <div className="w-full mt-10 fixed bottom-0"></div>
       </div>
     </>
   );
