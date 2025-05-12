@@ -1,7 +1,16 @@
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
+import { FaPlane, FaHotel, FaUtensils, FaEllipsisH } from 'react-icons/fa';
 import clsx from 'clsx';
 import { componentStyles, styleUtils } from '../../../utils/styles';
+import { CATEGORY_NAMES } from '../../../constants/expenseConstants';
+
+const CATEGORY_ICONS = {
+  transportation: FaPlane,
+  accommodation: FaHotel,
+  food: FaUtensils,
+  etc: FaEllipsisH,
+};
 
 const ExpenseRow = ({
   category,
@@ -12,13 +21,14 @@ const ExpenseRow = ({
   isSelected,
   expenses,
   newRow,
-  categoryIcons,
   onRowClick,
   onDeleteRow,
   onInputChange,
   onNewRowInputChange,
   onAmountChange,
 }) => {
+  const Icon = CATEGORY_ICONS[category];
+
   return (
     <Draggable
       key={`${category}-${index}`}
@@ -45,14 +55,8 @@ const ExpenseRow = ({
               className={componentStyles.cell}
             >
               <span className={componentStyles.category}>
-                {categoryIcons[category]}
-                {category === 'transportation'
-                  ? '교통편'
-                  : category === 'accommodation'
-                    ? '숙박비'
-                    : category === 'food'
-                      ? '식비'
-                      : '기타'}
+                {Icon && <Icon className="mr-2" />}
+                {CATEGORY_NAMES[category]}
               </span>
             </td>
           )}

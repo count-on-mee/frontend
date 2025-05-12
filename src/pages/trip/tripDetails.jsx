@@ -13,6 +13,47 @@ const TripDetails = () => {
   const [accommodations, setAccommodations] = useState([]);
   const [spots, setSpots] = useState([]);
   const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTripData = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const response = await fetch(`http://localhost:8888/trips/${tripId}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('여행 데이터를 가져오는데 실패했습니다.');
+        }
+
+        const tripData = await response.json();
+
+        // 여행 데이터 설정
+        if (tripData.tripItineraries) {
+          const spotData = tripData.tripItineraries.flatMap((day) =>
+            day.itineraries.map((spot) => ({
+              id: spot.spotId,
+              name: spot.title,
+              address: spot.address,
+              location: spot.location,
+              day: day.day,
+              order: spot.order,
+            })),
+          );
+          setSpots(spotData);
+        }
+      } catch (error) {
+        console.error('여행 데이터 로드 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTripData();
+  }, [tripId]);
 
   useEffect(() => {
     // Socket.IO 연결 설정
@@ -49,45 +90,33 @@ const TripDetails = () => {
       setSpots((prev) => prev.map((s) => (s.id === data.id ? data : s)));
     });
 
-    newSocket.on('todoUpdated', (data) => {
-      console.log('Todo updated:', data);
-      setTodos((prev) => prev.map((t) => (t.id === data.id ? data : t)));
+    newSocket.on('todoUpdated', (todo) => {
+      console.log('Todo updated:', todo);
+      setTodos((prevTodos) =>
+        prevTodos.map((t) => (t.id === todo.id ? todo : t)),
+      );
+    });
+
+    newSocket.on('todoAdded', (todo) => {
+      console.log('Todo added:', todo);
+      setTodos((prevTodos) => [...prevTodos, todo]);
+    });
+
+    newSocket.on('todoDeleted', (todoId) => {
+      console.log('Todo deleted:', todoId);
+      setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== todoId));
     });
 
     setSocket(newSocket);
-
-    // 임시 데이터 설정 (실제 API 호출 전)
-    setExpenses([
-      { id: 1, item: '비행기', amount: '150000', note: '가는편' },
-      { id: 2, item: '숙박', amount: '200000', note: '2박' },
-    ]);
-    setAccommodations([
-      {
-        id: 1,
-        name: '제주 호텔',
-        checkIn: '2024-03-15',
-        checkOut: '2024-03-17',
-        note: '시티뷰',
-      },
-    ]);
-    setSpots([
-      {
-        id: 1,
-        name: '성산일출봉',
-        address: '제주시 성산읍',
-        note: '일출 명소',
-      },
-      { id: 2, name: '우도', address: '제주시 우도면', note: '자전거 여행' },
-    ]);
-    setTodos([
-      { id: 1, task: '비행기 예약', completed: true },
-      { id: 2, task: '숙소 예약', completed: false },
-    ]);
 
     return () => {
       newSocket.disconnect();
     };
   }, [tripId]);
+
+  if (loading) {
+    return <div>로딩 중...</div>;
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -96,7 +125,7 @@ const TripDetails = () => {
           <h2 className="text-xl font-semibold mb-2">비용</h2>
           <Expenses expenses={expenses} socket={socket} tripId={tripId} />
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div>
           <h2 className="text-xl font-semibold mb-2">숙소</h2>
           <Accommodation
             accommodations={accommodations}
@@ -104,11 +133,11 @@ const TripDetails = () => {
             tripId={tripId}
           />
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div>
           <h2 className="text-xl font-semibold mb-2">장소</h2>
           <Spot spots={spots} socket={socket} tripId={tripId} />
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div>
           <h2 className="text-xl font-semibold mb-2">할 일</h2>
           <TodoList todos={todos} socket={socket} tripId={tripId} />
         </div>

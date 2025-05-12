@@ -7,14 +7,8 @@ import { useState, useEffect, useCallback } from 'react';
  */
 const useExpenses = (
   initialExpenses = {
-    transportation: [
-      { type: '가는편', amount: '' },
-      { type: '오는편', amount: '' },
-    ],
-    accommodation: [
-      { type: '1박 가격', amount: '' },
-      { type: '인당 추가 요금', amount: '' },
-    ],
+    transportation: [{ type: '수단명', amount: '' }],
+    accommodation: [{ type: '숙소명', amount: '' }],
     food: [{ name: '', amount: '' }],
     etc: [{ name: '', amount: '' }],
   },
