@@ -3,27 +3,34 @@ import { IoMdCafe } from 'react-icons/io';
 import { HiLocationMarker } from 'react-icons/hi';
 import { MdOutlineRestaurant } from 'react-icons/md';
 
-export default function Hashtag() {
-  const categories = [
-    { key: 'accomodation', label: '숙소', icon: FaBed },
-    { key: 'cafe', label: '카페', icon: IoMdCafe },
-    { key: 'exhibition', label: '전시관', icon: FaLandmark },
-    { key: 'landmark', label: '관광지', icon: HiLocationMarker },
-    { key: 'restaurant', label: '식당', icon: MdOutlineRestaurant },
+export default function Hashtag({category}) {
+  const categories_map = [
+    { key: '숙소', label: '숙소', icon: FaBed },
+    { key: '카페', label: '카페', icon: IoMdCafe },
+    { key: '복합 문화 공간', label: '복합문화공간', icon: FaLandmark },
+    { key: '박물관', label: '박물관', icon: FaLandmark },
+    { key: '미술관', label: '미술관', icon: FaLandmark },
+    { key: '도서관', label: '도서관', icon: FaLandmark },
+    { key: '역사', label: '역사', icon: FaLandmark },
+    { key: '종교', label: '종교', icon: FaLandmark },
+    { key: '관광지', label: '관광지', icon: HiLocationMarker },
+    { key: '자연', label: '자연', icon: HiLocationMarker },
+    { key: '식당', label: '식당', icon: MdOutlineRestaurant },
   ];
 
-  // const Icon = categories.icon
+  const categoryKey = Array.isArray(category) ? category[0] : category;
+  const categoryInfo = categories_map.find(cat => cat.key === categoryKey);
+
+  const Icon = categoryInfo?.icon
+
   return (
     <div className="gap-2 px-5">
-      {categories.map(({ key, label, icon: Icon }) => (
-        <div
-          key={key}
-          className="inline-flex items-center mr-1 px-2 rounded-full text-sm font-medium bg-charcoal text-background-light"
-        >
-          {Icon && <Icon alt={label} className="size-5 gap-1 pr-1" />}
-          {label}
-        </div>
-      ))}
+      <div
+        className="inline-flex items-center mr-1 px-2 rounded-full text-sm font-medium bg-charcoal text-background-light"
+      >
+        <Icon alt={categoryInfo.label} className="size-5 gap-1 pr-1" />
+        {categoryInfo.label}
+      </div>
     </div>
   );
 }
