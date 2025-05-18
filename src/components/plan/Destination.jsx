@@ -192,7 +192,7 @@ function Destination() {
                       <img
                         className="h-full w-full object-cover"
                         src={
-                          dest.imageUrl ||
+                          dest.imgUrl ||
                           `https://loremflickr.com/100/100?random=${5 * idx}`
                         }
                         alt={dest.name}
