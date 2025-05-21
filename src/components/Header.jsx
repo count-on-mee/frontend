@@ -1,6 +1,10 @@
 import { NavLink, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
+import userAtom from '../recoil/user';
+import useAuth from '../hooks/useAuth';
+import { useRecoilValue } from 'recoil';
+import clsx from 'clsx';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,6 +16,15 @@ export default function Header() {
   ];
   const mobileMenuClass =
     'flex flex-col items-center text-background-light text-shadow-header font-medium text-2xl';
+
+  const menuTextClass =
+    'hidden lg:flex justify-center text-shadow-header text-background-light font-medium';
+
+  const user = useRecoilValue(userAtom);
+  const { logout } = useAuth();
+  const handleLogout = async () => {
+    await logout();
+  };
   return (
     <>
       <header className="h-[80px] w-full items-center grid grid-cols-[1fr_2fr_1fr] py-1 bg-primary">
@@ -20,10 +33,10 @@ export default function Header() {
           <img
             alt="logo"
             src="/src/assets/icon.png"
-            className="w-24 h-15 border-2 ml-10 lg:ml-20 border-[#403D39]"
+            className="w-24 h-15 border-2 ml-10 lg:ml-20 border-charcoal"
           />
         </NavLink>
-        <nav className="hidden lg:flex justify-center text-shadow-header text-background-light font-medium text-2xl">
+        <nav className={clsx(menuTextClass, 'text-2xl')}>
           {links.map(({ to, label }) => (
             <NavLink
               key={to}
@@ -36,12 +49,27 @@ export default function Header() {
             </NavLink>
           ))}
         </nav>
-        <NavLink
-          to="/login"
-          className="hidden lg:flex text-background-light text-shadow-header font-light hover:font-normal justify-end pr-20"
-        >
-          Log in
-        </NavLink>
+        {user ? (
+          <div className="flex">
+            <div className={clsx(menuTextClass, 'text-lg pr-5')}>
+              {user.nickname}
+            </div>
+            <button
+              className={clsx(menuTextClass, 'text-lg')}
+              onClick={handleLogout}
+            >
+              logout
+            </button>
+          </div>
+        ) : (
+          <NavLink
+            to="/login"
+            className="hidden lg:flex text-background-light text-shadow-header font-light hover:font-normal justify-end pr-20"
+          >
+            Log in
+          </NavLink>
+        )}
+
         <div></div>
         <button
           onClick={() => setMobileMenuOpen(true)}
