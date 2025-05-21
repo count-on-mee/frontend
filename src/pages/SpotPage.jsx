@@ -5,7 +5,9 @@ export default function SpotPage() {
   return (
     <div className="w-full">
       <div className="w-1/4">
-        <Searchbar />
+        <div className="mt-6 mb-4 ml-5">
+          <Searchbar size="lg" />
+        </div>
         <Card />
         <Card />
         <Card />
