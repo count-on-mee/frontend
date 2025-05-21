@@ -1,46 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useRecoilState } from 'recoil';
 import selectedDestinationsAtom from '../../recoil/selectedDestinations';
 import useDestinations from '../../hooks/useDestinations';
+import { useListSearch } from '../../hooks/useSearch';
+import { baseStyles, componentStyles, styleUtils } from '../../utils/style';
 import clsx from 'clsx';
-
-// 기본 스타일
-const baseButtonStyles =
-  'flex items-center justify-center rounded-full transition-all duration-200';
-const baseShadowStyles = 'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]';
-const hoverShadowStyles =
-  'hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]';
-
-// 선택된 버튼 스타일
-const selectedButtonStyles = clsx(
-  baseButtonStyles,
-  'bg-[var(--color-primary)] text-white',
-  'shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
-);
-
-// 선택되지 않은 버튼 스타일
-const unselectedButtonStyles = clsx(
-  baseButtonStyles,
-  'bg-[var(--color-background-gray)] text-[#252422]',
-  'hover:bg-[#E0DFDE]',
-);
-
-// 네비게이션 버튼 스타일
-const navButtonStyles = clsx(
-  baseButtonStyles,
-  baseShadowStyles,
-  hoverShadowStyles,
-  'p-3',
-);
-
-// 검색 입력 필드 스타일
-const searchInputStyles = clsx(
-  'w-full h-12 rounded-full bg-[var(--color-background-gray)]',
-  'pl-10 pr-4 focus:outline-none focus:border-[var(--color-primary)]',
-  'transition-colors',
-);
+import Searchbar from '../ui/Searchbar';
 
 // 목적지 항목 스타일
 const destinationItemStyles = clsx(
@@ -50,27 +16,21 @@ const destinationItemStyles = clsx(
 
 // 이미지 컨테이너 스타일
 const imageContainerStyles = clsx(
-  baseShadowStyles,
+  baseStyles.shadow,
   'h-16 w-16 flex-shrink-0 rounded-full overflow-hidden',
 );
 
 // 선택 버튼 스타일
 const selectionButtonStyles = (isSelected) =>
   clsx(
-    baseButtonStyles,
-    baseShadowStyles,
-    isSelected ? selectedButtonStyles : unselectedButtonStyles,
+    baseStyles.button,
+    baseStyles.shadow,
+    isSelected
+      ? 'bg-[var(--color-primary)] text-white'
+      : 'bg-[var(--color-background-gray)] text-[#252422]',
     'px-5 py-2 text-base font-semibold',
+    baseStyles.hoverShadow,
   );
-
-// 다음 버튼 스타일
-const nextButtonStyles = clsx(
-  baseButtonStyles,
-  baseShadowStyles,
-  'bg-[var(--color-primary)] text-white font-semibold',
-  'py-3 px-8 text-xl hover:bg-[#D54E23]',
-  'transition-colors duration-300',
-);
 
 function Destination() {
   const navigate = useNavigate();
@@ -78,15 +38,11 @@ function Destination() {
     selectedDestinationsAtom,
   );
   const { destinations: apiDestinations, loading, error } = useDestinations();
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredDestinations = useMemo(
-    () =>
-      apiDestinations.filter((dest) =>
-        dest.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-    [apiDestinations, searchTerm],
-  );
+  const {
+    searchTerm,
+    handleSearch,
+    filteredItems: filteredDestinations,
+  } = useListSearch(apiDestinations);
 
   const goBack = () => navigate('/com/calendar');
 
@@ -104,8 +60,6 @@ function Destination() {
       }
     });
   };
-
-  const handleSearch = (e) => setSearchTerm(e.target.value);
 
   const handleNext = () => {
     if (selectedDestinations.length > 0) {
@@ -131,8 +85,8 @@ function Destination() {
         <button
           onClick={() => window.location.reload()}
           className={clsx(
-            baseButtonStyles,
-            baseShadowStyles,
+            baseStyles.button,
+            baseStyles.shadow,
             'bg-[var(--color-primary)] text-white px-4 py-2',
           )}
         >
@@ -145,7 +99,7 @@ function Destination() {
   return (
     <div className="bg-[var(--color-background-gray)] font-prompt h-full flex flex-col">
       <div className="flex items-center justify-between p-8">
-        <button onClick={goBack} className={navButtonStyles}>
+        <button onClick={goBack} className={styleUtils.closeButton}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -161,22 +115,16 @@ function Destination() {
             />
           </svg>
         </button>
-        <h2 className="text-4xl font-semibold text-[#252422] drop-shadow-[3px_3px_6px_#b8b8b8]">
-          어디로 떠나시나요?
-        </h2>
+        <h2 className={componentStyles.header}>어디로 떠나시나요?</h2>
         <div className="w-8"></div>
       </div>
-      <div className="w-4/5 mx-auto py-8 relative">
-        <div className={clsx(baseShadowStyles, 'rounded-full')}>
-          <MagnifyingGlassIcon className="absolute h-5 w-5 left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            className={searchInputStyles}
-            type="text"
-            placeholder="목적지 검색"
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-        </div>
+      <div className="w-4/5 mx-auto py-8">
+        <Searchbar
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="목적지 검색"
+          size="lg"
+        />
       </div>
       <div
         className="overflow-y-auto rounded-lg mb-8 mx-8"
@@ -237,7 +185,10 @@ function Destination() {
         </table>
       </div>
       <div className="flex justify-center mb-8">
-        <button onClick={handleNext} className={nextButtonStyles}>
+        <button
+          onClick={handleNext}
+          className={styleUtils.buttonStyle('primary', false, 'lg')}
+        >
           다음 단계로
         </button>
       </div>

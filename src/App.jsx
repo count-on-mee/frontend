@@ -10,6 +10,8 @@ import CurationPage from './pages/CurationPage';
 import LoginPage from './pages/LoginPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
 import useInitializeUser from './hooks/useInitializeUser';
+import MyScrapListPage from './pages/MyScrapListPage';
+import LoginNoticePage from './pages/LoginNoticePage';
 
 function App() {
   return (
@@ -24,9 +26,11 @@ function App() {
               <Route path="/auth-callback" element={<OAuthCallbackPage />} />
               <Route path="/spot" element={<SpotPage />} />
               <Route path="/curation" element={<CurationPage />} />
+              <Route path="/login-notice" element={<LoginNoticePage />} />
               <Route path="/com" element={<PlanLayout />}>
                 <Route path="calendar" element={<Calendar />} />
                 <Route path="destination" element={<Destination />} />
+                <Route path="my-scrap-list" element={<MyScrapListPage />} />
               </Route>
             </Routes>
           </main>
