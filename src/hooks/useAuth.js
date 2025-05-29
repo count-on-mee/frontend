@@ -12,7 +12,10 @@ export default function useAuth() {
 
   const login = (accessToken) => {
     console.log('로그인시도');
-    setAuth({ accessToken });
+    setAuth({
+      accessToken,
+      isAuthenticated: true,
+    });
     localStorage.setItem('isLoggedIn', 'true');
   };
 
@@ -32,7 +35,10 @@ export default function useAuth() {
     try {
       const res = await api.post('auth/reissue');
       const newToken = res.data.accessToken;
-      setAuth({ accessToken: newToken });
+      setAuth({
+        accessToken: newToken,
+        isAuthenticated: true,
+      });
     } catch (error) {
       console.error('토큰 갱신 실패:', error);
       logout();
