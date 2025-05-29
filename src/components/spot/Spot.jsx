@@ -1,66 +1,55 @@
-import Card from '../ui/Card';
-import api from '../../utils/axiosInstance';
-import selectedSpotAtom from '../../recoil/selectedSpot';
-import markersAtom from '../../recoil/markers';
-import userAtom from '../../recoil/user';
-import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil';
+import { BookmarkIcon } from '@heroicons/react/24/outline';
+import Hashtag from '../ui/Hashtag';
+import Carousel from '../ui/Carousel';
+import { useState, useEffect } from 'react';
 
-export default function Spot({ spot, onClick }) {
-  const setMarkers = useSetRecoilState(markersAtom);
-  const [selectedSpot, setSelectedSpot] = useRecoilState(selectedSpotAtom);
-  const user = useRecoilValue(userAtom);
-  
-  const handleSpotScrap = async event => {
-    event.stopPropagation();
+export default function Card({ handleScrapClick, spot, onClick, varient }) {
+  const { address, category, imgUrls, isScraped, name, scrapedCount } = spot;
 
-    if(!user) {
-      alert('로그인이 필요한 서비스입니다.');
-      return;
+  const [localScraped, setLocalScraped] = useState(isScraped);
+  const [localCount, setLocalCount] = useState(scrapedCount);
+
+  const isDetail = varient === 'detail';
+
+  const handleCount = () => {
+    if (localScraped) {
+      setLocalCount((prev) => prev - 1);
+    } else {
+      setLocalCount((prev) => prev + 1);
     }
+  };
 
-    try {
-      const method = spot.isScraped ? 'delete' : 'post';
-      await api({
-        url: `/scraps/spots/${spot.id}`,
-        method,
-      });
-
-      setMarkers(prev => {
-        const updateMarkers = Array.isArray(prev) ? prev : [];
-        return updateMarkers.map(marker =>
-          marker.id === spot.id
-            ? {...marker, isScraped: !marker.isScraped }
-            : marker
-        );
-      });
-      if (selectedSpot && selectedSpot.id === spot.id) {
-        setSelectedSpot(prev => ({ ...prev, isScraped: !prev.isScraped}));
-      }
-    } catch (error) {
-      console.error('Failed to update scrap status', error);
-    }
-  }
+  useEffect(() => {
+    setLocalScraped(isScraped);
+  }, [isScraped]);
 
   return (
-    <Card 
-      type="spot"
-      spot={spot}
-      onScrapClick={() => handleSpotScrap(spot.id)}
-    />
-    // <div className="w-8/9 justify-center mx-auto rounded-2xl mt-5 box-shadow">
-    //   <img
-    //     alt="logo"
-    //     src="/src/assets/icon.png"
-    //     className="border-2 border-charcoal rounded-t-2xl opacity-20"
-    //   />
-    //   <div className="pb-5">
-    //     <div className="relative">
-    //       <BookmarkIcon className="absolute top-1 right-5 size-5" />
-    //     </div>
-    //     <p className="mx-5 mt-3 text-md">title</p>
-    //     <p className="mx-5 text-sm font-mixed text-charcoal pb-1">address</p>
-    //     <Hashtag />
-    //   </div>
-    // </div>
+    <div
+      className={`justify-center mx-auto rounded-2xl ${isDetail ? 'w-full' : 'box-shadow w-8/9 mt-5'}`}
+      onClick={onClick}
+    >
+      <Carousel imgUrls={imgUrls} spot={spot} />
+      <div className="pb-5">
+        <div className="relative">
+          <BookmarkIcon
+            className={`absolute top-0 right-[9px] w-5 h-5 ${isScraped ? 'fill-[#EB5E28] stroke-[#EB5E28]' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleScrapClick();
+              handleCount();
+            }}
+          />
+          {/* <p className="absolute top-[15px] right-[16px] text-xs text-[#EB5E28]">{localCount}</p> */}
+        </div>
+        <p className="mx-5 mt-3 text-md font-bold">{name}</p>
+        {isDetail && (
+          <p className="mx-5 text-sm font-mixed text-charcoal pb-1">
+            {address}
+          </p>
+        )}
+        <p className="mx-5 mt-5 text-sm ">스크랩수: {localCount}</p>
+        <Hashtag category={category} />
+      </div>
+    </div>
   );
 }

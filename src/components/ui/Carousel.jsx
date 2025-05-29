@@ -5,13 +5,13 @@ import defaultImage from '../../assets/icon.png';
 function Carousel({ imgUrls, spot }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handlePrevious = event => {
+  const handlePrevious = (event) => {
     event.stopPropagation();
     const newIndex = currentIndex === 0 ? imgUrls.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
   };
 
-  const handleNext = event => {
+  const handleNext = (event) => {
     event.stopPropagation();
     const newIndex = currentIndex === imgUrls.length - 1 ? 0 : currentIndex + 1;
     setCurrentIndex(newIndex);
@@ -29,8 +29,10 @@ function Carousel({ imgUrls, spot }) {
               <img
                 src={url || defaultImage}
                 alt={`${spot.title}`}
-                className="w-72 h-36 object-cover rounded-md mx-auto"
-                onError={e => {e.target.src = defaultImage;}}
+                className="object-cover rounded-md mx-auto w-72 h-36"
+                onError={(e) => {
+                  e.target.src = defaultImage;
+                }}
               />
             </div>
           ))
