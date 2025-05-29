@@ -1,5 +1,5 @@
 import Searchbar from '../components/ui/Searchbar';
-import Card from '../components/ui/Card';
+import Spot from '../components/spot/Spot';
 
 export default function CurationPage() {
   return (
@@ -8,14 +8,14 @@ export default function CurationPage() {
         <Searchbar size="lg" />
       </div>
       <div className="grid grid-cols-4 gap-2">
-        <Card />
-        <Card />
-        <Card />
-        <Card />
-        <Card />
-        <Card />
-        <Card />
-        <Card />
+        <Spot />
+        <Spot />
+        <Spot />
+        <Spot />
+        <Spot />
+        <Spot />
+        <Spot />
+        <Spot />
       </div>
     </div>
   );
