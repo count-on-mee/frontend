@@ -3,6 +3,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import authAtom from '../recoil/auth';
 import userAtom from '../recoil/user';
 import axios from 'axios';
+import api from '../utils/axiosInstance';
 
 const useInitializeUser = () => {
   const accessToken = useRecoilValue(authAtom).accessToken;
@@ -13,7 +14,7 @@ const useInitializeUser = () => {
       // console.log('accessToken:', accessToken);
       if (accessToken) {
         try {
-          const response = await axios.get('http://localhost:8888/users/me', {
+          const response = await api.get('users/me', {
             headers: { Authorization: `Bearer ${accessToken}` },
           });
           // console.log('유저:', response.data);

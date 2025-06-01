@@ -2,18 +2,17 @@ import { useEffect, useCallback } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import centerAtom from '../../recoil/center';
 import zoomAtom from '../../recoil/zoom';
-import markersAtom from '../../recoil/markers';
 import { withCenter } from '../../recoil/selectedSpot';
 import MapPanel from './MapPanel';
 import MapMarker from './MapMarker';
 import MapResearch from './MapResearch';
 import useSearchSpots from '../../hooks/useSearchSpots';
 
-export default function Map({ mapRef }) {
+export default function Map({ mapRef, markers }) {
   const { naver } = window;
   const [center, setCenter] = useRecoilState(centerAtom);
   const setZoom = useSetRecoilState(zoomAtom);
-  const markers = useRecoilValue(markersAtom);
+  // const markers = useRecoilValue(markersAtom);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const handleSearch = useSearchSpots();
 

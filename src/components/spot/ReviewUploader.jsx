@@ -47,15 +47,15 @@ export default function ReviewUploader({
   // }, [newPhotos, newText]);
 
   const handleSave = async () => {
-    console.log('handleSave 시작');
+    // console.log('handleSave 시작');
     const formData = new FormData();
     formData.append('userId', user.userId);
     newPhotos.forEach((photo) => {
-      console.log('사진 추가 중:', photo);
+      // console.log('사진 추가 중:', photo);
       formData.append('reviewImgs', photo.file);
     });
     formData.append('content', newText);
-    console.log([...formData.entries()]);
+    // console.log([...formData.entries()]);
     try {
       const token = getRecoil(authAtom).accessToken;
       const response = await api.post(`/spots/${spot.id}/reviews`, formData, {

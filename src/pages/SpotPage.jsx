@@ -1,10 +1,10 @@
 import SpotDetail from '../components/spot/SpotDetail';
 import SpotList from '../components/spot/SpotList';
 import Map from '../components/map/Map';
-import { useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { getRecoil } from 'recoil-nexus';
 import selectedSpotAtom from '../recoil/selectedSpot';
-import markersAtom from '../recoil/markers';
+import spotMarkersAtom from '../recoil/spotMarkers';
 import userAtom from '../recoil/user';
 import authAtom from '../recoil/auth';
 import { useRef } from 'react';
@@ -13,7 +13,7 @@ import api from '../utils/axiosInstance';
 export default function SpotPage() {
   const [selectedSpot, setSelectedSpot] = useRecoilState(selectedSpotAtom);
   const mapRef = useRef(null);
-  const setMarkers = useSetRecoilState(markersAtom);
+  const [spotMarkers, setSpotMarkers] = useRecoilState(spotMarkersAtom);
   const user = useRecoilValue(userAtom);
   const spot = selectedSpot;
 
@@ -38,7 +38,7 @@ export default function SpotPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setMarkers((prev) => {
+      setSpotMarkers((prev) => {
         const updateMarkers = Array.isArray(prev) ? prev : [];
         return updateMarkers.map((marker) =>
           marker.id === spot.id
@@ -74,7 +74,7 @@ export default function SpotPage() {
       )}
       {/* MapLayout */}
       <div className={`${selectedSpot ? 'w-1/2' : 'w-3/4'}`}>
-        <Map mapRef={mapRef} />
+        <Map mapRef={mapRef} markers={spotMarkers} />
       </div>
     </div>
   );

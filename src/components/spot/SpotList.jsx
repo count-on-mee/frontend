@@ -1,12 +1,12 @@
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import Searchbar from '../ui/Searchbar';
 import Spot from './Spot';
-import markersAtom from '../../recoil/markers';
+import spotMarkersAtom from '../../recoil/spotMarkers';
 import { withCenter } from '../../recoil/selectedSpot';
 import { useState, useEffect } from 'react';
 
 export default function SpotList({ handleSpotScrap, onSpotClick }) {
-  const spots = useRecoilValue(markersAtom);
+  const spots = useRecoilValue(spotMarkersAtom);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentSpots, setCurrentSpots] = useState([]);

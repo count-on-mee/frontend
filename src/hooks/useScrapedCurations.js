@@ -71,7 +71,7 @@ function useScrapedCurations() {
 
     try {
       const response = await fetch(
-        `http://localhost:8888/scraps/curations/${curationId}`,
+        `https://api.countonme.site/scraps/curations/${curationId}`,
         {
           method: 'POST',
           headers: {

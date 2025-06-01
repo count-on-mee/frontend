@@ -4,7 +4,7 @@ import authAtom from '../recoil/auth';
 import api from '../utils/axiosInstance';
 import centerAtom from '../recoil/center';
 import zoomAtom from '../recoil/zoom';
-import markersAtom from '../recoil/markers';
+import markersAtom from '../recoil/spotMarkers';
 
 export default function useSearchSpots() {
   const center = useRecoilValue(centerAtom);

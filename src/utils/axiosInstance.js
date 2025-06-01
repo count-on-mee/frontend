@@ -35,7 +35,9 @@ api.interceptors.request.use(
           onRefreshed(token);
         } catch (err) {
           console.error('토큰 갱신 실패:', err);
-          window.location.href = '/login';
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
         } finally {
           isRefreshing = false;
         }

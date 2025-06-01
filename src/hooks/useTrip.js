@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import authAtom from '../recoil/auth';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8888';
+// const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8888';
 
 function useTrip() {
   const navigate = useNavigate();
