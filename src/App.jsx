@@ -6,6 +6,7 @@ import TripLayout from './layouts/TripLayout';
 import Calendar from './components/plan/Calendar';
 import Destination from './components/plan/Destination';
 import Header from './components/Header';
+import SpotPage from './pages/SpotPage';
 import CurationPage from './pages/CurationPage';
 import LoginPage from './pages/LoginPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
@@ -26,7 +27,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth-callback" element={<OAuthCallbackPage />} />
-
+              <Route path="/spot" element={<SpotPage />} />
               <Route path="/curation" element={<CurationPage />} />
               <Route path="/login-notice" element={<LoginNoticePage />} />
               <Route path="/com" element={<PlanLayout />}>
