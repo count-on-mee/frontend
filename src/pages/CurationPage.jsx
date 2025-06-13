@@ -6,12 +6,16 @@ import selectedCurationAtom from '../recoil/selectedCuration';
 import selectedCurationSpotAtom from '../recoil/selectedCurationSpot';
 import CurationUploader from '../components/curation/CurationUploader';
 import { FaRegPenToSquare } from 'react-icons/fa6';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import authAtom from '../recoil/auth';
 import curationsAtom from '../recoil/curations';
 import { getRecoil } from 'recoil-nexus';
 import api from '../utils/axiosInstance';
 import userAtom from '../recoil/user';
+import curationMarkersAtom from '../recoil/curationMarkers';
+import Map from '../components/map/Map';
+import SpotDetail from '../components/spot/SpotDetail';
+import { useSpotScrap } from '../hooks/useSpotScrap';
 
 export default function CurationPage() {
   const [curations, setCurations] = useRecoilState(curationsAtom);
@@ -21,8 +25,20 @@ export default function CurationPage() {
     selectedCurationSpotAtom,
   );
   const [isUploaderOpen, setIsUploaderOpen] = useState(null);
+  const [curationMarkers, setCurationMarkers] =
+    useRecoilState(curationMarkersAtom);
   const curation = selectedCuration;
   const user = useRecoilValue(userAtom);
+  const mapRef = useRef(null);
+
+  const { handleSpotScrap } = useSpotScrap({
+    selectedSpot: selectedCurationSpot,
+    setSelectedSpot: setSelectedCurationSpot,
+  });
+
+  const handleSpotClick = (spot) => {
+    mapRef.current.setCenter(spot.position);
+  };
 
   const fetchCuration = async () => {
     try {
@@ -34,8 +50,10 @@ export default function CurationPage() {
       });
 
       const data = response.data;
-      console.log(data);
-      setCurations(data);
+      // console.log(data);
+      if (curations.length !== data.length) {
+        setCurations(data);
+      }
     } catch (error) {
       console.error('Failed to fetch curation:', error);
     }
@@ -43,11 +61,25 @@ export default function CurationPage() {
 
   useEffect(() => {
     fetchCuration();
-    console.log(curations);
-  }, []);
+  }, [curations]);
 
-  const handleScrapClick = async (event, curation) => {
-    event.stopPropagation();
+  useEffect(() => {
+    if (!selectedCuration) return;
+
+    const markers = selectedCuration.spots.map((spot) => ({
+      ...spot,
+      position: {
+        lat: spot.location.lat,
+        lng: spot.location.lng,
+      },
+    }));
+
+    setCurationMarkers(markers);
+    // console.log(curationMarkers);
+  }, [selectedCuration]);
+
+  const handleScrapClick = async (curation) => {
+    // event.stopPropagation();
     if (!user) {
       alert('로그인이 필요한 서비스입니다.');
       return;
@@ -58,7 +90,7 @@ export default function CurationPage() {
       return;
     }
 
-    // console.log(curation);
+    // console.log(curation.curationId);
 
     try {
       const token = getRecoil(authAtom).accessToken;
@@ -68,6 +100,7 @@ export default function CurationPage() {
         method,
         headers: { Authorization: `Bearer ${token}` },
       });
+      // console.log("token:", token);
 
       setCurations((prev) => {
         const updatedCurations = Array.isArray(prev) ? prev : [];
@@ -100,43 +133,61 @@ export default function CurationPage() {
           </div>
           {/* curationList */}
           <div className="">
-            <CurationList handleScrapClick={handleScrapClick} />
+            <CurationList
+              handleScrapClick={handleScrapClick}
+              onSelectedCuration={setSelectedCuration}
+            />
           </div>
+          {/* curationUploader */}
+          <div className="fixed bottom-5 right-5">
+            <button
+              className="flex z-50 p-3 text-xl font-bold bg-background-light box-shadow rounded-2xl text-charcoal px-2 hover:bg-primary hover:text-background-light hover:p-5"
+              onClick={() => setIsUploaderOpen(true)}
+            >
+              <FaRegPenToSquare className="mx-1 my-1" />
+              <div>Curation 만들기</div>
+            </button>
+          </div>
+          <CurationUploader
+            isOpen={isUploaderOpen}
+            // selectedSpot={selectedSpot}
+            // setSelectedSpot={setSelectedSpot}
+            onClose={() => setIsUploaderOpen(false)}
+            fetchCuration={fetchCuration}
+            // fetchPhotoDump={fetchPhotoDump}
+          />
         </div>
       ) : (
         // curationDetail
-        <div>
-          <CurationDetail
-            selectedCuration={selectedCuration}
-            setSelectedCuration={setSelectedCuration}
-          />
+        <div className="w-full flex h-[calc(100vh-80px)]">
+          <div className="w-1/4 overflow-y-auto h-full">
+            <CurationDetail
+              selectedCuration={selectedCuration}
+              setSelectedCuration={setSelectedCuration}
+              handleScrapClick={handleScrapClick}
+              fetchCuration={fetchCuration}
+              handleSpotClick={handleSpotClick}
+              className=""
+            />
+          </div>
           {selectedCurationSpot && (
-            <div>
-              <SpotDetail />
+            <div className="w-1/4 overflow-y-auto h-full">
+              <SpotDetail
+                selectedSpot={selectedCurationSpot}
+                setSelectedSpot={setSelectedCurationSpot}
+                handleSpotScrap={handleSpotScrap}
+              />
             </div>
           )}
-          <div className="flex-1">
-            <Map />
+          <div className={`${selectedCurationSpot ? 'w-1/2' : 'w-3/4'}`}>
+            <Map
+              mapRef={mapRef}
+              markers={curationMarkers}
+              markerType="curation"
+            />
           </div>
         </div>
       )}
-      {/* curationUploader */}
-      <div className="fixed bottom-5 right-5">
-        <button
-          className="flex z-50 p-3 text-xl font-bold bg-background-light box-shadow rounded-2xl text-charcoal px-2 hover:bg-primary hover:text-background-light hover:p-5"
-          onClick={() => setIsUploaderOpen(true)}
-        >
-          <FaRegPenToSquare className="mx-1 my-1" />
-          <div>Curation 만들기</div>
-        </button>
-      </div>
-      <CurationUploader
-        isOpen={isUploaderOpen}
-        // selectedSpot={selectedSpot}
-        // setSelectedSpot={setSelectedSpot}
-        onClose={() => setIsUploaderOpen(false)}
-        // fetchPhotoDump={fetchPhotoDump}
-      />
     </div>
   );
 }

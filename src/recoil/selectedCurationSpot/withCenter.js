@@ -10,8 +10,8 @@ const curationSpotWithCenter = selector({
   set: ({ set }, spot) => {
     set(curationSpotAtom, spot);
     set(centerAtom, {
-      lat: spot.position.lat(),
-      lng: spot.position.lng(),
+      lat: spot.location.lat,
+      lng: spot.location.lng,
     });
   },
 });

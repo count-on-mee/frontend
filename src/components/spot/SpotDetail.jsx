@@ -15,11 +15,12 @@ export default function SpotDetail({
 }) {
   const [photoDump, setPhotoDump] = useState([]);
   const spot = selectedSpot;
+  // console.log(spot);
 
   const fetchPhotoDump = async () => {
     try {
       const token = getRecoil(authAtom).accessToken;
-      const response = await api(`spots/${spot.id}/reviews`, {
+      const response = await api(`spots/${spot.spotId}/reviews`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -35,11 +36,11 @@ export default function SpotDetail({
   };
 
   useEffect(() => {
-    if (spot.id) {
+    if (spot.spotId) {
       fetchPhotoDump();
       // console.log(photoDump);
     }
-  }, [spot.id]);
+  }, [spot?.spotId]);
 
   const handleClose = () => {
     setSelectedSpot(null);

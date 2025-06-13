@@ -58,7 +58,7 @@ export default function SpotList({ handleSpotScrap, onSpotClick }) {
         <div>
           {currentSpots.map((spot) => (
             <Spot
-              key={spot.id}
+              key={spot.spotId}
               spot={spot}
               handleScrapClick={handleSpotScrap}
               onClick={() => {

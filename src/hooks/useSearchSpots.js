@@ -5,11 +5,14 @@ import api from '../utils/axiosInstance';
 import centerAtom from '../recoil/center';
 import zoomAtom from '../recoil/zoom';
 import markersAtom from '../recoil/spotMarkers';
+import scrapStateAtom from '../recoil/scrapState';
 
 export default function useSearchSpots() {
   const center = useRecoilValue(centerAtom);
   const zoom = useRecoilValue(zoomAtom);
   const setMarkers = useSetRecoilState(markersAtom);
+  const setScrapState = useSetRecoilState(scrapStateAtom);
+  const scrapState = useRecoilValue(scrapStateAtom);
 
   return async function handleSearch() {
     const token = getRecoil(authAtom).accessToken;
@@ -24,7 +27,7 @@ export default function useSearchSpots() {
 
       setMarkers(
         data.map((place) => ({
-          id: place.spotId,
+          spotId: place.spotId,
           position: new naver.maps.LatLng(
             place.location.lat,
             place.location.lng,
@@ -35,11 +38,20 @@ export default function useSearchSpots() {
           businessHours: place.businessHours,
           isOpen: place.isOpen,
           isScraped: place.isScraped,
-          category: place.categories,
-          scrapedCount: place.scrapedCount,
+          categories: place.categories,
+          localScrapedCount: place.scrapedCount,
         })),
       );
-      // console.log(data);
+
+      const initialScrap = data.reduce((acc, place) => {
+        acc[place.spotId] = {
+          isScraped: place.isScraped,
+          scrapCount: place.scrapedCount,
+        };
+        return acc;
+      }, {});
+      setScrapState(initialScrap);
+      // console.log(scrapState);
     } catch (error) {
       console.error('Search error:', error);
     }

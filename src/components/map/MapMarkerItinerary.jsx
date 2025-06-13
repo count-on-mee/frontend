@@ -2,16 +2,16 @@ import { useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { withCenter } from '../../recoil/selectedSpot';
 
-export default function MapMarker({ map, markers }) {
+export default function MapMarkerItinerary({ map, markers }) {
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
 
   const handleMarkerClick = (marker) => {
     setSelectedSpotWithCenter(marker);
-    // setTimeout(() => {
-    //   if (map) {
-    //     map.setCenter(marker.postion);
-    //   }
-    // }, 300);
+    setTimeout(() => {
+      if (map) {
+        map.setCenter(marker.postion);
+      }
+    }, 300);
     // navigate('/spot');
   };
   //   const svgFood = `
@@ -53,15 +53,20 @@ export default function MapMarker({ map, markers }) {
   //   }
   // }
 
+  const isLatLngObject = (pos) =>
+    typeof pos.lat === 'function' && typeof pos.lng === 'function';
+
+  const getLat = (pos) => (isLatLngObject(pos) ? pos.lat() : pos.lat);
+  const getLng = (pos) => (isLatLngObject(pos) ? pos.lng() : pos.lng);
+
   useEffect(() => {
     if (!window.naver || !map || !markers) return;
 
     markers.forEach((markerData) => {
+      const lat = getLat(markerData.position);
+      const lng = getLng(markerData.position);
       const marker = new naver.maps.Marker({
-        position: new naver.maps.LatLng(
-          markerData.position.lat(),
-          markerData.position.lng(),
-        ),
+        position: new naver.maps.LatLng(lat, lng),
         map: map,
         // icon: { ... },
       });

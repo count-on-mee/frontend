@@ -1,6 +1,7 @@
 import Modal from 'react-modal';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Searchbar from '../ui/Searchbar';
 import { getRecoil } from 'recoil-nexus';
 import authAtom from '../../recoil/auth';
@@ -13,7 +14,7 @@ import defaultImage from '../../assets/icon.png';
 
 Modal.setAppElement('#root');
 
-export default function CurationUploader({ isOpen, onClose }) {
+export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
   const [error, setError] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -21,6 +22,7 @@ export default function CurationUploader({ isOpen, onClose }) {
   const [scrapedSpots, setScrapedSpots] = useRecoilState(scrappedSpotsAtom);
   const [cartSpots, setCartSpots] = useState([]);
   const categories = ['여행', '식당', '카페', '자연'];
+  const navigate = useNavigate();
 
   const handleAddToCart = (spot) => {
     setCartSpots((prev) => {
@@ -56,6 +58,7 @@ export default function CurationUploader({ isOpen, onClose }) {
     setDescription('');
     setSelectedCategories([]);
     setCartSpots([]);
+    fetchCuration();
     onClose();
   };
 
