@@ -34,6 +34,12 @@
       2px 2px 2px rgba(0, 0, 0, 0.25),
       -2px -2px 2px rgba(255, 255, 255, 0.35);
   }
+  .vertical-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
 }
 
 @layer components {
@@ -48,6 +54,20 @@
 body {
   font-family: 'Goorm', 'Prompt', sans-serif;
   background-color: #fafafa;
+}
+
+.slick-slide {
+  display: flex !important;       
+  align-items: center !important;          
+  justify-content: center;        
+}
+
+/* .slick-slide img {
+  object-fit: contain;           
+} */
+
+.slick-track{
+  height: 100%
 }
 
 /* ::-webkit-scrollbar {
