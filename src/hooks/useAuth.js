@@ -11,7 +11,7 @@ export default function useAuth() {
   const resetUser = useResetRecoilState(userAtom);
 
   const login = (accessToken) => {
-    console.log('로그인시도');
+    // console.log('로그인시도');
     setAuth({
       accessToken,
       isAuthenticated: true,

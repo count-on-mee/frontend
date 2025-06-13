@@ -16,12 +16,15 @@ export default function useCuration(curationId) {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:8888/curations/${id}`, {
-          headers: {
-            Authorization: `Bearer ${auth.accessToken}`,
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `https://http://localhost:8888/curations/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.accessToken}`,
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));

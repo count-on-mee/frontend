@@ -17,12 +17,11 @@ export default function ReviewUploader({
   // if (!isOpen) return null;
 
   const user = useRecoilValue(userAtom);
-  // console.log(user);
   const [newPhotos, setNewPhotos] = useState([]);
   const [newText, setNewText] = useState('');
   const [error, setError] = useState(false);
   const spot = selectedSpot;
-
+  // console.log(spot);
   const handleUpload = (files) => {
     const updatePhotos = Array.from(files).map((file, index) => ({
       id: index,
@@ -47,22 +46,26 @@ export default function ReviewUploader({
   // }, [newPhotos, newText]);
 
   const handleSave = async () => {
-    console.log('handleSave 시작');
+    // console.log('handleSave 시작');
     const formData = new FormData();
     formData.append('userId', user.userId);
     newPhotos.forEach((photo) => {
-      console.log('사진 추가 중:', photo);
+      // console.log('사진 추가 중:', photo);
       formData.append('reviewImgs', photo.file);
     });
     formData.append('content', newText);
-    console.log([...formData.entries()]);
+    // console.log([...formData.entries()]);
     try {
       const token = getRecoil(authAtom).accessToken;
-      const response = await api.post(`/spots/${spot.id}/reviews`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await api.post(
+        `/spots/${spot.spotId}/reviews`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
       // console.log('응답:', response);
       // console.log('저장 완료');
       fetchPhotoDump();
@@ -129,7 +132,7 @@ export default function ReviewUploader({
           <XMarkIcon className="w-6 h-6 cursor-pointer" onClick={onClose} />
         </div>
         <p className="px-5">{spot.address}</p>
-        <Hashtag category={spot.category} />
+        <Hashtag category={spot.categories} />
 
         <div className="grid grid-cols-2 px-5">
           <div className="">

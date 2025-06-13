@@ -1,19 +1,22 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState, act } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import centerAtom from '../../recoil/center';
 import zoomAtom from '../../recoil/zoom';
-import markersAtom from '../../recoil/markers';
 import { withCenter } from '../../recoil/selectedSpot';
 import MapPanel from './MapPanel';
-import MapMarker from './MapMarker';
+import MapMarkerSpot from './MapMarkerSpot';
+import MapMarkerCuration from './MapMarkerCuration';
+import MapMarkerItinerary from './MapMarkerItinerary';
 import MapResearch from './MapResearch';
 import useSearchSpots from '../../hooks/useSearchSpots';
+import FilterPanel from './FilterPanel';
 
-export default function Map({ mapRef }) {
+export default function Map({ mapRef, markerType, markers }) {
   const { naver } = window;
   const [center, setCenter] = useRecoilState(centerAtom);
   const setZoom = useSetRecoilState(zoomAtom);
-  const markers = useRecoilValue(markersAtom);
+  const [filteredMarkers, setFilteredMarkers] = useState([]);
+  const [activeCategories, setActiveCategories] = useState([]);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const handleSearch = useSearchSpots();
 
@@ -35,6 +38,21 @@ export default function Map({ mapRef }) {
     mapRef.current = new naver.maps.Map('map', mapOptions);
     handleLocateMe();
   }, []);
+
+  // useEffect(() => {
+  //   if (markers?.length > 0){
+  //     if (activeCategories?.length === 0) {
+  //       setFilteredMarkers(markers);
+  //     } else {
+  //       const newMarkers = markers.filter(marker =>
+  //         Array.isArray(marker.categories)
+  //         && Array.isArray(activeCategories) && activeCategories.some(category => marker.categories.includes(category)));
+  //       setFilteredMarkers(newMarkers);
+  //     }
+  //   }
+  //   console.log("ac:", activeCategories);
+  //   console.log("fm:", filteredMarkers);
+  //   }, [markers, activeCategories]);
 
   const handleZoomIn = useCallback(() => {
     if (mapRef.current) {
@@ -80,14 +98,15 @@ export default function Map({ mapRef }) {
     }
   }, [setCenter]);
 
-  const handleMarkerClick = (marker) => {
-    setSelectedSpotWithCenter(marker);
-    // navigate('/spot');
-  };
+  // const handleMarkerClick = (marker) => {
+  //   setSelectedSpotWithCenter(marker);
+  //   // navigate('/spot');
+  // };
 
   // 이동할 때 handleSearch 불러오지 않도록 idle 사용
   useEffect(() => {
     if (!mapRef.current) return;
+    if (markerType !== 'spot') return;
 
     const listener = window.naver.maps.Event.addListener(
       mapRef.current,
@@ -121,8 +140,49 @@ export default function Map({ mapRef }) {
     };
   }, []);
 
+  const handleFilter = (category) => {
+    setActiveCategories((prev) => {
+      if (prev.includes(category)) {
+        // 이미 포함 → 제거
+        return prev.filter((c) => c !== category);
+      } else {
+        // 미포함 → 추가
+        return [...prev, category];
+      }
+    });
+  };
+
+  const renderMarkerComponent = () => {
+    if (markerType === 'spot')
+      return (
+        <div className="absolute w-full">
+          <MapMarkerSpot
+            // markers={filteredMarkers}
+            markers={markers}
+            map={mapRef.current}
+            // position={position}
+          />
+          <FilterPanel onFilter={handleFilter} />
+        </div>
+      );
+    if (markerType === 'curation')
+      return (
+        <MapMarkerCuration
+          markers={markers}
+          map={mapRef.current}
+          // position={position}
+        />
+      );
+    if (markerType === 'itinerary') return;
+    <MapMarkerItinerary
+      markers={markers}
+      map={mapRef.current}
+      // position={position}
+    />;
+  };
+
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       <div id="map" style={{ width: '100%', height: 'calc(100vh - 80px)' }}>
         <MapPanel
           onZoomIn={handleZoomIn}
@@ -130,11 +190,8 @@ export default function Map({ mapRef }) {
           onLocateMe={handleLocateMe}
           onSearch={handleSearch}
         />
-        <MapMarker
-          markers={markers}
-          map={mapRef.current}
-          handleMarkerClick={handleMarkerClick}
-        />
+        {mapRef.current && renderMarkerComponent()}
+
         <MapResearch />
         {/* <MarkerCluster /> */}
       </div>

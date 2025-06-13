@@ -4,6 +4,7 @@ import { useRecoilValue } from 'recoil';
 import authAtom from '../recoil/auth';
 import axiosInstance from '../utils/axiosInstance';
 
+
 function useTrip() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
