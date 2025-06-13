@@ -59,6 +59,21 @@ export const componentStyles = {
     baseStyles.shadow,
     baseStyles.hoverShadow,
   ),
+
+  // placeholder 입력 필드
+  placeholderInput: clsx(
+    'w-full bg-[var(--color-background-gray)] rounded-full px-4 py-2 text-lg',
+    'border-2 border-[var(--color-primary)] text-[var(--color-primary)]',
+    'focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]',
+    baseStyles.shadow,
+    baseStyles.hoverShadow,
+  ),
+
+  // placeholder 셀
+  placeholderCell: clsx(
+    'p-3 rounded-full border-2 border-[var(--color-primary)] bg-white/60',
+    'transition-colors duration-200',
+  ),
 };
 
 /**
@@ -342,6 +357,111 @@ export const neumorphStyles = {
   icon: clsx('w-6 h-6', 'text-gray-600', 'transition-colors duration-200'),
 };
 
+/**
+ * DateRangePicker 관련 스타일
+ */
+export const dateRangePickerStyles = {
+  // 기본 버튼 스타일
+  baseButton: (size) => {
+    const sizeClasses = {
+      small:
+        'flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 text-sm',
+      default:
+        'flex h-14 w-14 items-center justify-center rounded-full transition-all duration-200 text-2xl',
+    };
+    return sizeClasses[size] || sizeClasses.default;
+  },
+
+  // 그림자 스타일
+  baseShadow: 'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]',
+  hoverShadow:
+    'hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
+
+  // 선택된 날짜 스타일
+  selectedDate:
+    'bg-primary text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
+
+  // 날짜 범위 내 스타일
+  dateRange: 'bg-primary/30 text-primary',
+
+  // 비활성화된 날짜 스타일
+  disabledDate: 'text-gray-400 cursor-not-allowed shadow-none',
+
+  // 오늘 날짜 스타일
+  todayDate: 'text-red-500',
+
+  // 현재 월의 날짜 스타일
+  currentMonthDate:
+    'text-gray-900 hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
+
+  // 다른 월의 날짜 스타일
+  otherMonthDate: 'text-gray-400',
+
+  // 네비게이션 버튼 스타일
+  navButton: (size) => {
+    const sizeClasses = {
+      small:
+        'flex items-center justify-center p-2 text-gray-400 hover:text-gray-500 transition-all duration-200 rounded-full',
+      default:
+        'flex items-center justify-center p-3 text-gray-400 hover:text-gray-500 transition-all duration-200 rounded-full',
+    };
+    return sizeClasses[size] || sizeClasses.default;
+  },
+
+  // 헤더 크기별 클래스
+  headerSize: {
+    small: {
+      container: 'flex items-center p-4',
+      month: 'block text-2xl text-[#EB5E28] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      year: 'block text-lg text-[#EB5E28] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      icon: 'w-5 h-5',
+    },
+    default: {
+      container: 'flex items-center p-8',
+      month: 'block text-7xl text-[#EB5E28] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      year: 'block text-3xl text-[#EB5E28] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      icon: 'w-8 h-8',
+    },
+  },
+
+  // 그리드 크기별 클래스
+  gridSize: {
+    small: 'grid grid-cols-7 gap-2 px-4',
+    default: 'grid grid-cols-7 gap-4 px-8',
+  },
+
+  // 요일 헤더 크기별 클래스
+  dayHeaderSize: {
+    small: 'text-sm leading-4 text-center font-medium text-gray-600',
+    default: 'text-2xl leading-6 text-center font-medium text-gray-600',
+  },
+
+  // 완료 버튼 크기별 클래스
+  completeButtonSize: {
+    small:
+      'w-full py-2 px-4 bg-primary text-white rounded-full hover:bg-[#D54E23] transition-all duration-200 text-sm shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31] hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
+    default:
+      'w-full py-4 px-6 bg-primary text-white rounded-full hover:bg-[#D54E23] transition-all duration-200 text-xl shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31] hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
+  },
+
+  // 완료 텍스트 크기별 클래스
+  completeTextSize: {
+    small: 'text-center text-gray-500 text-sm',
+    default: 'text-center text-gray-500 text-xl',
+  },
+
+  // 컬럼 시작 위치 클래스
+  colStart: [
+    '',
+    'col-start-2',
+    'col-start-3',
+    'col-start-4',
+    'col-start-5',
+    'col-start-6',
+    'col-start-7',
+  ],
+};
+
 export default {
   baseStyles,
   componentStyles,
@@ -350,4 +470,5 @@ export default {
   modalStyles,
   searchStyles,
   neumorphStyles,
+  dateRangePickerStyles,
 };

@@ -1,9 +1,47 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { componentStyles } from '../../../utils/styles';
+import { useSocketDebounce } from '../../../utils/debounce';
+import { componentStyles } from '../../../utils/style';
 
-const SettlementRow = ({ total, numberOfPeople, onNumberOfPeopleChange }) => {
+const SettlementRow = ({
+  total,
+  participantCount,
+  onParticipantCountChange,
+  socket,
+}) => {
+  // 소켓 이벤트를 debounce로 감싸기
+  const debouncedSocketEmit = useSocketDebounce(socket, 800);
+
+  // 소켓 이벤트 리스너 추가
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleParticipantCountUpdated = ({ participantFields }) => {
+      onParticipantCountChange({ target: { value: participantFields.count } });
+    };
+
+    socket.on('participantCountUpdated', handleParticipantCountUpdated);
+
+    return () => {
+      socket.off('participantCountUpdated', handleParticipantCountUpdated);
+    };
+  }, [socket, onParticipantCountChange]);
+
+  const handleParticipantCountChange = (e) => {
+    const value = parseInt(e.target.value) || 1;
+    // 1보다 작은 값 1로 설정
+    const validValue = Math.max(1, value);
+
+    // 부모 컴포넌트의 상태 업데이트
+    onParticipantCountChange(e);
+
+    // 소켓을 통해 다른 브라우저에 업데이트
+    debouncedSocketEmit('updateParticipantCount', {
+      participantFields: { count: validValue },
+    });
+  };
+
   return (
     <tr>
       <td colSpan="2" className={componentStyles.cell}>
@@ -13,8 +51,8 @@ const SettlementRow = ({ total, numberOfPeople, onNumberOfPeopleChange }) => {
             <input
               type="number"
               min="1"
-              value={numberOfPeople}
-              onChange={onNumberOfPeopleChange}
+              value={participantCount}
+              onChange={handleParticipantCountChange}
               className={clsx(componentStyles.input, 'w-16')}
               placeholder="N"
             />
@@ -24,7 +62,9 @@ const SettlementRow = ({ total, numberOfPeople, onNumberOfPeopleChange }) => {
       </td>
       <td className={componentStyles.cell}>
         <span className={componentStyles.header}>
-          {Math.floor(total / parseFloat(numberOfPeople || 1)).toLocaleString()}{' '}
+          {Math.floor(
+            total / parseFloat(participantCount || 1),
+          ).toLocaleString()}{' '}
           원
         </span>
       </td>
@@ -35,9 +75,10 @@ const SettlementRow = ({ total, numberOfPeople, onNumberOfPeopleChange }) => {
 
 SettlementRow.propTypes = {
   total: PropTypes.number.isRequired,
-  numberOfPeople: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  participantCount: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
     .isRequired,
-  onNumberOfPeopleChange: PropTypes.func.isRequired,
+  onParticipantCountChange: PropTypes.func.isRequired,
+  socket: PropTypes.object,
 };
 
 export default SettlementRow;

@@ -1,19 +1,57 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-/**
- * 경비 관리를 위한 커스텀 훅
- * @param {Object} initialExpenses - 초기 경비 데이터
- * @returns {Object} 경비 관련 상태와 함수들
- */
 const useExpenses = (
   initialExpenses = {
-    transportation: [{ type: '수단명', amount: '' }],
-    accommodation: [{ type: '숙소명', amount: '' }],
-    food: [{ name: '', amount: '' }],
-    etc: [{ name: '', amount: '' }],
+    transportation: [{ tripDocumentExpenseId: null, type: '', amount: '' }],
+    accommodation: [{ tripDocumentExpenseId: null, type: '', amount: '' }],
+    food: [{ tripDocumentExpenseId: null, name: '', amount: '' }],
+    etc: [{ tripDocumentExpenseId: null, name: '', amount: '' }],
   },
 ) => {
-  const [expenses, setExpenses] = useState(initialExpenses);
+  // 초기 데이터가 올바른 형태인지 확인하고 기본값 설정
+  const getDefaultExpenses = () => ({
+    transportation: [{ tripDocumentExpenseId: null, type: '', amount: '' }],
+    accommodation: [{ tripDocumentExpenseId: null, type: '', amount: '' }],
+    food: [{ tripDocumentExpenseId: null, name: '', amount: '' }],
+    etc: [{ tripDocumentExpenseId: null, name: '', amount: '' }],
+  });
+
+  const validateExpenses = (expenses) => {
+    if (!expenses || typeof expenses !== 'object') {
+      return getDefaultExpenses();
+    }
+
+    const requiredCategories = [
+      'transportation',
+      'accommodation',
+      'food',
+      'etc',
+    ];
+    const validated = {};
+
+    requiredCategories.forEach((category) => {
+      if (Array.isArray(expenses[category])) {
+        validated[category] = expenses[category];
+      } else {
+        validated[category] =
+          category === 'food' || category === 'etc'
+            ? [{ tripDocumentExpenseId: null, name: '', amount: '' }]
+            : [
+                {
+                  tripDocumentExpenseId: null,
+                  type: category === 'transportation' ? '수단명' : '숙소명',
+                  amount: '',
+                },
+              ];
+      }
+    });
+
+    return validated;
+  };
+
+  const [expenses, setExpenses] = useState(() =>
+    validateExpenses(initialExpenses),
+  );
   const [newRow, setNewRow] = useState({
     transportation: null,
     accommodation: null,
@@ -25,6 +63,25 @@ const useExpenses = (
     category: null,
     index: null,
   });
+
+  const initialExpensesRef = useRef(initialExpenses);
+
+  // 초기 데이터가 변경될 때 expenses 상태 업데이트
+  useEffect(() => {
+    const validatedExpenses = validateExpenses(initialExpenses);
+
+    const currentExpensesStr = JSON.stringify(expenses);
+    const newExpensesStr = JSON.stringify(validatedExpenses);
+    const previousInitialStr = JSON.stringify(initialExpensesRef.current);
+
+    if (
+      newExpensesStr !== previousInitialStr &&
+      currentExpensesStr !== newExpensesStr
+    ) {
+      setExpenses(validatedExpenses);
+      initialExpensesRef.current = initialExpenses;
+    }
+  }, [initialExpenses, expenses]);
 
   // 행 선택 처리
   const handleRowClick = useCallback((category, index) => {
@@ -39,6 +96,15 @@ const useExpenses = (
   const calculateTotal = useCallback(() => {
     const newTotal = Object.entries(expenses).reduce(
       (sum, [category, items]) => {
+        // items가 배열인지 확인
+        if (!Array.isArray(items)) {
+          console.warn(
+            `Items for category ${category} is not an array:`,
+            items,
+          );
+          return sum;
+        }
+
         const categorySum = items.reduce((catSum, item) => {
           // 콤마 제거 후 숫자로 변환
           const amountStr = item.amount
@@ -61,7 +127,7 @@ const useExpenses = (
   // 합계 자동 계산
   useEffect(() => {
     calculateTotal();
-  }, [expenses, newRow, calculateTotal]);
+  }, [calculateTotal]);
 
   // 입력 필드 변경 처리
   const handleInputChange = useCallback((category, index, field, value) => {
@@ -134,8 +200,8 @@ const useExpenses = (
       ...prev,
       [category]:
         category === 'food' || category === 'etc'
-          ? { name: '', amount: '' }
-          : { type: '', amount: '' },
+          ? { tripDocumentExpenseId: null, name: '', amount: '' }
+          : { tripDocumentExpenseId: null, type: '', amount: '' },
     }));
   }, []);
 
@@ -155,32 +221,54 @@ const useExpenses = (
 
   // 행 삭제
   const deleteRow = useCallback((category, index) => {
-    setExpenses((prev) => ({
-      ...prev,
-      [category]: prev[category].filter((_, i) => i !== index),
-    }));
+    setExpenses((prev) => {
+      const filteredExpenses = prev[category].filter((_, i) => i !== index);
+
+      // 각 카테고리에 최소 1개 기본행
+      if (filteredExpenses.length === 0) {
+        if (category === 'food' || category === 'etc') {
+          filteredExpenses.push({
+            tripDocumentExpenseId: null,
+            name: '',
+            amount: '',
+          });
+        } else {
+          const defaultType =
+            category === 'transportation' ? '수단명' : '숙소명';
+          filteredExpenses.push({
+            tripDocumentExpenseId: null,
+            type: defaultType,
+            amount: '',
+          });
+        }
+      }
+
+      return {
+        ...prev,
+        [category]: filteredExpenses,
+      };
+    });
     setSelectedRow({ category: null, index: null });
   }, []);
 
   // 드래그 앤 드롭 처리
-  const handleDragEnd = useCallback(
-    (result) => {
-      if (!result.destination) return;
+  const handleDragEnd = useCallback((result) => {
+    if (!result.destination) return;
 
-      const { source, destination } = result;
-      const category = source.droppableId;
+    const { source, destination } = result;
+    const category = source.droppableId;
 
-      const items = Array.from(expenses[category]);
+    setExpenses((prev) => {
+      const items = Array.from(prev[category]);
       const [reorderedItem] = items.splice(source.index, 1);
       items.splice(destination.index, 0, reorderedItem);
 
-      setExpenses((prev) => ({
+      return {
         ...prev,
         [category]: items,
-      }));
-    },
-    [expenses],
-  );
+      };
+    });
+  }, []);
 
   // 금액 포맷팅 (표시용)
   const formatNumber = useCallback((num) => {

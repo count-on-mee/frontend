@@ -1,383 +1,231 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
-import { componentStyles, styleUtils } from '../../../utils/styles';
-import { format, parse } from 'date-fns';
-import LocalDateRangePicker from '../../datePickers/localDateRangePicker';
+import useAccommodations from '../../../hooks/useAccommodations';
+import { useSocketDebounce } from '../../../utils/debounce';
+import { componentStyles } from '../../../utils/style';
 
-const Accommodation = ({
+import AccommodationRow from './AccommodationRow';
+
+const AccommodationSection = ({
   accommodations: initialAccommodations,
   socket,
   tripId,
 }) => {
-  const [accommodations, setAccommodations] = useState(
-    initialAccommodations || [],
-  );
-  const [newAccommodation, setNewAccommodation] = useState({
-    name: '',
-    checkIn: '',
-    checkOut: '',
-    note: '',
-    address: '',
-    price: '',
-    bookingReference: '',
-    status: '예약완료',
-  });
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [dateRange, setDateRange] = useState({
-    startDate: null,
-    endDate: null,
-  });
-  const [editingAccommodation, setEditingAccommodation] = useState(null);
+  const debouncedSocketEmit = useSocketDebounce(socket, 800);
+  const {
+    accommodations,
+    newRow,
+    selectedRow,
+    setSelectedRow,
+    handleRowClick,
+    handleInputChange,
+    handleNewRowInputChange,
+    confirmNewRow,
+    deleteRow,
+    setNewRow,
+    finishEdit,
+    setAccommodations,
+  } = useAccommodations(initialAccommodations);
 
+  // 소켓 이벤트 리스너 등록
   useEffect(() => {
-    if (initialAccommodations) {
-      setAccommodations(initialAccommodations);
-    }
-  }, [initialAccommodations]);
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('accommodationAdded', (data) => {
-        setAccommodations((prev) => [...prev, data.accommodation]);
-      });
-
-      socket.on('accommodationUpdated', (data) => {
-        setAccommodations((prev) =>
-          prev.map((acc) =>
-            acc.id === data.accommodation.id ? data.accommodation : acc,
-          ),
-        );
-      });
-
-      socket.on('accommodationDeleted', (data) => {
-        setAccommodations((prev) =>
-          prev.filter((acc) => acc.id !== data.accommodationId),
-        );
-      });
-
-      return () => {
-        socket.off('accommodationAdded');
-        socket.off('accommodationUpdated');
-        socket.off('accommodationDeleted');
-      };
-    }
+    if (!socket) return;
+    const handleAdded = (newAccommodation) => {
+      setAccommodations((prev) => [...prev, newAccommodation]);
+    };
+    const handleUpdated = ({
+      tripDocumentAccommodationId,
+      accommodationFields,
+    }) => {
+      setAccommodations((prev) =>
+        prev.map((accommodation) =>
+          accommodation.tripDocumentAccommodationId ===
+          tripDocumentAccommodationId
+            ? { ...accommodation, ...accommodationFields }
+            : accommodation,
+        ),
+      );
+    };
+    const handleDeleted = ({ tripDocumentAccommodationId }) => {
+      setAccommodations((prev) =>
+        prev.filter(
+          (accommodation) =>
+            accommodation.tripDocumentAccommodationId !==
+            tripDocumentAccommodationId,
+        ),
+      );
+    };
+    socket.on('accommodationAdded', handleAdded);
+    socket.on('accommodationUpdated', handleUpdated);
+    socket.on('accommodationDeleted', handleDeleted);
+    return () => {
+      socket.off('accommodationAdded', handleAdded);
+      socket.off('accommodationUpdated', handleUpdated);
+      socket.off('accommodationDeleted', handleDeleted);
+    };
   }, [socket]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewAccommodation((prev) => ({ ...prev, [name]: value }));
+  // 입력/수정 시 소켓 emit
+  const handleRowInputChange = (index, field, value) => {
+    handleInputChange(index, field, value);
+    const item = accommodations[index];
+    if (item && item.tripDocumentAccommodationId) {
+      debouncedSocketEmit('updateAccommodation', {
+        tripDocumentAccommodationId: item.tripDocumentAccommodationId,
+        accommodationFields: { [field]: value },
+      });
+    }
   };
 
-  const handleAddAccommodation = () => {
+  // 날짜 변경 시 소켓 emit
+  const handleRowDateChange = (index, startDate, endDate) => {
+    handleInputChange(
+      index,
+      'checkInDate',
+      startDate ? startDate.toISOString().slice(0, 10) : '',
+    );
+    handleInputChange(
+      index,
+      'checkOutDate',
+      endDate ? endDate.toISOString().slice(0, 10) : '',
+    );
+    const item = accommodations[index];
+    if (item && item.tripDocumentAccommodationId) {
+      debouncedSocketEmit('updateAccommodation', {
+        tripDocumentAccommodationId: item.tripDocumentAccommodationId,
+        accommodationFields: {
+          checkInDate: startDate ? startDate.toISOString().slice(0, 10) : '',
+          checkOutDate: endDate ? endDate.toISOString().slice(0, 10) : '',
+        },
+      });
+    }
+  };
+
+  // 새 행 추가(완료)
+  const handleConfirmNewRow = () => {
     if (
-      newAccommodation.name &&
-      newAccommodation.checkIn &&
-      newAccommodation.checkOut
+      newRow &&
+      newRow.accommodation &&
+      newRow.checkInDate &&
+      newRow.checkOutDate
     ) {
-      const accommodation = {
-        id: Date.now(),
-        name: newAccommodation.name,
-        checkIn: newAccommodation.checkIn,
-        checkOut: newAccommodation.checkOut,
-        note: newAccommodation.note || null,
-        address: newAccommodation.address || null,
-        price: newAccommodation.price || null,
-        bookingReference: newAccommodation.bookingReference || null,
-        status: newAccommodation.status,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      socket.emit('addAccommodation', { tripId, accommodation });
-
-      setAccommodations((prev) => [...prev, accommodation]);
-
-      setNewAccommodation({
-        name: '',
-        checkIn: '',
-        checkOut: '',
-        note: '',
-        address: '',
-        price: '',
-        bookingReference: '',
-        status: '예약완료',
+      debouncedSocketEmit('addAccommodation', {
+        accommodationData: {
+          accommodation: newRow.accommodation,
+          checkInDate: newRow.checkInDate,
+          checkOutDate: newRow.checkOutDate,
+          memo: newRow.memo || null,
+        },
       });
-      setDateRange({
-        startDate: null,
-        endDate: null,
+      confirmNewRow();
+    }
+  };
+
+  // 행 삭제
+  const handleDeleteRow = (index) => {
+    const item = accommodations[index];
+    if (item && item.tripDocumentAccommodationId) {
+      debouncedSocketEmit('deleteAccommodation', {
+        tripDocumentAccommodationId: item.tripDocumentAccommodationId,
       });
     }
+    deleteRow(index);
   };
 
-  const handleUpdateAccommodation = (id, updatedData) => {
-    socket.emit('updateAccommodation', {
-      tripId,
-      accommodation: { id, ...updatedData },
+  // 새 행 입력 활성화
+  const handleShowNewRow = () => {
+    setNewRow({
+      accommodation: '',
+      checkInDate: '',
+      checkOutDate: '',
+      memo: '',
     });
-  };
-
-  const handleDeleteAccommodation = (id) => {
-    if (socket) {
-      socket.emit('deleteAccommodation', { tripId, accommodationId: id });
-
-      setAccommodations((prev) => prev.filter((acc) => acc.id !== id));
-    }
-  };
-
-  const handleFieldClick = (accommodation, field) => {
-    setEditingAccommodation({
-      ...accommodation,
-      editingField: field,
-    });
-  };
-
-  const handleFieldChange = (e) => {
-    const { name, value } = e.target;
-    const updatedAccommodation = {
-      ...editingAccommodation,
-      [name]: value,
-      updatedAt: new Date().toISOString(),
-    };
-    setEditingAccommodation(updatedAccommodation);
-    socket.emit('updateAccommodation', {
-      tripId,
-      accommodation: updatedAccommodation,
-    });
-  };
-
-  const handleDateClick = (accommodation) => {
-    setEditingAccommodation({
-      ...accommodation,
-      editingField: 'date',
-    });
-    setShowCalendar(true);
-    setDateRange({
-      startDate: parse(accommodation.checkIn, 'yyyy-MM-dd', new Date()),
-      endDate: parse(accommodation.checkOut, 'yyyy-MM-dd', new Date()),
-    });
-  };
-
-  const handleCalendarToggle = () => {
-    setShowCalendar((prev) => !prev);
-  };
-
-  const handleDateRangeChange = (startDate, endDate) => {
-    if (startDate && endDate) {
-      setDateRange({ startDate, endDate });
-      setNewAccommodation((prev) => ({
-        ...prev,
-        checkIn: format(startDate, 'yyyy-MM-dd'),
-        checkOut: format(endDate, 'yyyy-MM-dd'),
-      }));
-      setShowCalendar(false);
-    } else {
-      setDateRange({ startDate, endDate });
-    }
-  };
-
-  const formatDateForDisplay = (dateString) => {
-    if (!dateString) return '';
-    const date = parse(dateString, 'yyyy-MM-dd', new Date());
-    return format(date, 'yyyy.MM.dd');
+    setSelectedRow(null);
   };
 
   return (
-    <div className="bg-[var(--color-background-gray)] font-prompt p-6 rounded-lg shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th className="w-1/6 p-2 text-left text-gray-600">숙소명</th>
-              <th className="w-1/2 p-2 text-left text-gray-600">
-                체크인/체크아웃
-              </th>
-              <th className="w-1/4 p-2 text-left text-gray-600">메모</th>
-              <th className="w-16 p-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="hover:bg-[#E0DFDE]/50 transition-colors duration-200">
-              <td className="p-3">
-                <input
-                  type="text"
-                  name="name"
-                  value={newAccommodation.name}
-                  onChange={handleInputChange}
-                  placeholder="숙소명"
-                  className="w-full bg-[var(--color-background-gray)] rounded-full px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]"
-                />
-              </td>
-              <td className="p-3">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={
-                      newAccommodation.checkIn && newAccommodation.checkOut
-                        ? `${formatDateForDisplay(newAccommodation.checkIn)} - ${formatDateForDisplay(newAccommodation.checkOut)}`
-                        : ''
-                    }
-                    placeholder="체크인/체크아웃 날짜 선택"
-                    readOnly
-                    className="w-full bg-[var(--color-background-gray)] rounded-full px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] pr-16"
-                    onClick={handleCalendarToggle}
-                  />
-                  <button
-                    onClick={handleCalendarToggle}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] transition-all duration-200"
-                  >
-                    📅
-                  </button>
-                </div>
-              </td>
-              <td className="p-3">
-                <input
-                  type="text"
-                  name="note"
-                  value={newAccommodation.note}
-                  onChange={handleInputChange}
-                  placeholder="메모"
-                  className="w-full bg-[var(--color-background-gray)] rounded-full px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]"
-                />
-              </td>
-              <td className="p-3 text-right">
-                <button
-                  onClick={handleAddAccommodation}
-                  className="flex items-center justify-center rounded-full transition-all duration-200 shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] w-20 py-2 text-white text-lg gap-2 hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] bg-[var(--color-primary)] hover:bg-[#D54E23] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-                  disabled={
-                    !newAccommodation.name ||
-                    !newAccommodation.checkIn ||
-                    !newAccommodation.checkOut
-                  }
-                >
-                  <span className="text-lg">✓</span> 추가
-                </button>
-              </td>
-            </tr>
-            {accommodations &&
-              accommodations.map((accommodation) => (
-                <tr
-                  key={accommodation.id}
-                  className="hover:bg-[#E0DFDE]/50 transition-colors duration-200"
-                >
-                  <td className="p-3 rounded-full shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]">
-                    {editingAccommodation?.id === accommodation.id &&
-                    editingAccommodation.editingField === 'name' ? (
-                      <input
-                        type="text"
-                        name="name"
-                        value={editingAccommodation.name}
-                        onChange={handleFieldChange}
-                        onBlur={() => setEditingAccommodation(null)}
-                        autoFocus
-                        className="w-full bg-[var(--color-background-gray)] rounded-full px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]"
-                      />
-                    ) : (
-                      <div
-                        onClick={() => handleFieldClick(accommodation, 'name')}
-                        className="cursor-pointer"
-                      >
-                        {accommodation.name}
-                      </div>
-                    )}
-                  </td>
-                  <td className="p-3 rounded-full shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]">
-                    <div
-                      onClick={() => handleDateClick(accommodation)}
-                      className="cursor-pointer"
-                    >
-                      {`${formatDateForDisplay(accommodation.checkIn)} - ${formatDateForDisplay(accommodation.checkOut)}`}
-                    </div>
-                  </td>
-                  <td className="p-3 rounded-full shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]">
-                    {editingAccommodation?.id === accommodation.id &&
-                    editingAccommodation.editingField === 'note' ? (
-                      <input
-                        type="text"
-                        name="note"
-                        value={editingAccommodation.note || ''}
-                        onChange={handleFieldChange}
-                        onBlur={() => setEditingAccommodation(null)}
-                        autoFocus
-                        className="w-full bg-[var(--color-background-gray)] rounded-full px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]"
-                      />
-                    ) : (
-                      <div
-                        onClick={() => handleFieldClick(accommodation, 'note')}
-                        className="cursor-pointer"
-                      >
-                        {accommodation.note || '-'}
-                      </div>
-                    )}
-                  </td>
-                  <td className="p-3 text-right">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteAccommodation(accommodation.id);
-                      }}
-                      className="w-8 h-8 flex items-center justify-center rounded-full shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] transition-all duration-200"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-red-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-      {showCalendar && (
-        <div className="mt-4 rounded-lg shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]">
-          <LocalDateRangePicker
-            initialDates={dateRange}
-            onDateRangeChange={(startDate, endDate) => {
-              if (startDate && endDate) {
-                setDateRange({ startDate, endDate });
-                if (editingAccommodation) {
-                  const updatedAccommodation = {
-                    ...editingAccommodation,
-                    checkIn: format(startDate, 'yyyy-MM-dd'),
-                    checkOut: format(endDate, 'yyyy-MM-dd'),
-                    updatedAt: new Date().toISOString(),
-                  };
-                  setEditingAccommodation(null);
-                  socket.emit('updateAccommodation', {
-                    tripId,
-                    accommodation: updatedAccommodation,
-                  });
-                } else {
-                  setNewAccommodation((prev) => ({
-                    ...prev,
-                    checkIn: format(startDate, 'yyyy-MM-dd'),
-                    checkOut: format(endDate, 'yyyy-MM-dd'),
-                  }));
-                }
-                setShowCalendar(false);
-              } else {
-                setDateRange({ startDate, endDate });
-              }
-            }}
-            showCompleteButton={true}
-            onComplete={() => setShowCalendar(false)}
-            completeButtonText="날짜 선택 완료"
-          />
+    <div className="bg-[var(--color-background-gray)] font-prompt p-6 rounded-lg shadow-[4px_4px_8px_#b8b8b8,-4px_-4px_8px_#ffffff]">
+      <table className="w-full table-fixed">
+        <thead>
+          <tr>
+            <th className="w-1/4 p-2">
+              <span className={componentStyles.header}>숙소명</span>
+            </th>
+            <th className="w-1/3 p-2">
+              <span className={componentStyles.header}>체크인 ~ 체크아웃</span>
+            </th>
+            <th className="w-1/3 p-2">
+              <span className={componentStyles.header}>메모</span>
+            </th>
+            <th className="w-12 p-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {accommodations.map((item, idx) => (
+            <AccommodationRow
+              key={item.tripDocumentAccommodationId || `placeholder-${idx}`}
+              item={item}
+              index={idx}
+              isPlaceholder={item.isPlaceholder}
+              isSelected={selectedRow === idx}
+              onRowClick={handleRowClick}
+              onDeleteRow={handleDeleteRow}
+              onInputChange={handleRowInputChange}
+              onNewRowInputChange={handleNewRowInputChange}
+              onDateChange={handleRowDateChange}
+            />
+          ))}
+          {newRow && (
+            <AccommodationRow
+              item={newRow}
+              index={accommodations.length}
+              isNewRow={true}
+              isSelected={false}
+              onRowClick={() => {}}
+              onDeleteRow={() => setNewRow(null)}
+              onInputChange={() => {}}
+              onNewRowInputChange={handleNewRowInputChange}
+              onDateChange={() => {}}
+            />
+          )}
+        </tbody>
+      </table>
+      {/* 새 행 추가 버튼 */}
+      {!newRow && (
+        <div className="p-2">
+          <button
+            onClick={handleShowNewRow}
+            className="px-6 py-2 rounded-lg shadow-[2px_2px_4px_#b8b8b8,-2px_-2px_4px_#ffffff] hover:shadow-[inset_2px_2px_4px_#b8b8b8,inset_-2px_-2px_4px_#ffffff] transition-all duration-200 bg-[var(--color-primary)] text-white font-medium"
+          >
+            <span className="text-lg">+</span> 숙소 추가
+          </button>
+        </div>
+      )}
+      {/* 새 행 입력 완료 버튼 */}
+      {newRow && (
+        <div className="p-2">
+          <button
+            onClick={handleConfirmNewRow}
+            className={clsx(
+              'px-6 py-2 rounded-lg font-medium',
+              newRow.accommodation && newRow.checkInDate && newRow.checkOutDate
+                ? 'bg-[var(--color-primary)] text-white'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed hover:bg-gray-300',
+            )}
+            disabled={
+              !(
+                newRow.accommodation &&
+                newRow.checkInDate &&
+                newRow.checkOutDate
+              )
+            }
+          >
+            <span className="text-lg">✓</span> 완료
+          </button>
         </div>
       )}
     </div>
   );
 };
 
-export default Accommodation;
+export default AccommodationSection;

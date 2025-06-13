@@ -1,60 +1,95 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { componentStyles, styleUtils } from '../../../utils/styles';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { componentStyles, styleUtils } from '../../../utils/style';
+import { useSocketDebounce } from '../../../utils/debounce';
 import clsx from 'clsx';
 
-const TodoList = ({ todos, socket, tripId }) => {
-  const [newTodo, setNewTodo] = useState(null);
-  const [selectedTodo, setSelectedTodo] = useState(null);
-  const [localTodos, setLocalTodos] = useState(todos || []);
+const TodoList = ({ tasks, socket, tripId }) => {
+  const debouncedSocketEmit = useSocketDebounce(socket, 800);
+
+  const [newTask, setNewTask] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [localTasks, setLocalTasks] = useState(tasks || []);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    setLocalTodos(todos || []);
-  }, [todos]);
+    setLocalTasks(tasks || []);
+  }, [tasks]);
 
   useEffect(() => {
     if (!socket) return;
 
-    const handleTodoUpdated = (updatedTodo) => {
-      setLocalTodos((prev) =>
-        prev.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)),
+    const handleTaskUpdated = ({ tripDocumentTaskId, taskFields }) => {
+      setLocalTasks((prev) =>
+        prev.map((task) =>
+          task.tripDocumentTaskId === tripDocumentTaskId
+            ? { ...task, ...taskFields }
+            : task,
+        ),
       );
     };
 
-    const handleTodoAdded = (newTodo) => {
-      setLocalTodos((prev) => [...prev, newTodo]);
+    const handleTaskAdded = (newTask) => {
+      setLocalTasks((prev) => {
+        // 임시 task (tripDocumentTaskId가 null인 task)를 찾아서 실제 task로 교체
+        const hasTempTask = prev.some(
+          (task) => task.tripDocumentTaskId === null,
+        );
+        if (hasTempTask) {
+          // 임시 task를 제거하고 새 task 추가
+          return prev
+            .filter((task) => task.tripDocumentTaskId !== null)
+            .concat(newTask);
+        } else {
+          // 임시 task가 없으면 그냥 새 task 추가
+          return [...prev, newTask];
+        }
+      });
     };
 
-    const handleTodoDeleted = (todoId) => {
-      setLocalTodos((prev) => prev.filter((todo) => todo.id !== todoId));
-      setSelectedTodo(null);
+    const handleTaskDeleted = ({ tripDocumentTaskId }) => {
+      setLocalTasks((prev) =>
+        prev.filter((task) => task.tripDocumentTaskId !== tripDocumentTaskId),
+      );
+      setSelectedTask(null);
     };
 
-    socket.on('todoUpdated', handleTodoUpdated);
-    socket.on('todoAdded', handleTodoAdded);
-    socket.on('todoDeleted', handleTodoDeleted);
+    const handleError = ({ message }) => {
+      console.error('Task 에러:', message);
+
+      alert(`Task 작업 중 오류가 발생했습니다: ${message}`);
+    };
+
+    socket.on('taskUpdated', handleTaskUpdated);
+    socket.on('taskAdded', handleTaskAdded);
+    socket.on('taskDeleted', handleTaskDeleted);
+    socket.on('error', handleError);
 
     return () => {
-      socket.off('todoUpdated', handleTodoUpdated);
-      socket.off('todoAdded', handleTodoAdded);
-      socket.off('todoDeleted', handleTodoDeleted);
+      socket.off('taskUpdated', handleTaskUpdated);
+      socket.off('taskAdded', handleTaskAdded);
+      socket.off('taskDeleted', handleTaskDeleted);
+      socket.off('error', handleError);
     };
   }, [socket]);
 
   const handleInputChange = (index, value) => {
-    const updatedTodo = { ...localTodos[index], task: value };
-    setLocalTodos((prev) =>
-      prev.map((todo, i) => (i === index ? updatedTodo : todo)),
+    const updatedTask = { ...localTasks[index], task: value };
+    setLocalTasks((prev) =>
+      prev.map((task, i) => (i === index ? updatedTask : task)),
     );
-    socket?.emit('todoUpdate', { tripId, todo: updatedTodo });
+
+    debouncedSocketEmit('updateTask', {
+      tripDocumentTaskId: localTasks[index].tripDocumentTaskId,
+      taskFields: { task: value },
+    });
   };
 
-  const handleNewTodoInputChange = (value) => {
-    setNewTodo((prev) => ({ ...prev, task: value }));
+  const handleNewTaskInputChange = (value) => {
+    setNewTask((prev) => ({ ...prev, task: value }));
   };
 
-  const addTodo = () => {
-    setNewTodo({ id: Date.now(), task: '', completed: false });
+  const addTask = () => {
+    setNewTask({ id: Date.now(), task: '', isCompleted: false });
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
@@ -62,79 +97,96 @@ const TodoList = ({ todos, socket, tripId }) => {
     }, 0);
   };
 
-  const confirmNewTodo = () => {
-    if (newTodo && newTodo.task.trim()) {
-      const todoToAdd = {
-        id: Date.now(),
-        task: newTodo.task.trim(),
-        completed: false,
+  const confirmNewTask = () => {
+    if (newTask && newTask.task.trim()) {
+      const taskData = {
+        task: newTask.task.trim(),
+        isCompleted: false,
       };
-      setLocalTodos((prev) => [...prev, todoToAdd]);
-      socket?.emit('todoAdd', { tripId, todo: todoToAdd });
-      setNewTodo(null);
+
+      const tempTask = {
+        id: Date.now(),
+        task: newTask.task.trim(),
+        isCompleted: false,
+        tripDocumentTaskId: null, // 서버에서 생성될 ID
+      };
+      setLocalTasks((prev) => [...prev, tempTask]);
+      setNewTask(null);
+
+      debouncedSocketEmit('addTask', { taskData });
     }
   };
 
-  const deleteTodo = (index) => {
-    const todoToDelete = localTodos[index];
-    setLocalTodos((prev) => prev.filter((_, i) => i !== index));
-    socket?.emit('todoDelete', { tripId, todoId: todoToDelete.id });
-    setSelectedTodo(null);
+  const deleteTask = (index) => {
+    const taskToDelete = localTasks[index];
+
+    setLocalTasks((prev) => prev.filter((_, i) => i !== index));
+    setSelectedTask(null);
+
+    if (taskToDelete.tripDocumentTaskId) {
+      debouncedSocketEmit('deleteTask', {
+        tripDocumentTaskId: taskToDelete.tripDocumentTaskId,
+      });
+    }
   };
 
-  const toggleTodo = (index) => {
-    const updatedTodo = {
-      ...localTodos[index],
-      completed: !localTodos[index].completed,
+  const toggleTask = (index) => {
+    const updatedTask = {
+      ...localTasks[index],
+      isCompleted: !localTasks[index].isCompleted,
     };
-    setLocalTodos((prev) =>
-      prev.map((todo, i) => (i === index ? updatedTodo : todo)),
+    setLocalTasks((prev) =>
+      prev.map((task, i) => (i === index ? updatedTask : task)),
     );
-    socket?.emit('todoUpdate', { tripId, todo: updatedTodo });
+
+    debouncedSocketEmit('updateTask', {
+      tripDocumentTaskId: localTasks[index].tripDocumentTaskId,
+      taskFields: { isCompleted: !localTasks[index].isCompleted },
+    });
   };
 
-  const handleTodoClick = (index) => {
-    setSelectedTodo(selectedTodo === index ? null : index);
+  const handleTaskClick = (index) => {
+    setSelectedTask(selectedTask === index ? null : index);
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && newTodo && newTodo.task.trim()) {
-      confirmNewTodo();
+    if (e.key === 'Enter' && newTask && newTask.task.trim()) {
+      confirmNewTask();
     }
   };
 
   const handleInputFocus = () => {
-    if (!newTodo) {
-      addTodo();
+    if (!newTask) {
+      addTask();
     }
   };
 
-  const renderTodo = (todo, index, isNewTodo = false) => {
-    const validTodo = isNewTodo
-      ? newTodo
-      : todo || { id: Date.now(), task: '', completed: false };
+  const renderTask = (task, index, isNewTask = false) => {
+    const validTask = isNewTask
+      ? newTask
+      : task || { id: Date.now(), task: '', isCompleted: false };
 
     return (
       <div
-        key={validTodo.id || index}
+        key={validTask.tripDocumentTaskId || validTask.id || index}
         className={clsx(
           'flex items-center justify-between p-3 mb-2 rounded-full transition-all duration-200',
-          selectedTodo === index
+          selectedTask === index
             ? 'shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]'
             : 'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
-          isNewTodo && 'border-2 border-[var(--color-primary)]',
+          isNewTask && 'border-2 border-[var(--color-primary)]',
         )}
-        onClick={() => !isNewTodo && handleTodoClick(index)}
+        onClick={() => !isNewTask && handleTaskClick(index)}
       >
         <div className="flex items-center gap-3 flex-1">
           <div className="relative">
             <input
               type="checkbox"
-              checked={isNewTodo ? false : validTodo.completed}
+              checked={isNewTask ? false : validTask.isCompleted}
               onChange={(e) => {
                 e.stopPropagation();
-                if (!isNewTodo) {
-                  toggleTodo(index);
+                if (!isNewTask) {
+                  toggleTask(index);
                 }
               }}
               className="w-5 h-5 rounded-full border-2 border-[var(--color-primary)] appearance-none checked:bg-[var(--color-primary)] checked:border-[var(--color-primary)] transition-all duration-200 shadow-[inset_2px_2px_4px_#b8b8b8,inset_-2px_-2px_4px_#ffffff]"
@@ -142,29 +194,29 @@ const TodoList = ({ todos, socket, tripId }) => {
           </div>
           <input
             type="text"
-            value={isNewTodo ? newTodo?.task || '' : validTodo.task || ''}
+            value={isNewTask ? newTask?.task || '' : validTask.task || ''}
             onChange={(e) => {
               e.stopPropagation();
-              if (isNewTodo) {
-                handleNewTodoInputChange(e.target.value);
+              if (isNewTask) {
+                handleNewTaskInputChange(e.target.value);
               } else {
                 handleInputChange(index, e.target.value);
               }
             }}
             onKeyPress={handleKeyPress}
-            ref={isNewTodo ? inputRef : undefined}
+            ref={isNewTask ? inputRef : undefined}
             className={clsx(
               'flex-1 bg-transparent border-none focus:outline-none text-[var(--color-text)]',
-              validTodo.completed && 'line-through text-gray-400',
+              validTask.isCompleted && 'line-through text-gray-400',
             )}
             placeholder="할 일 입력"
           />
         </div>
-        {!isNewTodo && selectedTodo === index && (
+        {!isNewTask && selectedTask === index && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              deleteTodo(index);
+              deleteTask(index);
             }}
             className="p-2 text-red-500 hover:text-red-700 transition-colors duration-200"
           >
@@ -187,54 +239,30 @@ const TodoList = ({ todos, socket, tripId }) => {
   };
 
   useEffect(() => {
-    if (newTodo && inputRef.current) {
+    if (newTask && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [newTodo]);
+  }, [newTask]);
 
   return (
     <div className="bg-[var(--color-background-gray)] font-prompt p-6 rounded-lg shadow-[4px_4px_8px_#b8b8b8,-4px_-4px_8px_#ffffff]">
       <div className="space-y-2">
-        {localTodos.length === 0 && !newTodo && (
-          <div
-            className="flex items-center gap-3 p-3 mb-2 rounded-full shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] hover:rounded-full transition-all duration-200 cursor-pointer"
-            onClick={addTodo}
+        {localTasks.map((task, index) => renderTask(task, index))}
+        {newTask && renderTask(newTask, localTasks.length, true)}
+
+        {!newTask && (
+          <button
+            onClick={addTask}
+            className="flex items-center gap-3 p-3 w-full rounded-full shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] hover:rounded-full transition-all duration-200 cursor-pointer border-none "
           >
-            <div className="relative">
-              <input
-                type="checkbox"
-                disabled
-                className="w-5 h-5 rounded-full border-2 border-[var(--color-primary)] appearance-none shadow-[inset_2px_2px_4px_#b8b8b8,inset_-2px_-2px_4px_#ffffff]"
-              />
+            <div className="w-5 h-5 rounded-full border-2 border-[var(--color-primary)] flex items-center justify-center">
+              <span className="text-[var(--color-primary)] text-sm">+</span>
             </div>
-            <input
-              type="text"
-              onFocus={handleInputFocus}
-              className="flex-1 bg-transparent border-none text-gray-400"
-              placeholder="할 일을 추가하려면 클릭하세요"
-              readOnly
-            />
-          </div>
+            <span className="text-[var(--color-primary)] font-medium">
+              새 할 일 추가
+            </span>
+          </button>
         )}
-        {localTodos.map((todo, index) => renderTodo(todo, index))}
-        {newTodo && renderTodo(newTodo, localTodos.length, true)}
-        <div className="mt-4">
-          {newTodo ? (
-            <button
-              onClick={confirmNewTodo}
-              className="w-full py-2 px-4 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors duration-200 flex items-center justify-center gap-2 shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]"
-            >
-              <span className="text-lg">✓</span> 완료
-            </button>
-          ) : (
-            <button
-              onClick={addTodo}
-              className="w-full py-2 px-4 text-[var(--color-primary)] rounded-full hover:bg-[var(--color-primary-light)] transition-colors duration-200 flex items-center justify-center gap-2 shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]"
-            >
-              <span className="text-lg">+</span> 할 일 추가
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );

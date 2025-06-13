@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { componentStyles } from '../../../utils/styles';
+import { componentStyles } from '../../../utils/style';
 
 const TotalRow = ({ total, formatNumber }) => {
   return (

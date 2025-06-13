@@ -22,10 +22,10 @@ export const CATEGORY_NAMES = {
 };
 
 export const FIXED_ROW_RULES = {
-  transportation: (index) => index === 0,
-  accommodation: (index) => index === 0,
-  food: (index) => index === 0,
-  etc: (index) => index === 0,
+  transportation: (index) => false,
+  accommodation: (index) => false,
+  food: (index) => false,
+  etc: (index) => false,
 };
 
 export const isValidNewRow = (category, newRow) => {
