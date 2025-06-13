@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import authAtom from '../recoil/auth';
+import axiosInstance from '../utils/axiosInstance';
 
-// const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8888';
 
 function useTrip() {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ function useTrip() {
     startDate,
     endDate,
     spotIds,
+    participantFields,
   }) => {
     setLoading(true);
     setError(null);
@@ -26,36 +27,30 @@ function useTrip() {
         throw new Error('로그인이 필요합니다.');
       }
 
-      const response = await fetch(`${API_URL}/trips`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          destinations,
-          startDate,
-          endDate,
-          spotIds,
-        }),
-      });
+      const requestData = {
+        title,
+        destinations,
+        startDate,
+        endDate,
+        spotIds,
+        participantFields,
+      };
 
-      if (response.status === 401) {
-        navigate('/login-notice');
-        throw new Error('로그인이 만료되었습니다. 다시 로그인해주세요.');
-      }
+      const response = await axiosInstance.post('/trips', requestData);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || '여행 생성에 실패했습니다.');
-      }
-
-      const data = await response.json();
-      return data;
+      return response.data;
     } catch (error) {
       console.error('Failed to create trip:', error);
-      setError(error.message);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+
+      if (error.response?.status === 401) {
+        navigate('/login-notice');
+        setError('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      } else {
+        setError(error.response?.data?.message || '여행 생성에 실패했습니다.');
+      }
+
       throw error;
     } finally {
       setLoading(false);

@@ -159,9 +159,16 @@ export default function MyScrapListPage() {
       const trip = await createTrip({
         title: `${destinations.join(', ')} 여행`,
         destinations,
-        startDate: tripDates.startDate,
-        endDate: tripDates.endDate,
+        startDate: tripDates.startDate
+          ? tripDates.startDate.toISOString().slice(0, 10)
+          : null,
+        endDate: tripDates.endDate
+          ? tripDates.endDate.toISOString().slice(0, 10)
+          : null,
         spotIds,
+        participantFields: {
+          count: 1,
+        },
       });
 
       // 상태 초기화
