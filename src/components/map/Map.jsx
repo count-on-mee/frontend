@@ -7,16 +7,15 @@ import MapPanel from './MapPanel';
 import MapMarkerSpot from './MapMarkerSpot';
 import MapMarkerCuration from './MapMarkerCuration';
 import MapMarkerItinerary from './MapMarkerItinerary';
+import MapMarkerScrapList from './MapMarkerScrapList';
 import MapResearch from './MapResearch';
 import useSearchSpots from '../../hooks/useSearchSpots';
 import FilterPanel from './FilterPanel';
 
-export default function Map({ mapRef, markerType, markers }) {
+export default function Map({ mapRef, markerType, markers, filteredMarkers, activeCategories, setActiveCategories }) {
   const { naver } = window;
   const [center, setCenter] = useRecoilState(centerAtom);
   const setZoom = useSetRecoilState(zoomAtom);
-  const [filteredMarkers, setFilteredMarkers] = useState([]);
-  const [activeCategories, setActiveCategories] = useState([]);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const handleSearch = useSearchSpots();
 
@@ -37,22 +36,8 @@ export default function Map({ mapRef, markerType, markers }) {
 
     mapRef.current = new naver.maps.Map('map', mapOptions);
     handleLocateMe();
+    console.log(filteredMarkers);
   }, []);
-
-  // useEffect(() => {
-  //   if (markers?.length > 0){
-  //     if (activeCategories?.length === 0) {
-  //       setFilteredMarkers(markers);
-  //     } else {
-  //       const newMarkers = markers.filter(marker =>
-  //         Array.isArray(marker.categories)
-  //         && Array.isArray(activeCategories) && activeCategories.some(category => marker.categories.includes(category)));
-  //       setFilteredMarkers(newMarkers);
-  //     }
-  //   }
-  //   console.log("ac:", activeCategories);
-  //   console.log("fm:", filteredMarkers);
-  //   }, [markers, activeCategories]);
 
   const handleZoomIn = useCallback(() => {
     if (mapRef.current) {
@@ -78,7 +63,9 @@ export default function Map({ mapRef, markerType, markers }) {
   const handleCenterChanged = () => {
     if (mapRef.current) {
       const newCenter = mapRef.current.getCenter();
-      setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
+       if (newCenter && typeof newCenter.lat === 'function' && typeof newCenter.lng === 'function') {
+        setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });}
+      // setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
     }
   };
 
@@ -141,6 +128,7 @@ export default function Map({ mapRef, markerType, markers }) {
   }, []);
 
   const handleFilter = (category) => {
+    console.log("Clicked category:", category);
     setActiveCategories((prev) => {
       if (prev.includes(category)) {
         // 이미 포함 → 제거
@@ -155,25 +143,45 @@ export default function Map({ mapRef, markerType, markers }) {
   const renderMarkerComponent = () => {
     if (markerType === 'spot')
       return (
-        <div className="absolute w-full">
+        <div className="w-full">
+          <MapPanel
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onLocateMe={handleLocateMe}
+            onSearch={handleSearch}
+          />
           <MapMarkerSpot
-            // markers={filteredMarkers}
-            markers={markers}
+            markers={filteredMarkers}
+            // markers={markers}
             map={mapRef.current}
             // position={position}
           />
-          <FilterPanel onFilter={handleFilter} />
+          <FilterPanel onFilter={handleFilter} activeCategories={activeCategories}/>
+          <MapResearch />
         </div>
       );
     if (markerType === 'curation')
       return (
-        <MapMarkerCuration
+        <div className="w-full">
+          <MapResearch onSearch={handleSearch} />
+          <MapPanel
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onLocateMe={handleLocateMe}
+            onSearch={handleSearch}
+          />
+          <MapMarkerCuration
           markers={markers}
           map={mapRef.current}
           // position={position}
-        />
+          />
+        </div>
       );
-    if (markerType === 'itinerary') return;
+    if (markerType === 'scrapList')
+      return (
+        <MapMarkerScrapList markers={markers} map={mapRef.current}/>
+      );
+    if (markerType === 'itinerary') return
     <MapMarkerItinerary
       markers={markers}
       map={mapRef.current}
@@ -182,17 +190,9 @@ export default function Map({ mapRef, markerType, markers }) {
   };
 
   return (
-    <div className="w-full relative">
-      <div id="map" style={{ width: '100%', height: 'calc(100vh - 80px)' }}>
-        <MapPanel
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onLocateMe={handleLocateMe}
-          onSearch={handleSearch}
-        />
+    <div className="w-full">
+      <div id="map" className="relative" style={{ width: '100%', height: 'calc(100vh - 80px)' }}>
         {mapRef.current && renderMarkerComponent()}
-
-        <MapResearch />
         {/* <MarkerCluster /> */}
       </div>
     </div>

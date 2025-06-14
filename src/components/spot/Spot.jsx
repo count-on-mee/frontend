@@ -8,11 +8,16 @@ import scrapStateAtom from '../../recoil/scrapState';
 export default function Spot({ handleScrapClick, spot, onClick, varient }) {
   const { address, categories, imgUrls, name } = spot;
 
-  const { isScraped, scrapCount } =
-    useRecoilValue(scrapStateAtom)[spot.spotId] ?? spot;
-
   const scrapState = useRecoilValue(scrapStateAtom);
+  // console.log(scrapState);
   const currentScrap = scrapState[spot.spotId];
+
+  const isScraped = currentScrap?.isScraped ?? spot.isScraped;
+  const scrapCount = currentScrap?.scrapCount ?? spot.scrapCount;
+
+  // const { isScraped, scrapCount } =
+  //   useRecoilValue(scrapStateAtom)[spot.spotId] ?? spot;
+
   // console.log(currentScrap);
 
   const isDetail = varient === 'detail';
@@ -44,7 +49,7 @@ export default function Spot({ handleScrapClick, spot, onClick, varient }) {
             {address}
           </p>
         )}
-        <p className="mx-5 mt-5 text-sm ">스크랩수: {scrapCount}</p>
+        <p className="mx-5 mt-5 text-sm ">{scrapCount}명이 스크랩했어요.</p>
         <Hashtag category={categories} />
       </div>
     </div>

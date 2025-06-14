@@ -55,7 +55,7 @@ export const useSpotScrap = ({
             ...prev,
             [spotId]: {
               isScraped: !isScraped,
-              scrapCount: scrapCount + (isScraped ? -1 : 1),
+              scrapCount: Math.max(0, scrapCount + (isScraped ? -1 : 1)),
             },
           }));
 

@@ -10,7 +10,7 @@ export default function CurationDetail({
   selectedCuration,
   setSelectedCuration,
   handleScrapClick,
-  handleSpotClick,
+  // handleSpotClick,
 }) {
   const [selectedCurationSpot, setSelectedCurationSpot] = useRecoilState(
     selectedCurationSpotAtom,
@@ -59,7 +59,7 @@ export default function CurationDetail({
               e.stopPropagation();
               handleSelectSpot(spot);
               setSelectedCurationSpotWithCenter(spot);
-              handleSpotClick(spot);
+              // handleSpotClick(spot);
             }}
             className="mx-auto w-5/6 box-shadow bg-background-gray rounded-xl my-3"
           >

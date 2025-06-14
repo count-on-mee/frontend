@@ -1,5 +1,6 @@
-import selectedSpotAtom from './atom';
+import selectedSpotsAtom from './atom';
 import withCenter from './withCenter';
 
 export { withCenter };
-export default selectedSpotAtom;
+export default selectedSpotsAtom;
+

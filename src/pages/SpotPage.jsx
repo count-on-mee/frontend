@@ -7,7 +7,7 @@ import selectedSpotAtom from '../recoil/selectedSpot';
 import spotMarkersAtom from '../recoil/spotMarkers';
 import userAtom from '../recoil/user';
 import authAtom from '../recoil/auth';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import api from '../utils/axiosInstance';
 import scrapStateAtom from '../recoil/scrapState';
 import { useSpotScrap } from '../hooks/useSpotScrap';
@@ -17,8 +17,9 @@ export default function SpotPage() {
   const mapRef = useRef(null);
   const [spotMarkers, setSpotMarkers] = useRecoilState(spotMarkersAtom);
   const user = useRecoilValue(userAtom);
-  // const spot = selectedSpot;
   const [scrapState, setScrapState] = useRecoilState(scrapStateAtom);
+  const [filteredMarkers, setFilteredMarkers] = useState([]);
+  const [activeCategories, setActiveCategories] = useState([]);
 
   const handleSpotClick = (spot) => {
     mapRef.current.setCenter(spot.position);
@@ -30,55 +31,19 @@ export default function SpotPage() {
     setSelectedSpot,
   });
 
-  // const handleSpotScrap = async (spotId) => {
-  //   // event.stopPropagation();
-
-  //   const currentScrap = scrapState[spotId];
-  //   const isScraped = currentScrap?.isScraped ?? false;
-  //   const scrapCount = currentScrap?.scrapCount ?? 0;
-
-  //   if (!user) {
-  //     alert('로그인이 필요한 서비스입니다.');
-  //     return;
-  //   }
-
-  //   // console.log(spot);
-
-  //   try {
-  //     const token = getRecoil(authAtom).accessToken;
-  //     const method = isScraped ? 'delete' : 'post';
-  //     await api({
-  //       url: `/scraps/spots/${spotId}`,
-  //       method,
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-
-  //     setSpotMarkers((prev) => {
-  //       const updateMarkers = Array.isArray(prev) ? prev : [];
-  //       return updateMarkers.map((marker) =>
-  //         marker.spotId === spotId
-  //           ? { ...marker, isScraped: !marker.isScraped, }
-  //           : marker,
-  //       );
-  //     });
-
-  //     setScrapState((prev) => {
-  //       return {
-  //         ...prev,
-  //         [spotId] : {
-  //           isScraped: !isScraped,
-  //           scrapCount: scrapCount + (isScraped ? -1 : 1),
-  //         }
-  //       };
-  //     });
-
-  //     if (selectedSpot && selectedSpot.spotId === spotId) {
-  //       setSelectedSpot((prev) => ({ ...prev, isScraped: !prev.isScraped, }));
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to update scrap status', error);
-  //   }
-  // };
+  useEffect(() => {
+    if (spotMarkers?.length > 0){
+      if (activeCategories?.length === 0) {
+         setFilteredMarkers(spotMarkers);
+      } else {
+        const newMarkers = spotMarkers.filter(marker =>
+          Array.isArray(marker.categories) &&  Array.isArray(activeCategories) && activeCategories.some(category => marker.categories.includes(category)));
+          setFilteredMarkers(newMarkers);
+        }
+    }
+      // console.log("ac:", activeCategories);
+      // console.log("fm:", filteredMarkers);
+  }, [spotMarkers, activeCategories]);
 
   return (
     <div className="w-full flex h-[calc(100vh-80px)]">
@@ -87,6 +52,7 @@ export default function SpotPage() {
         <SpotList
           onSpotClick={handleSpotClick}
           handleSpotScrap={handleSpotScrap}
+          spots={filteredMarkers}
         />
       </div>
       {/* SpotDetail */}
@@ -101,7 +67,7 @@ export default function SpotPage() {
       )}
       {/* MapLayout */}
       <div className={`${selectedSpot ? 'w-1/2' : 'w-3/4'}`}>
-        <Map mapRef={mapRef} markers={spotMarkers} markerType="spot" />
+        <Map mapRef={mapRef} markers={spotMarkers} markerType="spot" filteredMarkers={filteredMarkers} activeCategories={activeCategories} setActiveCategories={setActiveCategories}/>
       </div>
     </div>
   );
