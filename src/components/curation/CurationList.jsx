@@ -3,8 +3,8 @@ import Curation from './curation';
 import curationsAtom from '../../recoil/curations';
 import selectedCurationAtom from '../../recoil/selectedCuration';
 
-export default function CurationList({ handleScrapClick, onSelectedCuration }) {
-  const curations = useRecoilValue(curationsAtom);
+export default function CurationList({ handleScrapClick, onSelectedCuration, curations }) {
+  // const curations = useRecoilValue(curationsAtom);
   const [selectedCuration, setSelectedCuration] =
     useRecoilState(selectedCurationAtom);
   return (

@@ -1,4 +1,4 @@
-import { Suspense, useState, useMemo } from 'react';
+import { Suspense, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import authAtom from '../recoil/auth';
@@ -17,6 +17,7 @@ import { baseStyles, componentStyles, scrapListStyles } from '../utils/style';
 import Searchbar from '../components/ui/Searchbar';
 import ScrapSpots from '../components/scrap/ScrapSpots';
 import ScrapCurations from '../components/scrap/ScrapCurations';
+import Map from '../components/map/Map';
 
 // 스팟 카드 컴포넌트
 const SpotCard = ({ spot, isSelected, onToggleSelection }) => (
@@ -98,6 +99,14 @@ export default function MyScrapListPage() {
     filteredItems: filteredSpots,
     handleSearch,
   } = useListSearch(scrapedSpots);
+  const mapRef = useRef(null);
+    const markers = selectedSpots.map((spot) => ({
+      ...spot,
+      position: {
+        lat: spot.location.lat,
+        lng: spot.location.lng,
+      },
+    }));
 
   // 선택된 destination의 주소와 일치하는 스팟을 우선적으로 보여주기 위한 정렬 함수
   const sortedSpots = useMemo(() => {
@@ -269,7 +278,7 @@ export default function MyScrapListPage() {
 
         <div className="bg-background-gray rounded-lg shadow-xl w-full max-w-7xl h-[calc(100vh-8rem)] relative z-10 flex flex-col">
           {/* 헤더 */}
-          <div className="relative pt-8 pb-8 px-8 border-b border-gray-200">
+          <div className="relative pt-16 pb-8 px-8 border-b border-gray-200">
             <button
               onClick={goBack}
               className={clsx(
@@ -336,9 +345,10 @@ export default function MyScrapListPage() {
             </div>
 
             {/* 오른쪽 섹션: 지도 */}
-            <div className="w-full md:w-1/2 h-[300px] md:h-auto relative px-8 py-8">
+            <div className="w-full md:w-1/2 h-[300px] relative px-8 py-8">
               <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                <p className="text-gray-500">지도가 여기에 표시됩니다</p>
+                <Map markers={markers} mapRef={mapRef} markerType="scrapList"/>
+                {/* <p>지도</p> */}
               </div>
             </div>
           </div>

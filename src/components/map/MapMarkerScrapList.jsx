@@ -1,15 +1,15 @@
 import { useEffect, useRef } from 'react';
 import { useSetRecoilState } from 'recoil';
-import { withCenter } from '../../recoil/selectedSpot';
+import { withCenter } from '../../recoil/selectedSpots';
 import categories_map from '../../utils/categoriesMap';
 import { createCategorySVGMarker } from '../../utils/svgMaker';
 
-export default function MapMarkerSpot({ map, markers }) {
-  const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
-  const markerRef = useRef([]);
+export default function MapMarkerScrapList({ map, markers }) {
+  const setSelectedSpotsWithCenter = useSetRecoilState(withCenter);
+  // const markerRef = useRef([]);
 
   const handleMarkerClick = (marker) => {
-    setSelectedSpotWithCenter(marker);
+    setSelectedSpotsWithCenter(marker);
     setTimeout(() => {
       if (map) {
         map.setCenter(marker.postion);
@@ -45,10 +45,10 @@ export default function MapMarkerSpot({ map, markers }) {
   useEffect(() => {
     if (!window.naver || !map || !markers) return;
 
-    markerRef.current.forEach((m) => m.setMap(null));
-    markerRef.current = [];
+    // markerRef.current.forEach((m) => m.setMap(null));
+    // markerRef.current = [];
 
-    const newMarkerList = [];
+    // const newMarkerList = [];
 
     markers.forEach((markerData) => {
       const lat = getLat(markerData.position);
@@ -75,8 +75,25 @@ export default function MapMarkerSpot({ map, markers }) {
           map.setCenter(marker.position);
         }, 200);
       });
-      newMarkerList.push(marker);
+      // newMarkerList.push(marker);
     });
-    markerRef.current = newMarkerList;
+    // markerRef.current = newMarkerList;
+
+    const bounds = new naver.maps.LatLngBounds();
+      markers.forEach(marker => {
+        bounds.extend(new naver.maps.LatLng(marker.position.lat, marker.position.lng));
+      });
+    map.fitBounds(bounds);
+
+    // const latLngArray = markers.map((markerData) => {
+    //   const lat = getLat(markerData.position);
+    //   const lng = getLng(markerData.position);
+    //   return new naver.maps.LatLng(lat, lng);
+    // });
+
+    // const bounds = new naver.maps.LatLngBounds(latLngArray[0], latLngArray[0]);
+    // latLngArray.forEach((latLng) => bounds.extend(latLng));
+
+    // map.fitBounds(bounds);
   }, [markers]);
 }

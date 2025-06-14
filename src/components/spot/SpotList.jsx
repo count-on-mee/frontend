@@ -4,14 +4,16 @@ import Spot from './Spot';
 import spotMarkersAtom from '../../recoil/spotMarkers';
 import { withCenter } from '../../recoil/selectedSpot';
 import { useState, useEffect } from 'react';
+import { useSearch } from '../../hooks/useSearch';
 
-export default function SpotList({ handleSpotScrap, onSpotClick }) {
-  const spots = useRecoilValue(spotMarkersAtom);
+export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
+  // const spots = useRecoilValue(spotMarkersAtom);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentSpots, setCurrentSpots] = useState([]);
   const spotsPerPage = 15;
   const totalPages = Math.ceil(spots.length / spotsPerPage);
+  const { searchTerm, handleSearch, filteredItems } = useSearch(currentSpots);
 
   useEffect(() => {
     const indexOfLastSpot = currentPage * spotsPerPage;
@@ -51,12 +53,12 @@ export default function SpotList({ handleSpotScrap, onSpotClick }) {
 
   return (
     <div>
-      <Searchbar />
+      <Searchbar value={searchTerm} onChange={handleSearch}/>
       {spots.length === 0 ? (
         <p className="text-center">주변에 스팟이 없습니다.</p>
       ) : (
         <div>
-          {currentSpots.map((spot) => (
+          {filteredItems.map((spot) => (
             <Spot
               key={spot.spotId}
               spot={spot}

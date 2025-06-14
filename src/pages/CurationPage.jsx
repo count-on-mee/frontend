@@ -16,6 +16,8 @@ import curationMarkersAtom from '../recoil/curationMarkers';
 import Map from '../components/map/Map';
 import SpotDetail from '../components/spot/SpotDetail';
 import { useSpotScrap } from '../hooks/useSpotScrap';
+import scrapStateAtom from '../recoil/scrapState';
+import { useSearch } from '../hooks/useSearch';
 
 export default function CurationPage() {
   const [curations, setCurations] = useRecoilState(curationsAtom);
@@ -24,6 +26,7 @@ export default function CurationPage() {
   const [selectedCurationSpot, setSelectedCurationSpot] = useRecoilState(
     selectedCurationSpotAtom,
   );
+  const setScrapState = useSetRecoilState(scrapStateAtom)
   const [isUploaderOpen, setIsUploaderOpen] = useState(null);
   const [curationMarkers, setCurationMarkers] =
     useRecoilState(curationMarkersAtom);
@@ -36,9 +39,11 @@ export default function CurationPage() {
     setSelectedSpot: setSelectedCurationSpot,
   });
 
-  const handleSpotClick = (spot) => {
-    mapRef.current.setCenter(spot.position);
-  };
+  const { searchTerm, handleSearch, filteredItems } = useSearch(curations);
+
+  // const handleSpotClick = (spot) => {
+  //   mapRef.current.setCenter(spot.position);
+  // };
 
   const fetchCuration = async () => {
     try {
@@ -77,6 +82,20 @@ export default function CurationPage() {
     setCurationMarkers(markers);
     // console.log(curationMarkers);
   }, [selectedCuration]);
+
+  useEffect(() => {
+    const initial = {};
+    // console.log(selectedCuration);
+    if (Array.isArray(selectedCuration?.spots)) {
+      selectedCuration.spots.forEach((spot) => {
+      initial[spot.spotId] = {
+        isScraped: spot.isScraped,
+        scrapCount: spot.scrapedCount,
+      };
+    });
+  }
+    setScrapState(initial); // useSetRecoilState(scrapStateAtom)
+}, [selectedCuration]);
 
   const handleScrapClick = async (curation) => {
     // event.stopPropagation();
@@ -129,13 +148,14 @@ export default function CurationPage() {
       {!selectedCuration ? (
         <div>
           <div className="w-1/2 mb-4 mt-6 ml-5">
-            <Searchbar size="lg" />
+            <Searchbar value={searchTerm} onChange={handleSearch} size="lg" />
           </div>
           {/* curationList */}
           <div className="">
             <CurationList
               handleScrapClick={handleScrapClick}
               onSelectedCuration={setSelectedCuration}
+              curations={filteredItems}
             />
           </div>
           {/* curationUploader */}
@@ -166,7 +186,7 @@ export default function CurationPage() {
               setSelectedCuration={setSelectedCuration}
               handleScrapClick={handleScrapClick}
               fetchCuration={fetchCuration}
-              handleSpotClick={handleSpotClick}
+              // handleSpotClick={handleSpotClick}
               className=""
             />
           </div>
