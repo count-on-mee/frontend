@@ -9,6 +9,7 @@ const api = axios.create({
 
 let isRefreshing = false;
 let refreshSubscribers = [];
+const nonAuthRoutes = ['/', '/spot', '/curation', '/login'];
 
 function onRefreshed(token) {
   refreshSubscribers.forEach((callback) => callback(token));
@@ -35,7 +36,9 @@ api.interceptors.request.use(
           onRefreshed(token);
         } catch (err) {
           console.error('토큰 갱신 실패:', err);
-          if (window.location.pathname !== '/login') {
+          const currentPath = window.location.pathname;
+          if (!nonAuthRoutes.includes(currentPath)) {
+            alert('로그인이 필요한 기능입니다.')
             window.location.href = '/login';
           }
         } finally {
