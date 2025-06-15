@@ -75,11 +75,41 @@ function useTrip() {
     }
   }, []);
 
+  const updateTripDates = useCallback(
+    async (tripId, { startDate, endDate }) => {
+      if (!tripId) return;
+
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axiosInstance.patch(`/trips/${tripId}`, {
+          startDate,
+          endDate,
+        });
+        return response.data;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          navigate('/login-notice');
+          setError('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        } else {
+          setError(
+            error.response?.data?.message || '여행 날짜 수정에 실패했습니다.',
+          );
+        }
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate],
+  );
+
   return {
     loading,
     error,
     createTrip,
     getTrip,
+    updateTripDates,
   };
 }
 

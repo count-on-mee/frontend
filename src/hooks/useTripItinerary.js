@@ -71,10 +71,26 @@ function useTripItinerary(tripId) {
   };
 
   const updateTripDates = async ({ startDate, endDate }) => {
-    await axiosInstance.patch(`/trips/${tripId}`, {
-      startDate,
-      endDate,
-    });
+    try {
+      await axiosInstance.patch(`/trips/${tripId}`, {
+        startDate,
+        endDate,
+      });
+
+      const { data } = await axiosInstance.get(`/trips/${tripId}`, {
+        params: { 'include[]': 'itineraries' },
+      });
+
+      const validItineraries = (data.itineraries || []).filter(
+        (item) => item.tripItineraryId || item.itineraryId || item.id,
+      );
+      setItinerary(validItineraries);
+
+      return data;
+    } catch (error) {
+      setError(error);
+      throw error;
+    }
   };
 
   return {
