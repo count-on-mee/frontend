@@ -16,7 +16,7 @@ export const createCategorySVGMarker = (IconComponent, bgColor = '#999') => {
             color: 'white',
           }}
         >
-          <IconComponent style={{ width: '16px', height: '16px' }} />
+          {IconComponent && <IconComponent style={{ width: '16px', height: '16px' }} />}
         </div>
       </foreignObject>
     </svg>,
