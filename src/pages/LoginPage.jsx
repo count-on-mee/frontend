@@ -1,14 +1,14 @@
 export default function LoginPage() {
   const handleNaverLogin = async () => {
-    window.location.href = 'http://localhost:8888/auth/naver';
+    window.location.href = 'https://countonme.site/auth/naver';
   };
 
   const handleKakaoLogin = () => {
-    window.location.href = 'http://localhost:8888/auth/kakao';
+    window.location.href = 'https://countonme.site/auth/kakao';
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8888/auth/google';
+    window.location.href = 'https://countonme.site/auth/google';
   };
 
   return (
