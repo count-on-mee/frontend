@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
 import authAtom from '../recoil/auth';
+import axiosInstance from '../utils/axiosInstance';
 
 export default function useCuration(curationId) {
   const [curationSpots, setCurationSpots] = useState([]);
@@ -16,29 +17,7 @@ export default function useCuration(curationId) {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(
-          `https://http://localhost:8888/curations/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${auth.accessToken}`,
-              'Content-Type': 'application/json',
-            },
-          },
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('큐레이션 API 응답:', {
-            status: response.status,
-            statusText: response.statusText,
-            errorData,
-          });
-          throw new Error(
-            errorData.message || '큐레이션 데이터를 가져오지 못했습니다.',
-          );
-        }
-
-        const data = await response.json();
+        const { data } = await axiosInstance.get(`/curations/${id}`);
 
         if (!data) {
           throw new Error('큐레이션 데이터가 없습니다.');
@@ -72,7 +51,7 @@ export default function useCuration(curationId) {
         setLoading(false);
       }
     },
-    [auth.isAuthenticated, auth.accessToken],
+    [auth.isAuthenticated],
   );
 
   useEffect(() => {

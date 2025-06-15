@@ -26,6 +26,7 @@ function App() {
           <Header />
           <main className="flex-grow flex">
             <Routes>
+              <Route path="/" element={<SpotPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth-callback" element={<OAuthCallbackPage />} />
               <Route path="/me" element={<MyPage />} />
