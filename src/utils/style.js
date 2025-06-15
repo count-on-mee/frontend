@@ -74,6 +74,26 @@ export const componentStyles = {
     'p-3 rounded-full border-2 border-[var(--color-primary)] bg-white/60',
     'transition-colors duration-200',
   ),
+
+  // 버튼 스타일
+  button: {
+    primary: 'px-6 py-2.5 bg-[#FF8C4B] text-white rounded-full font-medium',
+    secondary: 'px-4 py-2 rounded-full text-lg font-semibold',
+  },
+
+  // 컨테이너 스타일
+  container: {
+    base: 'rounded-2xl p-3 py-4',
+    card: 'rounded-2xl p-6',
+  },
+
+  // 텍스트 스타일
+  text: {
+    title: 'font-bold text-lg text-gray-800',
+    subtitle: 'text-sm text-gray-500 mt-1',
+    error: 'text-red-500',
+    loading: 'text-gray-400',
+  },
 };
 
 /**
@@ -316,45 +336,19 @@ export const searchStyles = {
 };
 
 export const neumorphStyles = {
-  container: clsx(
-    'bg-background-gray',
-    'rounded-2xl',
-    'p-6 sm:p-8',
-    'shadow-[4px_4px_8px_rgba(0,0,0,0.1),-4px_-4px_8px_rgba(255,255,255,0.8)]',
-    'hover:shadow-[6px_6px_12px_rgba(0,0,0,0.12),-6px_-6px_12px_rgba(255,255,255,0.9)]',
-    'transition-all duration-300 ease-in-out',
-  ),
-  button: clsx(
-    'bg-background-gray',
-    'rounded-full',
-    'px-6 py-3',
-    'shadow-[4px_4px_8px_rgba(0,0,0,0.1),-4px_-4px_8px_rgba(255,255,255,0.8)]',
-    'hover:shadow-[6px_6px_12px_rgba(0,0,0,0.12),-6px_-6px_12px_rgba(255,255,255,0.9)]',
-    'active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)]',
-    'transition-all duration-300 ease-in-out',
-    'text-gray-700',
-    'font-medium',
-  ),
-  input: clsx(
-    'bg-background-gray',
-    'rounded-xl',
-    'px-4 py-3',
-    'shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)]',
-    'focus:shadow-[inset_6px_6px_12px_rgba(0,0,0,0.12),inset_-6px_-6px_12px_rgba(255,255,255,0.9)]',
-    'transition-all duration-300 ease-in-out',
-    'w-full',
-    'outline-none',
-    'text-gray-700',
-  ),
-  card: clsx(
-    'bg-background-gray',
-    'rounded-xl',
-    'p-4',
-    'shadow-[4px_4px_8px_rgba(0,0,0,0.1),-4px_-4px_8px_rgba(255,255,255,0.8)]',
-    'hover:shadow-[6px_6px_12px_rgba(0,0,0,0.12),-6px_-6px_12px_rgba(255,255,255,0.9)]',
-    'transition-all duration-300 ease-in-out',
-  ),
-  icon: clsx('w-6 h-6', 'text-gray-600', 'transition-colors duration-200'),
+  // 기본 Neumorphism 스타일
+  base: 'bg-[#f0f0f3] shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff]',
+  // 작은 Neumorphism 스타일
+  small: 'bg-[#f0f0f3] shadow-[4px_4px_8px_#d1d1d1,-4px_-4px_8px_#ffffff]',
+  // 작은 inset Neumorphism 스타일
+  smallInset:
+    'bg-[#f0f0f3] shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]',
+  // 매우 작은 inset Neumorphism 스타일
+  tinyInset:
+    'bg-[#f0f0f3] shadow-[inset_2px_2px_4px_#d1d1d1,inset_-2px_-2px_4px_#ffffff]',
+  // hover 효과가 있는 Neumorphism 스타일
+  hover:
+    'hover:shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-200',
 };
 
 /**
@@ -462,6 +456,151 @@ export const dateRangePickerStyles = {
   ],
 };
 
+export const layoutStyles = {
+  flex: {
+    center: 'flex items-center justify-center',
+    between: 'flex justify-between items-center',
+    gap: 'flex gap-4',
+  },
+  spacing: {
+    section: 'mb-8',
+    item: 'mb-4',
+  },
+};
+
+export const animationStyles = {
+  fadeIn: {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.3 },
+  },
+  scaleIn: {
+    initial: { scale: 0, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    exit: { scale: 0, opacity: 0 },
+    transition: {
+      type: 'spring',
+      stiffness: 260,
+      damping: 20,
+      duration: 0.5,
+    },
+  },
+};
+
+/**
+ * ItineraryModal 관련 스타일
+ */
+export const itineraryModalStyles = {
+  // 모달 배경
+  modalBg: clsx(
+    'fixed inset-0 w-screen h-screen bg-black/35 z-[2000]',
+    'flex items-center justify-center overflow-hidden',
+    'backdrop-blur-sm',
+  ),
+
+  // 모달 컨텐츠
+  modalContent: clsx(
+    'min-w-[700px] max-w-[90vw] max-h-[90vh] overflow-auto',
+    'bg-[#f8f8fa] rounded-[24px] relative p-10',
+    'shadow-[0_8px_32px_rgba(0,0,0,0.18)]',
+    'flex flex-col items-center',
+    'border border-white/20',
+  ),
+
+  // 날짜 컨테이너
+  dateContainer: clsx('flex justify-center gap-6 mb-6 w-full'),
+
+  // 날짜 박스
+  dateBox: clsx(
+    'px-6 py-3 rounded-[16px] bg-[#f0f0f3]',
+    'font-semibold text-lg text-[#252422]',
+    'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]',
+    'hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
+    'transition-all duration-200',
+  ),
+
+  // 일정 컨테이너
+  itineraryContainer: clsx(
+    'flex flex-row gap-6 w-full justify-start mt-6',
+    'overflow-x-auto pb-4 min-w-full',
+    'scrollbar-thin scrollbar-thumb-[#FF8C4B] scrollbar-track-[#f0f0f3]',
+  ),
+
+  // 일정 카드
+  itineraryCard: clsx(
+    'min-w-[220px] flex-shrink-0 bg-[#f8f8fa]',
+    'rounded-xl p-4 flex flex-col items-center',
+    'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]',
+    'hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
+    'transition-all duration-200',
+  ),
+
+  // 일정 제목
+  itineraryTitle: clsx(
+    'text-xl font-bold mb-2 text-[#252422]',
+    'flex items-center gap-2',
+  ),
+
+  // 일정 날짜
+  itineraryDate: clsx('text-[#FF8C4B] font-medium text-base'),
+
+  // 일정 리스트
+  itineraryList: clsx('min-h-[40px] w-full space-y-2'),
+
+  // 일정 아이템
+  itineraryItem: clsx(
+    'bg-white rounded-lg p-3',
+    'text-base flex items-center justify-between',
+    'transition-all duration-200',
+    'shadow-[2px_2px_4px_#b8b8b8,-2px_-2px_4px_#ffffff]',
+    'hover:shadow-[inset_2px_2px_4px_#b8b8b8,inset_-2px_-2px_4px_#ffffff]',
+    'hover:bg-[#f8f8fa]',
+    'group',
+  ),
+
+  // 삭제 버튼
+  deleteButton: clsx(
+    'ml-2 text-[#FF8C4B] bg-none border-none',
+    'font-semibold cursor-pointer',
+    'opacity-0 group-hover:opacity-100',
+    'transition-all duration-200',
+    'hover:text-[#D54E23]',
+  ),
+
+  // 드래그 오버레이
+  dragOverlay: clsx(
+    'p-3 bg-white rounded-lg',
+    'text-base opacity-90',
+    'shadow-[4px_4px_8px_#b8b8b8,-4px_-4px_8px_#ffffff]',
+    'border border-[#FF8C4B]/20',
+  ),
+
+  // 버튼 컨테이너
+  buttonContainer: clsx('mt-8 text-center flex gap-4 justify-center'),
+
+  // 완료 버튼
+  completeButton: clsx(
+    'min-w-[180px] text-xl py-3.5 rounded-xl',
+    'bg-[#FF8C4B] text-white font-bold',
+    'shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31]',
+    'hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
+    'hover:bg-[#D54E23]',
+    'transition-all duration-200',
+    'border-none cursor-pointer',
+  ),
+
+  // 취소 버튼
+  cancelButton: clsx(
+    'min-w-[100px] text-base rounded-lg',
+    'bg-[#f0f0f3] text-[#666] font-medium',
+    'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]',
+    'hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
+    'hover:text-[#252422]',
+    'transition-all duration-200',
+    'border-none py-2.5 cursor-pointer',
+  ),
+};
+
 export default {
   baseStyles,
   componentStyles,
@@ -471,4 +610,7 @@ export default {
   searchStyles,
   neumorphStyles,
   dateRangePickerStyles,
+  layoutStyles,
+  animationStyles,
+  itineraryModalStyles,
 };
