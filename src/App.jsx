@@ -15,6 +15,7 @@ import MyScrapListPage from './pages/MyScrapListPage';
 import LoginNoticePage from './pages/LoginNoticePage';
 import TripDetails from './pages/trip/tripDetails';
 import TripItinerary from './pages/trip/tripItinerary';
+import MyPage from './pages/MyPage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               <Route path="/" element={<SpotPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth-callback" element={<OAuthCallbackPage />} />
+              <Route path="/me" element={<MyPage />} />
               <Route path="/spot" element={<SpotPage />} />
               <Route path="/curation" element={<CurationPage />} />
               <Route path="/login-notice" element={<LoginNoticePage />} />

@@ -18,9 +18,10 @@ export default function Header() {
     'flex flex-col items-center text-background-light text-shadow-header font-medium text-2xl';
 
   const menuTextClass =
-    'hidden lg:flex justify-center text-shadow-header text-background-light font-medium';
+    'hidden justify-center lg:flex text-shadow-header text-background-light font-medium';
 
   const user = useRecoilValue(userAtom);
+  console.log(user);
   const { logout } = useAuth();
   const handleLogout = async () => {
     await logout();
@@ -50,10 +51,18 @@ export default function Header() {
           ))}
         </nav>
         {user ? (
-          <div className="flex">
-            <div className={clsx(menuTextClass, 'text-lg pr-5')}>
-              {user.nickname}
-            </div>
+          <div className="flex items-center">
+            <Link to="/me">
+              <div className="flex items-center">
+                <img
+                className="border border-slate-500 size-10 rounded-full object-cover mr-2 hover:border-black hover:border-2"
+                src={user.imgUrl}
+              />
+              <div className={clsx(menuTextClass, 'text-lg pr-5')}>
+                {user.nickname}
+              </div>
+              </div>
+            </Link>
             <button
               className={clsx(menuTextClass, 'text-lg')}
               onClick={handleLogout}
