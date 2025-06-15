@@ -313,7 +313,7 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
           });
 
         if (changedMoves.length > 0) {
-          await moveItineraries(changedMoves);
+          await moveItineraries({ moves: changedMoves });
         }
       }
       onSave?.();

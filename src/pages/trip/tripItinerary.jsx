@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useRecoilState } from 'recoil';
 import useTrip from '../../hooks/useTrip';
 import useTripItinerary from '../../hooks/useTripItinerary';
 import ItineraryModal from '../../components/itineraryModal';
 import Invitation from '../../components/invitation';
 import TransportationInfo from '../../components/transportationInfo';
+import RecoilDateRangePicker from '../../components/datePickers/recoilDateRangePicker';
+import tripDatesAtom from '../../recoil/tripDates/atom';
 import defaultImage from '../../assets/icon.png';
 import koreaMap from '../../assets/Korea.png';
 import {
@@ -59,7 +62,7 @@ const formatDate = (dateStr) => {
 
 const TripItinerary = () => {
   const { tripId } = useParams();
-  const { getTrip } = useTrip();
+  const { getTrip, updateTripDates } = useTrip();
   const {
     itinerary,
     loading: itineraryLoading,
@@ -71,6 +74,8 @@ const TripItinerary = () => {
   const [metaError, setMetaError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
 
   const fetchTripData = useCallback(async () => {
     if (!tripId) return;
@@ -91,6 +96,15 @@ const TripItinerary = () => {
   useEffect(() => {
     fetchTripData();
   }, [fetchTripData]);
+
+  useEffect(() => {
+    if (meta) {
+      setTripDates({
+        startDate: new Date(meta.startDate),
+        endDate: new Date(meta.endDate),
+      });
+    }
+  }, [meta, setTripDates]);
 
   // Day별 spot 리스트로 변환
   const dayMap = useMemo(() => {
@@ -126,6 +140,17 @@ const TripItinerary = () => {
     })),
   }));
 
+  const handleDateUpdate = async (startDate, endDate) => {
+    try {
+      const updatedTrip = await updateTripDates(tripId, { startDate, endDate });
+      setMeta(updatedTrip);
+      await refetchItinerary();
+      setShowStartDatePicker(false);
+    } catch (error) {
+      console.error('날짜 업데이트 실패:', error);
+    }
+  };
+
   return (
     <div className="flex w-full">
       <div className="w-1/2 p-8">
@@ -141,16 +166,34 @@ const TripItinerary = () => {
           </span>
         ) : (
           <>
-            <span
-              className={`${componentStyles.button.secondary} mr-9 ${neumorphStyles.small} text-[var(--color-primary)] ${neumorphStyles.hover}`}
-            >
-              {formatDate(meta.startDate)}
-            </span>
-            <span
-              className={`${componentStyles.button.secondary} ${neumorphStyles.small} text-[var(--color-primary)] ${neumorphStyles.hover}`}
-            >
-              {formatDate(meta.endDate)}
-            </span>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <button
+                  onClick={() => setShowStartDatePicker(!showStartDatePicker)}
+                  className={`${componentStyles.button.secondary} ${neumorphStyles.small} text-[var(--color-primary)] ${neumorphStyles.hover}`}
+                >
+                  {formatDate(meta.startDate)} - {formatDate(meta.endDate)}
+                </button>
+                {showStartDatePicker && (
+                  <div className="absolute z-10 mt-2">
+                    <div className="scale-75 origin-top-left w-[800px]">
+                      <RecoilDateRangePicker
+                        atom={tripDatesAtom}
+                        showCompleteButton
+                        onComplete={() => {
+                          handleDateUpdate(
+                            tripDates.startDate,
+                            tripDates.endDate,
+                          );
+                        }}
+                        completeButtonText="선택 완료"
+                        allowPastDates
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
             {meta.destinations?.length > 0 && (
               <span
                 className={`ml-4 text-base text-gray-600 ${neumorphStyles.small} ${neumorphStyles.hover}`}
