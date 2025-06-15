@@ -158,8 +158,8 @@ export default function MyPage () {
 
     const handleJoinTrip = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await api.post(`/trips/invite/${inviteCode}`, {
+      const token = getRecoil(authAtom).accessToken;
+      const response = await api.post(`/trips/invitations/${inviteCode}`, {
         headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -167,7 +167,7 @@ export default function MyPage () {
       const data = await response.data;
       setInviteModalOpen(false);
       setInviteCode('');
-      navigate(`/com/${data.tripId}/itinerary`);
+      navigate(`/trip/${data.tripId}/itinerary`);
     } catch (error) {
       console.error('Error joining trip:', error);
       alert('참여하는 중 문제가 발생했습니다.');
