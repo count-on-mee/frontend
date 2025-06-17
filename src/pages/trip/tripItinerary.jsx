@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useRecoilState } from 'recoil';
@@ -17,6 +17,7 @@ import {
   layoutStyles,
   animationStyles,
 } from '../../utils/style';
+import Map from '../../components/map/Map';
 
 const TripItineraryContainer = ({ children }) => (
   <div className="flex flex-col p-8 max-w-7xl mx-auto bg-[#f0f0f3] min-h-screen">
@@ -139,6 +140,21 @@ const TripItinerary = () => {
       itineraryId: item.tripItineraryId,
     })),
   }));
+
+  const mapRef = useRef(null);
+  const markers = modalSpots.flatMap(dayItem =>
+  dayItem.list.map(item => ({
+    ...item.spot,
+    day: dayItem.day,
+    position: {
+      lat: item.spot.location.lat,
+      lng: item.spot.location.lng,
+    },
+   }))
+  );
+  const filteredMarkers = markers.filter(marker => marker.day === activeDay);
+  // console.log("필터링마커:", filteredMarkers);
+
 
   const handleDateUpdate = async (startDate, endDate) => {
     try {
@@ -313,7 +329,10 @@ const TripItinerary = () => {
           </>
         )}
       </div>
-      <div className="w-1/2">{/* 지도 구현 예정 */}</div>
+      <div className="w-1/2 h-[500px] overflow-hidden sticky top-30">
+      {/* 지도 구현 예정 */}
+          <Map mapRef={mapRef} markers={filteredMarkers} markerType = "itinerary"/>
+      </div>
       <ItineraryModal
         open={showModal}
         onClose={() => setShowModal(false)}

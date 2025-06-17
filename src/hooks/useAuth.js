@@ -3,6 +3,7 @@ import authAtom from '../recoil/auth';
 import userAtom from '../recoil/user';
 import { useCallback, useEffect } from 'react';
 import api from '../utils/axiosInstance.js';
+import { tokenStorage } from '../utils/tokenStorage.js';
 
 export default function useAuth() {
   // console.log('useAuth호출');
@@ -16,7 +17,8 @@ export default function useAuth() {
       accessToken,
       isAuthenticated: true,
     });
-    localStorage.setItem('isLoggedIn', 'true');
+    tokenStorage.setToken(accessToken);
+    // localStorage.setItem('isLoggedIn', 'true');
   };
 
   const logout = useCallback(async () => {
@@ -31,26 +33,26 @@ export default function useAuth() {
     }
   }, [resetAuth, resetUser]);
 
-  const reissue = useCallback(async () => {
-    try {
-      const res = await api.post('auth/reissue');
-      const newToken = res.data.accessToken;
-      setAuth({
-        accessToken: newToken,
-        isAuthenticated: true,
-      });
-    } catch (error) {
-      console.error('토큰 갱신 실패:', error);
-      logout();
-    }
-  }, [setAuth, logout]);
+  // const reissue = useCallback(async () => {
+  //   try {
+  //     const res = await api.post('auth/reissue');
+  //     const newToken = res.data.accessToken;
+  //     setAuth({
+  //       accessToken: newToken,
+  //       isAuthenticated: true,
+  //     });
+  //   } catch (error) {
+  //     console.error('토큰 갱신 실패:', error);
+  //     logout();
+  //   }
+  // }, [setAuth, logout]);
 
-  useEffect(() => {
-    const shouldReissue = localStorage.getItem('isLoggedIn') === 'true';
-    if (shouldReissue) {
-      reissue();
-    }
-  }, [reissue]);
+  // useEffect(() => {
+  //   const shouldReissue = localStorage.getItem('isLoggedIn') === 'true';
+  //   if (shouldReissue) {
+  //     reissue();
+  //   }
+  // }, [reissue]);
 
-  return { login, logout, reissue };
+  return { login, logout };
 }

@@ -5,6 +5,7 @@ import userAtom from '../recoil/user';
 import useAuth from '../hooks/useAuth';
 import { useRecoilValue } from 'recoil';
 import clsx from 'clsx';
+import logoImage from '../assets/icon.png'
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function Header() {
     'hidden justify-center lg:flex text-shadow-header text-background-light font-medium';
 
   const user = useRecoilValue(userAtom);
-  console.log(user);
+  // console.log(user);
   const { logout } = useAuth();
   const handleLogout = async () => {
     await logout();
@@ -33,7 +34,7 @@ export default function Header() {
         <NavLink to="/" className="flex justify-start">
           <img
             alt="logo"
-            src="/src/assets/icon.png"
+            src={logoImage}
             className="w-24 h-15 border-2 ml-10 lg:ml-20 border-charcoal"
           />
         </NavLink>

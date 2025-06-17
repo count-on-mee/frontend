@@ -2,13 +2,16 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import authAtom from '../recoil/auth';
-import axiosInstance from '../utils/axiosInstance';
+import userAtom from '../recoil/user';
+import api from '../utils/axiosInstance';
 
 function useTrip() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const auth = useRecoilValue(authAtom);
+  const user = useRecoilValue(userAtom);
+  // console.log(auth, user);
 
   const createTrip = useCallback(
     async ({
@@ -36,7 +39,7 @@ function useTrip() {
           participantFields,
         };
 
-        const response = await axiosInstance.post('/trips', requestData);
+        const response = await api.post('/trips', requestData);
         return response.data;
       } catch (error) {
         if (error.response?.status === 401) {
@@ -52,7 +55,7 @@ function useTrip() {
         setLoading(false);
       }
     },
-    [auth.isAuthenticated, navigate],
+    [auth, navigate],
   );
 
   const getTrip = useCallback(async (tripId) => {
@@ -61,7 +64,7 @@ function useTrip() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosInstance.get(`/trips/${tripId}`, {
+      const response = await api.get(`/trips/${tripId}`, {
         params: {
           'include[]': ['itineraries', 'tripDestinations'],
         },
@@ -82,7 +85,7 @@ function useTrip() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axiosInstance.patch(`/trips/${tripId}`, {
+        const response = await api.patch(`/trips/${tripId}`, {
           startDate,
           endDate,
         });

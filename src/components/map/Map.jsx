@@ -18,6 +18,7 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
   const setZoom = useSetRecoilState(zoomAtom);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const handleSearch = useSearchSpots();
+  // console.log(markers);
 
   useEffect(() => {
     const mapOptions = {
@@ -36,7 +37,7 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
 
     mapRef.current = new naver.maps.Map('map', mapOptions);
     handleLocateMe();
-    console.log(filteredMarkers);
+    // console.log(filteredMarkers);
   }, []);
 
   const handleZoomIn = useCallback(() => {
@@ -128,7 +129,7 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
   }, []);
 
   const handleFilter = (category) => {
-    console.log("Clicked category:", category);
+    // console.log("Clicked category:", category);
     setActiveCategories((prev) => {
       if (prev.includes(category)) {
         // 이미 포함 → 제거
@@ -181,12 +182,12 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
       return (
         <MapMarkerScrapList markers={markers} map={mapRef.current}/>
       );
-    if (markerType === 'itinerary') return
-    <MapMarkerItinerary
-      markers={markers}
-      map={mapRef.current}
-      // position={position}
-    />;
+    if (markerType === 'itinerary') 
+      return(
+        <MapMarkerItinerary
+          markers={markers}
+          map={mapRef.current}
+    />);
   };
 
   return (

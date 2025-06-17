@@ -1,14 +1,17 @@
 export default function LoginPage() {
   const handleNaverLogin = async () => {
-    window.location.href = 'https://api.countonme.site/auth/naver';
+    window.location.href = 'https://countonme.site/auth/naver';
+    // window.location.href = 'http://localhost:8888/auth/naver';
   };
 
   const handleKakaoLogin = () => {
-    window.location.href = 'https://api.countonme.site/auth/kakao';
+    window.location.href = 'https://countonme.site/auth/kakao';
+    // window.location.href = 'http://localhost:8888/auth/kakao';
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'https://api.countonme.site/auth/google';
+    window.location.href = 'https://countonme.site/auth/google';
+    // window.location.href = 'http://localhost:8888/auth/google';
   };
 
   return (

@@ -15,6 +15,7 @@ export const useSpotScrap = ({
   const user = useRecoilValue(userAtom);
   // const [scrapState, setScrapState] = useRecoilState(scrapStateAtom);
   const navigate = useNavigate();
+
   const handleSpotScrap = useRecoilCallback(
     ({ snapshot, set }) =>
       async (spotId) => {
