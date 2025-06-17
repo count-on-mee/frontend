@@ -48,7 +48,7 @@ export default function MyPage () {
         },
       });
       const data = await response.data;
-      console.log(data);
+      // console.log(data);
       setScrapedSpots(data);
     } catch (error) {
       console.error('Failed to fetch scraped spots:', error);
@@ -64,7 +64,7 @@ export default function MyPage () {
         },
       });
       const data = await response.data;
-      console.log(data);
+      // console.log(data);
       setScrapedCurations(data);
     } catch (error) {
       console.error('Failed to fetch scraped curations:', error);

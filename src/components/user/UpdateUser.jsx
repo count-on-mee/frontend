@@ -13,7 +13,7 @@ export default async function updateUser({ nickname, uploadImage }) {
       Authorization: `Bearer ${token}`,
     },
   });
-  console.log('FormData:', [...formData.entries()]);
+  // console.log('FormData:', [...formData.entries()]);
 //   return response.data; 
   } catch (error) {
     console.error('Failed to update profile.:', error);

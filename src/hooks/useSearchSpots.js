@@ -19,7 +19,7 @@ export default function useSearchSpots() {
     try {
       const response = await api.get('/spots', {
         params: { lat: center.lat, lng: center.lng, zoom },
-        headers: { Authorization: `Bearer ${token}` },
+        // headers: { Authorization: `Bearer ${token}` },
         validateStatus: () => true,
       });
 

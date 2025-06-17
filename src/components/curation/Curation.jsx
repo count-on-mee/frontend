@@ -29,7 +29,7 @@ export default function Curation({
         <img
           src={curation.imgUrl || defaultImage}
           // src='https://www.midascad.com/hubfs/image-png-Feb-22-2024-11-28-44-2386-PM.png'
-          className={`object-cover w-full ${isDetail ? 'aspect-4/3' : 'aspect-3/4'} mx-auto opacity-70 rounded-2xl box-shadow`}
+          className={`object-cover w-full ${isDetail ? 'aspect-4/3' : 'aspect-3/4'} mx-auto rounded-2xl box-shadow`}
           alt={curation.name}
         />
         <div className="absolute text-lg text-background-light font-mixed font-extrabold bottom-10 left-5 text-shadow-header bg-charcoal/60 px-2 rounded-2xl">

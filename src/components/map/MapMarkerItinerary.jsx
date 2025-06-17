@@ -1,57 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSetRecoilState } from 'recoil';
-import { withCenter } from '../../recoil/selectedSpot';
+import { withCenter } from '../../recoil/itinerarySpot';
+import numbersIcon from '../../utils/numbersMap';
+import { createCategorySVGMarker } from '../../utils/svgMaker';
 
 export default function MapMarkerItinerary({ map, markers }) {
-  const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
+  const markersRef = useRef([]);
+  const currentPolylineRef = useRef(null);
+  // console.log("markers", markers);
+  const setItinerarySpotWithCenter = useSetRecoilState(withCenter);
 
   const handleMarkerClick = (marker) => {
-    setSelectedSpotWithCenter(marker);
+    setItinerarySpotWithCenter(marker);
     setTimeout(() => {
       if (map) {
         map.setCenter(marker.postion);
+        // console.log(marker.position);
       }
     }, 300);
-    // navigate('/spot');
+  
   };
-  //   const svgFood = `
-  // <svg
-  //   xmlns="http://www.w3.org/2000/svg"
-  //   viewBox="0 0 24 24"
-  //   width="20"
-  //   height="20"
-  //   transform="translate(-8, -11)"
-  // >
-  //   <circle cx="12" cy="12" r="12" fill="orange" />
-  //   <rect x="12" y="2" width="2" height="10" fill="white" transform="rotate(30, 9, 10)"/>
-  //   <rect x="6" y="12" width="8" height="8" rx="5" fill="white"/>
-  //   </svg>`;
-  // const svgHouse = `
-  // <svg
-  //   xmlns="http://www.w3.org/2000/svg"
-  //   viewBox="0 0 24 24"
-  //   width="20"
-  //   height="20"
-  //   transform="translate(-8, -11)"
-  // >
-  //   <circle cx="12" cy="12" r="12" fill="green" />
-  //   <path
-  //     d="M12 3L4 10H7V20H17V10H20L12 3Z"
-  //     fill="white"
-  //   />
-  // </svg>`;
-
-  // const getIconContent = (category) => {
-  //   const categoryString = category[0];
-  //   switch (categoryString) {
-  //     case "식당":
-  //       return svgFood;
-  //     case "숙소":
-  //       return svgHouse;
-  //     default:
-  //       return svgHouse;
-  //   }
-  // }
 
   const isLatLngObject = (pos) =>
     typeof pos.lat === 'function' && typeof pos.lng === 'function';
@@ -62,21 +30,78 @@ export default function MapMarkerItinerary({ map, markers }) {
   useEffect(() => {
     if (!window.naver || !map || !markers) return;
 
-    markers.forEach((markerData) => {
+    const clearAllMarkers = () => {
+      const oldMarkers = markersRef.current;
+    if (oldMarkers && Array.isArray(oldMarkers)) {
+      oldMarkers.forEach(marker => {
+        if (marker && typeof marker.setMap === 'function') {
+          marker.setMap(null);
+
+        }
+      });
+    }
+    
+      markersRef.current = [];
+    };
+
+    clearAllMarkers();
+
+    const newMarkers = markers.map((markerData, index) => {
       const lat = getLat(markerData.position);
       const lng = getLng(markerData.position);
+      const icon = numbersIcon[index];
+      const iconURL = createCategorySVGMarker(icon, '#eb5e28');
       const marker = new naver.maps.Marker({
         position: new naver.maps.LatLng(lat, lng),
+        icon: {
+          url: iconURL,
+          size: new naver.maps.Size(35, 35),
+          anchor: new naver.maps.Point(12, 12),
+        },
         map: map,
-        // icon: { ... },
       });
+      // console.log("지도내 마커:", marker.position);
 
       naver.maps.Event.addListener(marker, 'click', () => {
         handleMarkerClick(markerData);
         setTimeout(() => {
           map.setCenter(marker.position);
         }, 200);
+      return marker;
       });
     });
+    markersRef.current = newMarkers;
+
+    // oldMarkers.forEach(marker => {
+    //   if(marker && typeof marker.setMap === 'function') {
+    //     console.log("지워지냐?");
+    //     marker.setMap(null);
+    //   }
+    // })
+
+    const latLngArray = markers.map((markerData) => {
+      const lat = getLat(markerData.position);
+      const lng = getLng(markerData.position);
+      return new naver.maps.LatLng(lat, lng);
+    });
+
+    const bounds = new naver.maps.LatLngBounds(latLngArray[0], latLngArray[0]);
+    latLngArray.forEach((latLng) => bounds.extend(latLng));
+
+    map.fitBounds(bounds);
+
+    if (currentPolylineRef.current) {
+      currentPolylineRef.current.setMap(null);
+      }
+      
+      const newPolyline = new naver.maps.Polyline({
+        path: latLngArray,
+        strokeColor: '#000',
+        strokeWeight: 4,
+        strokeOpacity: 0.8,
+        strokeStyle: 'solid',
+        map: map
+      });
+      currentPolylineRef.current = newPolyline;
   }, [markers]);
 }

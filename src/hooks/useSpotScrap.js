@@ -4,6 +4,7 @@ import authAtom from '../recoil/auth';
 import userAtom from '../recoil/user';
 import api from '../utils/axiosInstance';
 import scrapStateAtom from '../recoil/scrapState';
+import { useNavigate } from 'react-router-dom';
 
 export const useSpotScrap = ({
   setSpotMarkers,
@@ -13,6 +14,7 @@ export const useSpotScrap = ({
   const token = useRecoilValue(authAtom)?.accessToken;
   const user = useRecoilValue(userAtom);
   // const [scrapState, setScrapState] = useRecoilState(scrapStateAtom);
+  const navigate = useNavigate();
 
   const handleSpotScrap = useRecoilCallback(
     ({ snapshot, set }) =>
@@ -29,7 +31,7 @@ export const useSpotScrap = ({
 
         if (!user) {
           alert('로그인이 필요한 서비스입니다.');
-          return;
+          navigate('/login');
         }
 
         try {
