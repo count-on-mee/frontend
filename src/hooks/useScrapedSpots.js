@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import authAtom from '../recoil/auth';
 import axiosInstance from '../utils/axiosInstance';
+import api from '../utils/axiosInstance';
 
 function useScrapedSpots() {
   const navigate = useNavigate();
@@ -21,7 +22,9 @@ function useScrapedSpots() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await axiosInstance.get('/scraps/spots');
+      const { data } = await api.get('/scraps/spots', {
+        headers: { Authorization: `Bearer ${auth.accessToken}` },
+      });
       setScrapedSpots(data);
     } catch (error) {
       console.error('스크랩된 스팟 조회 중 오류 발생:', error);

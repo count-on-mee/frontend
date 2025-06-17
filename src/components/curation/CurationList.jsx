@@ -1,5 +1,5 @@
 import { useRecoilState, useRecoilValue } from 'recoil';
-import Curation from './curation';
+import Curation from './Curation';
 import curationsAtom from '../../recoil/curations';
 import selectedCurationAtom from '../../recoil/selectedCuration';
 
