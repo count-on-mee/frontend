@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRecoilState } from 'recoil';
 import tripDatesAtom from '../recoil/tripDates/atom';
 import useTripItinerary from '../hooks/useTripItinerary';
+import LoadingSpinner from './loadingSpinner';
 import { itineraryModalStyles } from '../utils/style';
 import {
   DndContext,
@@ -23,7 +24,10 @@ import { CSS } from '@dnd-kit/utilities';
 import { addDays, format } from 'date-fns';
 import clsx from 'clsx';
 
-// Sortable Item 컴포넌트
+const getSpotId = (spot) => {
+  return spot.tripItineraryId || spot.itineraryId || spot.id;
+};
+
 const SortableItem = ({ id, spot, onDelete, loading }) => {
   const {
     attributes,
@@ -56,7 +60,7 @@ const SortableItem = ({ id, spot, onDelete, loading }) => {
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onDelete(spot.tripItineraryId || spot.itineraryId || spot.id);
+          onDelete(getSpotId(spot));
         }}
         disabled={loading}
         className={itineraryModalStyles.deleteButton}
@@ -68,8 +72,7 @@ const SortableItem = ({ id, spot, onDelete, loading }) => {
 };
 
 const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
-  const { addItinerary, moveItineraries, updateItinerary, deleteItinerary } =
-    useTripItinerary(tripId);
+  const { moveItineraries, deleteItinerary } = useTripItinerary(tripId);
   const [tripDates] = useRecoilState(tripDatesAtom);
   const [itinerary, setItinerary] = useState(spots);
   const [loading, setLoading] = useState(false);
@@ -88,7 +91,6 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
     setItinerary(spots);
   }, [spots, days]);
 
-  // useMemo로 메모이제이션하여 불필요한 리렌더링 방지
   const safeItinerary = useMemo(() => {
     const safeDays = days.map((day) => Number(day));
     const result = safeDays.map((day) => {
@@ -137,14 +139,10 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
           : Array.from(safeItinerary[destDayIdx].list);
 
       const activeIndex = sourceList.findIndex(
-        (item) =>
-          String(item.tripItineraryId || item.itineraryId || item.id) ===
-          activeSpotId,
+        (item) => String(getSpotId(item)) === activeSpotId,
       );
       const overIndex = destList.findIndex(
-        (item) =>
-          String(item.tripItineraryId || item.itineraryId || item.id) ===
-          overSpotId,
+        (item) => String(getSpotId(item)) === overSpotId,
       );
 
       if (activeIndex === -1 || overIndex === -1) return;
@@ -170,11 +168,10 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
           );
           const newMoves = newList
             .map((item) => {
-              const itineraryId = Number(item.tripItineraryId);
+              const itineraryId = Number(getSpotId(item));
               const day = Number(activeDay);
               const order = Number(item.order);
               if (!Number.isInteger(itineraryId)) {
-                console.warn('tripItineraryId가 정수가 아님:', item);
                 return null;
               }
               return { itineraryId, day, order };
@@ -219,11 +216,10 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
           );
           const newMoves = newSourceList
             .map((item) => {
-              const itineraryId = Number(item.tripItineraryId);
+              const itineraryId = Number(getSpotId(item));
               const day = Number(activeDay);
               const order = Number(item.order);
               if (!Number.isInteger(itineraryId)) {
-                console.warn('tripItineraryId가 정수가 아님:', item);
                 return null;
               }
               return { itineraryId, day, order };
@@ -237,11 +233,10 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
             );
           const newMovesDest = newDestList
             .map((item) => {
-              const itineraryId = Number(item.tripItineraryId);
+              const itineraryId = Number(getSpotId(item));
               const day = Number(overDay);
               const order = Number(item.order);
               if (!Number.isInteger(itineraryId)) {
-                console.warn('tripItineraryId가 정수가 아님:', item);
                 return null;
               }
               return { itineraryId, day, order };
@@ -262,15 +257,6 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
     [loading, safeItinerary],
   );
 
-  const handleAddSpot = async (spotId, day, order) => {
-    setLoading(true);
-    try {
-      await addItinerary({ spotId, day, order });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDeleteSpot = async (itineraryId) => {
     setLoading(true);
     try {
@@ -287,7 +273,7 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
         // 원본 데이터와 비교하여 실제로 변경된 스팟만 필터링
         const originalSpots = spots.reduce((acc, day) => {
           day.list.forEach((spot) => {
-            const spotId = spot.tripItineraryId || spot.itineraryId || spot.id;
+            const spotId = getSpotId(spot);
             acc[spotId] = {
               day: Number(day.day),
               order: Number(spot.order),
@@ -350,7 +336,6 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
           'min-w-[900px] max-w-[95vw]',
         )}
       >
-        {/* 상단 날짜 UI - tripItinerary 기준 */}
         <div className={itineraryModalStyles.dateContainer}>
           <div className={itineraryModalStyles.dateBox}>
             {safeItinerary[0]?.date
@@ -373,14 +358,12 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
           <div className={itineraryModalStyles.itineraryContainer}>
             {safeItinerary.map((dayItem) => {
               const daySpots = dayItem.list.filter((spot) => {
-                const spotId =
-                  spot.tripItineraryId || spot.itineraryId || spot.id;
-                return spotId && spotId !== undefined && spotId !== null;
+                const spotId = getSpotId(spot);
+                return spotId;
               });
 
               const spotIds = daySpots.map((spot) => {
-                const spotId =
-                  spot.tripItineraryId || spot.itineraryId || spot.id;
+                const spotId = getSpotId(spot);
                 return `day-${dayItem.day}-spot-${String(spotId)}`;
               });
 
@@ -401,8 +384,7 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
                   >
                     <ul className={itineraryModalStyles.itineraryList}>
                       {daySpots.map((spot) => {
-                        const spotId =
-                          spot.tripItineraryId || spot.itineraryId || spot.id;
+                        const spotId = getSpotId(spot);
                         const id = `day-${dayItem.day}-spot-${String(spotId)}`;
                         return (
                           <SortableItem
@@ -449,6 +431,8 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
             취소
           </button>
         </div>
+
+        {loading && <LoadingSpinner message="최적 경로 재생성 중이에요!" />}
       </div>
     </div>
   );
