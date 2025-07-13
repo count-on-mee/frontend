@@ -30,8 +30,7 @@ export const useSpotScrap = ({
         // console.log('currentScrap:', currentScrap);
 
         if (!user) {
-          alert('로그인이 필요한 서비스입니다.');
-          navigate('/login');
+          navigate('/login-notice');
         }
 
         try {

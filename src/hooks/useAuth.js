@@ -1,15 +1,14 @@
-import { useSetRecoilState, useResetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import authAtom from '../recoil/auth';
-import userAtom from '../recoil/user';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import api from '../utils/axiosInstance.js';
 import { tokenStorage } from '../utils/tokenStorage.js';
+import { useResetUserAtoms } from '../utils/resetUserAtoms.js';
 
 export default function useAuth() {
   // console.log('useAuth호출');
   const setAuth = useSetRecoilState(authAtom);
-  const resetAuth = useResetRecoilState(authAtom);
-  const resetUser = useResetRecoilState(userAtom);
+  const resetUserAtoms = useResetUserAtoms();
 
   const login = (accessToken) => {
     // console.log('로그인시도');
@@ -18,7 +17,7 @@ export default function useAuth() {
       isAuthenticated: true,
     });
     tokenStorage.setToken(accessToken);
-    // localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('isLoggedIn', 'true');
   };
 
   const logout = useCallback(async () => {
@@ -27,32 +26,10 @@ export default function useAuth() {
     } catch (err) {
       console.error('로그아웃 실패:', err.response?.data || err.message);
     } finally {
-      resetAuth();
-      resetUser();
+      resetUserAtoms();
       localStorage.removeItem('isLoggedIn');
     }
-  }, [resetAuth, resetUser]);
-
-  // const reissue = useCallback(async () => {
-  //   try {
-  //     const res = await api.post('auth/reissue');
-  //     const newToken = res.data.accessToken;
-  //     setAuth({
-  //       accessToken: newToken,
-  //       isAuthenticated: true,
-  //     });
-  //   } catch (error) {
-  //     console.error('토큰 갱신 실패:', error);
-  //     logout();
-  //   }
-  // }, [setAuth, logout]);
-
-  // useEffect(() => {
-  //   const shouldReissue = localStorage.getItem('isLoggedIn') === 'true';
-  //   if (shouldReissue) {
-  //     reissue();
-  //   }
-  // }, [reissue]);
+  }, [resetUserAtoms]);
 
   return { login, logout };
 }

@@ -1,4 +1,4 @@
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, Navigate, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
 import userAtom from '../recoil/user';
@@ -22,10 +22,12 @@ export default function Header() {
     'hidden justify-center lg:flex text-shadow-header text-background-light font-medium';
 
   const user = useRecoilValue(userAtom);
+  const navigate = useNavigate();
   // console.log(user);
   const { logout } = useAuth();
   const handleLogout = async () => {
     await logout();
+    navigate('/');
   };
   return (
     <>

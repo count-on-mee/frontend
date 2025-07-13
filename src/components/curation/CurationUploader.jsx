@@ -23,6 +23,7 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
   const [cartSpots, setCartSpots] = useState([]);
   const categories = ['여행', '식당', '카페', '자연'];
   const navigate = useNavigate();
+  const token = authAtom.accessToken;
 
   const handleAddToCart = (spot) => {
     setCartSpots((prev) => {
@@ -127,6 +128,7 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
   };
 
   useEffect(() => {
+    if (!token) return;
     fetchScrapedSpots();
   }, []);
 

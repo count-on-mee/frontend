@@ -40,11 +40,6 @@ export default function ReviewUploader({
     };
   }, []);
 
-  // useEffect(() => {
-  //   console.log('newPhotos 상태:', newPhotos);
-  //   console.log('newText:', newText);
-  // }, [newPhotos, newText]);
-
   const handleSave = async () => {
     // console.log('handleSave 시작');
     const formData = new FormData();
