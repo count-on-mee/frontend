@@ -7,6 +7,8 @@ import PhotoDump from './PhotoDump';
 import { getRecoil } from 'recoil-nexus';
 import authAtom from '../../recoil/auth';
 import api from '../../utils/axiosInstance';
+import { useRecoilValue } from 'recoil';
+import { useNavigate } from 'react-router-dom';
 
 export default function SpotDetail({
   selectedSpot,
@@ -15,6 +17,8 @@ export default function SpotDetail({
 }) {
   const [photoDump, setPhotoDump] = useState([]);
   const spot = selectedSpot;
+  const auth = useRecoilValue(authAtom);
+  const navigate = useNavigate();
   // console.log(spot);
 
   const fetchPhotoDump = async () => {
@@ -47,6 +51,14 @@ export default function SpotDetail({
   };
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
   // console.log(selectedSpot);
+
+  const handleUploaderOpen = () => {
+     if (!auth.accessToken) {
+      navigate('/login-notice');
+      return;
+    }
+    setIsUploaderOpen(true);
+  }
   return (
     <div>
       <div className="sticky top-0 z-10 flex justify-between bg-background-light">
@@ -73,7 +85,7 @@ export default function SpotDetail({
         <div className="text-lg font-bold">후기</div>
         <button
           className="flex bg-background-light box-shadow rounded-2xl text-charcoal px-2 hover:bg-primary hover:text-background-light"
-          onClick={() => setIsUploaderOpen(true)}
+          onClick={handleUploaderOpen}
         >
           <FaRegPenToSquare className="mx-1 my-1" />
           <div>후기 등록</div>
