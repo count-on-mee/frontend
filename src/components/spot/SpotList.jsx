@@ -10,22 +10,21 @@ export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
   // const spots = useRecoilValue(spotMarkersAtom);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentSpots, setCurrentSpots] = useState([]);
+  // const [currentSpots, setCurrentSpots] = useState([]);
   const spotsPerPage = 15;
-  const totalPages = Math.ceil(spots.length / spotsPerPage);
-  const { searchTerm, handleSearch, filteredItems } = useSearch(currentSpots);
+  const { searchTerm, handleSearch, filteredItems } = useSearch(spots);
+  const isSearching = searchTerm && searchTerm.trim() !== '';
+  const sourcedItems = isSearching ? filteredItems : spots;
+  const indexOfLastSpot = currentPage * spotsPerPage;
+  const indexOfFirstSpot = indexOfLastSpot - spotsPerPage;
+  const currentItems = sourcedItems.slice(indexOfFirstSpot, indexOfLastSpot);
 
-  useEffect(() => {
-    const indexOfLastSpot = currentPage * spotsPerPage;
-    const indexOfFirstSpot = indexOfLastSpot - spotsPerPage;
-    setCurrentSpots(spots.slice(indexOfFirstSpot, indexOfLastSpot));
-  }, [spots, currentPage]);
-
-  const spotIds = spots.map((spot) => spot.id).join(',');
+  const totalItems = sourcedItems.length;
+  const totalPages = Math.ceil(totalItems / spotsPerPage);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [spotIds]);
+  }, [searchTerm]);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -55,10 +54,10 @@ export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
     <div>
       <Searchbar value={searchTerm} onChange={handleSearch}/>
       {spots.length === 0 ? (
-        <p className="text-center">주변에 스팟이 없습니다.</p>
+        <p className="text-center">스팟을 검색하거나 지도를 움직여 주세요.</p>
       ) : (
         <div>
-          {filteredItems.map((spot) => (
+          {currentItems.map((spot) => (
             <Spot
               key={spot.spotId}
               spot={spot}
@@ -80,7 +79,7 @@ export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
             {Array.from(
               { length: endPageGroup - startPageGroup + 1 },
               (_, i) => {
-                const pageNumber = startPageGroup + i;
+                const pageNumber = i + 1;
                 return (
                   <button
                     key={pageNumber}
