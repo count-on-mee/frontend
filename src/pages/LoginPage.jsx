@@ -1,16 +1,8 @@
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
-  // 개발 환경인지 확인
-  const isDevelopment =
-    import.meta.env.DEV ||
-    import.meta.env.MODE === 'development' ||
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.port === '5173';
-  const baseURL = isDevelopment
-    ? 'http://localhost:8888'
-    : 'https://api.countonme.site';
+
+  const baseURL = 'https://api.countonme.site';
 
   const handleNaverLogin = () => {
     window.location.href = `${baseURL}/auth/naver`;
