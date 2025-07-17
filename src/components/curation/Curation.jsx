@@ -40,7 +40,7 @@ export default function Curation({
           onClick={(e) => {
             e.stopPropagation();
             handleScrapClick(curation);
-            console.log('스크랩:', curation);
+            // console.log('스크랩:', curation);
           }}
         >
           <BookmarkIcon

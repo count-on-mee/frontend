@@ -1,4 +1,4 @@
-import { Suspense, useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import authAtom from '../recoil/auth';
@@ -7,10 +7,10 @@ import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import tripDatesAtom from '../recoil/tripDates';
 import defaultImage from '../assets/icon.png';
 import CurationModal from '../components/plan/CurationModal';
+import LoadingSpinner from '../components/loadingSpinner';
 import clsx from 'clsx';
 import useScrapedSpots from '../hooks/useScrapedSpots';
 import useScrapedCurations from '../hooks/useScrapedCurations';
-import useCuration from '../hooks/useCuration';
 import useTrip from '../hooks/useTrip';
 import { useListSearch } from '../hooks/useSearch';
 import { baseStyles, componentStyles, scrapListStyles } from '../utils/style';
@@ -18,53 +18,6 @@ import Searchbar from '../components/ui/Searchbar';
 import ScrapSpots from '../components/scrap/ScrapSpots';
 import ScrapCurations from '../components/scrap/ScrapCurations';
 import Map from '../components/map/Map';
-
-// 스팟 카드 컴포넌트
-const SpotCard = ({ spot, isSelected, onToggleSelection }) => (
-  <div className={scrapListStyles.spotCard}>
-    <div className={scrapListStyles.imageContainer}>
-      <img
-        src={spot.imgUrls?.[0] || defaultImage}
-        alt={spot.name}
-        className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-    </div>
-    <div className="p-2 sm:p-3 pb-0">
-      <h3 className="font-medium text-sm sm:text-base mb-1">{spot.name}</h3>
-      <p className="text-gray-600 text-xs sm:text-sm mb-2">{spot.address}</p>
-      <button
-        onClick={() => onToggleSelection(spot)}
-        className={scrapListStyles.selectionButton(isSelected)}
-      >
-        {isSelected ? '선택' : '선택'}
-      </button>
-    </div>
-  </div>
-);
-
-// 큐레이션 카드 컴포넌트
-const CurationCard = ({ curation, onClick }) => (
-  <div className={scrapListStyles.curationImage} onClick={onClick}>
-    <img
-      src={curation.imgUrl}
-      alt={curation.name}
-      className="w-full h-full object-cover"
-    />
-    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-      <h4 className="text-white text-xs sm:text-sm font-medium">
-        {curation.name}
-      </h4>
-    </div>
-  </div>
-);
-
-// 섹션 헤더 컴포넌트
-const SectionHeader = ({ title }) => (
-  <div className={scrapListStyles.sectionHeader}>
-    <h3 className={scrapListStyles.sectionHeaderTitle}>{title}</h3>
-  </div>
-);
 
 export default function MyScrapListPage() {
   const navigate = useNavigate();
@@ -87,26 +40,20 @@ export default function MyScrapListPage() {
     loading: curationsLoading,
     error: curationsError,
   } = useScrapedCurations();
-  const {
-    curationSpots,
-    loading: curationLoading,
-    error: curationError,
-    fetchCuration,
-  } = useCuration(selectedCurationId);
-  const { createTrip, loading: tripLoading, error: tripError } = useTrip();
+  const { createTrip, loading: tripLoading } = useTrip();
   const {
     searchTerm,
     filteredItems: filteredSpots,
     handleSearch,
   } = useListSearch(scrapedSpots);
   const mapRef = useRef(null);
-    const markers = selectedSpots.map((spot) => ({
-      ...spot,
-      position: {
-        lat: spot.location.lat,
-        lng: spot.location.lng,
-      },
-    }));
+  const markers = selectedSpots.map((spot) => ({
+    ...spot,
+    position: {
+      lat: spot.location.lat,
+      lng: spot.location.lng,
+    },
+  }));
 
   // 선택된 destination의 주소와 일치하는 스팟을 우선적으로 보여주기 위한 정렬 함수
   const sortedSpots = useMemo(() => {
@@ -128,7 +75,6 @@ export default function MyScrapListPage() {
 
   const handleCurationClick = async (curationId) => {
     setSelectedCurationId(curationId);
-    await fetchCuration(curationId);
     setShowCurationModal(true);
   };
 
@@ -225,14 +171,6 @@ export default function MyScrapListPage() {
     );
   }
 
-  if (spotsLoading || curationsLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
-      </div>
-    );
-  }
-
   if (spotsError || curationsError) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center">
@@ -269,10 +207,18 @@ export default function MyScrapListPage() {
     );
   }
 
+  if (tripLoading) {
+    return <LoadingSpinner message="최적 경로를 생성하고 있어요!" />;
+  }
+
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="flex items-center justify-center min-h-screen p-2 sm:p-4 md:p-6">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+    <div className="fixed inset-0 z-40 overflow-hidden" style={{ top: '80px' }}>
+      <div className="flex items-center justify-center h-full p-2 sm:p-4 md:p-6">
+        <div
+          className="fixed inset-0 transition-opacity"
+          aria-hidden="true"
+          style={{ top: '80px' }}
+        >
           <div className="absolute inset-0 bg-background opacity-70 backdrop-filter backdrop-blur-xl"></div>
         </div>
 
@@ -347,8 +293,7 @@ export default function MyScrapListPage() {
             {/* 오른쪽 섹션: 지도 */}
             <div className="w-full md:w-1/2 h-[300px] relative px-8 py-8">
               <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                <Map markers={markers} mapRef={mapRef} markerType="scrapList"/>
-                {/* <p>지도</p> */}
+                <Map markers={markers} mapRef={mapRef} markerType="scrapList" />
               </div>
             </div>
           </div>
@@ -358,7 +303,7 @@ export default function MyScrapListPage() {
             <button
               onClick={handleStartTrip}
               className={scrapListStyles.startTripButton}
-              disabled={selectedSpots.length === 0}
+              disabled={selectedSpots.length === 0 || tripLoading}
             >
               여행 시작하기
             </button>

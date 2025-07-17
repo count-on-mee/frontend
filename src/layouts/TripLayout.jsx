@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Outlet, useParams, Link, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
+
 import useSocket from '../hooks/useSocket';
 
 // 기본 스타일
@@ -8,8 +9,6 @@ const baseShadowStyles =
   'shadow-[4px_4px_8px_rgba(0,0,0,0.1),-4px_-4px_8px_rgba(255,255,255,0.8)]';
 const hoverShadowStyles =
   'hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)]';
-const activeShadowStyles =
-  'shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)]';
 
 // 네비게이션 링크 스타일
 const navLinkStyles = (isActive) =>
@@ -26,13 +25,7 @@ const navLinkStyles = (isActive) =>
 const TripLayout = () => {
   const { tripId } = useParams();
   const location = useLocation();
-  const socketRef = useRef(null);
   const { socket, isConnected, error } = useSocket(tripId);
-
-  // 소켓 인스턴스를 ref에 저장
-  if (socket && !socketRef.current) {
-    socketRef.current = socket;
-  }
 
   const isActive = (path) => {
     return location.pathname === `/trip/${tripId}${path}`;
@@ -64,9 +57,7 @@ const TripLayout = () => {
           {error && (
             <div style={{ color: 'red' }}>소켓 에러: {error.message}</div>
           )}
-          <Outlet
-            context={{ socket: socketRef.current, isConnected, tripId }}
-          />
+          <Outlet context={{ socket, isConnected, tripId }} />
         </div>
       </main>
     </div>

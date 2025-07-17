@@ -18,6 +18,7 @@ import SpotDetail from '../components/spot/SpotDetail';
 import { useSpotScrap } from '../hooks/useSpotScrap';
 import scrapStateAtom from '../recoil/scrapState';
 import { useSearch } from '../hooks/useSearch';
+import { useNavigate } from 'react-router-dom';
 
 export default function CurationPage() {
   const [curations, setCurations] = useRecoilState(curationsAtom);
@@ -33,6 +34,7 @@ export default function CurationPage() {
   const curation = selectedCuration;
   const user = useRecoilValue(userAtom);
   const mapRef = useRef(null);
+  const navigate = useNavigate();
 
   const { handleSpotScrap } = useSpotScrap({
     selectedSpot: selectedCurationSpot,
@@ -41,17 +43,9 @@ export default function CurationPage() {
 
   const { searchTerm, handleSearch, filteredItems } = useSearch(curations);
 
-  // const handleSpotClick = (spot) => {
-  //   mapRef.current.setCenter(spot.position);
-  // };
-
   const fetchCuration = async () => {
     try {
-      const token = getRecoil(authAtom).accessToken;
       const response = await api.get('/curations', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
 
       const data = response.data;
@@ -100,7 +94,7 @@ export default function CurationPage() {
   const handleScrapClick = async (curation) => {
     // event.stopPropagation();
     if (!user) {
-      alert('로그인이 필요한 서비스입니다.');
+      navigate('/login-notice');
       return;
     }
 
@@ -143,6 +137,14 @@ export default function CurationPage() {
     }
   };
 
+  const handleOpenUploader = () => {
+    if (!user) {
+      navigate('/login-notice');
+      return;
+    }
+    setIsUploaderOpen(true);
+  }
+
   return (
     <div className="w-full">
       {!selectedCuration ? (
@@ -162,7 +164,7 @@ export default function CurationPage() {
           <div className="fixed bottom-5 right-5">
             <button
               className="flex z-50 p-3 text-xl font-bold bg-background-light box-shadow rounded-2xl text-charcoal px-2 hover:bg-primary hover:text-background-light hover:p-5"
-              onClick={() => setIsUploaderOpen(true)}
+              onClick={handleOpenUploader}
             >
               <FaRegPenToSquare className="mx-1 my-1" />
               <div>Curation 만들기</div>
@@ -170,11 +172,8 @@ export default function CurationPage() {
           </div>
           <CurationUploader
             isOpen={isUploaderOpen}
-            // selectedSpot={selectedSpot}
-            // setSelectedSpot={setSelectedSpot}
             onClose={() => setIsUploaderOpen(false)}
             fetchCuration={fetchCuration}
-            // fetchPhotoDump={fetchPhotoDump}
           />
         </div>
       ) : (
@@ -186,8 +185,6 @@ export default function CurationPage() {
               setSelectedCuration={setSelectedCuration}
               handleScrapClick={handleScrapClick}
               fetchCuration={fetchCuration}
-              // handleSpotClick={handleSpotClick}
-              className=""
             />
           </div>
           {selectedCurationSpot && (
