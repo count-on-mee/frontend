@@ -80,7 +80,8 @@ const Photodump = ({ photoDump }) => {
 
         {selectedReview && (
           <div className="grid grid-cols-2 h-[70vh]">
-            <Slider {...sliderSettings} className="">
+            {selectedReview.imgUrls.length > 1 ? (
+              <Slider {...sliderSettings} className="">
               {selectedReview.imgUrls.map((url, idx) => (
                 <div
                   key={idx}
@@ -94,6 +95,12 @@ const Photodump = ({ photoDump }) => {
                 </div>
               ))}
             </Slider>
+            ) : (
+              <div className="pt-10 h-full flex items-center justify-center">
+                <img src={selectedReview.imgUrls[0]} className="w-8/9 h-auto mx-auto object-contain max-h-[60vh] my-auto"/>
+              </div>
+            ) }
+            
             <div className="mt-10 h-[60vh]">
               <div className="flex">
                 <img

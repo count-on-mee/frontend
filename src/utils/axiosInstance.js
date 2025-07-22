@@ -4,7 +4,8 @@ import authAtom from '../recoil/auth';
 import { tokenStorage } from './tokenStorage';
 
 const api = axios.create({
-  baseURL: 'https://api.countonme.site',
+  // baseURL: 'https://api.countonme.site',
+  baseURL: 'http://localhost:8888',
   withCredentials: true,
 });
 

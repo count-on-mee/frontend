@@ -12,7 +12,7 @@ import MapResearch from './MapResearch';
 import useSearchSpots from '../../hooks/useSearchSpots';
 import FilterPanel from './FilterPanel';
 
-export default function Map({ mapRef, markerType, markers, filteredMarkers, activeCategories, setActiveCategories }) {
+export default function Map({ mapRef, markerType, markers, filteredMarkers, activeCategories, setActiveCategories, showAllDays }) {
   const { naver } = window;
   const [center, setCenter] = useRecoilState(centerAtom);
   const setZoom = useSetRecoilState(zoomAtom);
@@ -187,6 +187,7 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
         <MapMarkerItinerary
           markers={markers}
           map={mapRef.current}
+          showAllDays={showAllDays}
     />);
   };
 
