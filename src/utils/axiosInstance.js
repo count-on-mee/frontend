@@ -3,18 +3,9 @@ import { getRecoil } from 'recoil-nexus';
 import authAtom from '../recoil/auth';
 import { tokenStorage } from './tokenStorage';
 
-// 개발 환경인지 확인
-const isDevelopment =
-  import.meta.env.DEV ||
-  import.meta.env.MODE === 'development' ||
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1' ||
-  window.location.port === '';
-
 const api = axios.create({
-  baseURL: isDevelopment
-    ? 'http://localhost:8888'
-    : 'https://api.countonme.site',
+  baseURL: 'https://api.countonme.site',
+  // baseURL: 'http://localhost:8888',
   withCredentials: true,
 });
 
@@ -46,15 +37,13 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return api(originalRequest);
         } catch (refreshError) {
-          if (isDevelopment) {
             if (refreshError.response?.status === 401) {
-            console.debug(
-              'Token refresh failed with 401, user probably logged out',
-            );
+              console.debug(
+                'Token refresh failed with 401, user probably logged out',
+              );
             } else {
               console.error('Token refresh failed', refreshError);
             }
-          }   
         }
       } 
     }

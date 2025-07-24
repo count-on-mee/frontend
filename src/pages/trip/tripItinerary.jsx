@@ -63,6 +63,7 @@ const TripItinerary = () => {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
   const [isUpdatingDates, setIsUpdatingDates] = useState(false);
+  const [showAllDays, setShowAllDays] = useState(false);
 
   const fetchTripData = useCallback(async () => {
     if (!tripId) return;
@@ -134,7 +135,9 @@ const TripItinerary = () => {
       },
     })),
   );
+
   const filteredMarkers = markers.filter((marker) => marker.day === activeDay);
+  const markersToSend = showAllDays ? markers : filteredMarkers;
 
   const handleDateUpdate = async (startDate, endDate) => {
     try {
@@ -226,6 +229,12 @@ const TripItinerary = () => {
               <Invitation tripId={tripId} />
             </div>
             <button
+              onClick={() => setShowAllDays(prev => !prev)}
+              className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} ${showAllDays ? 'text-[var(--color-primary)]' : 'text-gray-600'}`}
+            >
+              {showAllDays ? 'Day 보기' : '전체 보기'}
+            </button>
+            <button
               onClick={() => setShowModal(true)}
               className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} text-[var(--color-primary)]`}
             >
@@ -239,7 +248,7 @@ const TripItinerary = () => {
               <DayButton
                 key={day}
                 active={activeDay === day}
-                onClick={() => setActiveDay(day)}
+                onClick={() => {setActiveDay(day); setShowAllDays(false)}}
               >
                 Day{day}
               </DayButton>
@@ -323,7 +332,8 @@ const TripItinerary = () => {
         <div className="w-1/2 h-[500px] overflow-hidden sticky top-30">
           <Map
             mapRef={mapRef}
-            markers={filteredMarkers}
+            markers={markersToSend}
+            showAllDays={showAllDays}
             markerType="itinerary"
           />
         </div>
