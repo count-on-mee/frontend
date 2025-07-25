@@ -14,7 +14,12 @@ function useScrapedSpots() {
   const setAuth = useSetRecoilState(authAtom);
 
   const fetchScrapedSpots = useCallback(async () => {
-    if (!auth.isAuthenticated) {
+    const token = localStorage.getItem('accessToken');
+    if (token && !auth.isAuthenticated) {
+      setAuth({ isAuthenticated: true, accessToken: token });
+    }
+
+    if (!auth.accessToken) {
       navigate('/login-notice');
       return;
     }
@@ -22,13 +27,12 @@ function useScrapedSpots() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.get('/scraps/spots', {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
-      });
+      const { data } = await axiosInstance.get('/scraps/spots');
       setScrapedSpots(data);
     } catch (error) {
       console.error('스크랩된 스팟 조회 중 오류 발생:', error);
       if (error.response?.status === 401) {
+        localStorage.removeItem('accessToken');
         setAuth({ isAuthenticated: false, accessToken: null });
         navigate('/login-notice');
         return;
@@ -37,10 +41,11 @@ function useScrapedSpots() {
     } finally {
       setLoading(false);
     }
-  }, [auth.isAuthenticated, navigate, setAuth]);
+  }, [auth.isAuthenticated, auth.accessToken, navigate, setAuth]);
 
   const scrapSpot = async (spotId) => {
-    if (!auth.isAuthenticated) {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
       alert('로그인이 필요한 서비스입니다.');
       navigate('/login');
       return;
@@ -52,6 +57,7 @@ function useScrapedSpots() {
     } catch (error) {
       console.error('Failed to scrap spot:', error);
       if (error.response?.status === 401) {
+        localStorage.removeItem('accessToken');
         setAuth({ isAuthenticated: false, accessToken: null });
         alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
         navigate('/login');
@@ -61,7 +67,8 @@ function useScrapedSpots() {
   };
 
   const unscrapSpot = async (spotId) => {
-    if (!auth.isAuthenticated) {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
       alert('로그인이 필요한 서비스입니다.');
       navigate('/login');
       return;
@@ -73,6 +80,7 @@ function useScrapedSpots() {
     } catch (error) {
       console.error('Failed to unscrap spot:', error);
       if (error.response?.status === 401) {
+        localStorage.removeItem('accessToken');
         setAuth({ isAuthenticated: false, accessToken: null });
         alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
         navigate('/login');
