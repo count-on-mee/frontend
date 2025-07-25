@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { neumorphStyles } from '../utils/style';
+import { neumorphStyles, layoutStyles } from '../utils/style';
 import serviceIcon from '../assets/service.png';
 import questionIcon from '../assets/question.png';
 import boardIcon from '../assets/board.png';
@@ -15,11 +15,10 @@ const navItems = [
 const SupportLayout = () => {
   return (
     <div className="min-h-screen bg-[#f0f0f3] font-prompt">
-      {/* 상단 헤더 및 네비게이션 */}
       <div className="w-full bg-[#f0f0f3] mb-6 pt-20 sm:pt-24 lg:pt-28">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-3">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-5 mb-2">
+            <div className={`${layoutStyles.flex.center} gap-5 mb-2`}>
               <img
                 src={serviceIcon}
                 alt="고객지원"
@@ -34,7 +33,9 @@ const SupportLayout = () => {
               드리겠습니다.
             </p>
           </div>
-          <nav className="flex justify-center gap-10 sm:gap-5 lg:gap-10 mt-6 lg:mt-8 flex-wrap">
+          <nav
+            className={`${layoutStyles.flex.center} gap-10 sm:gap-5 lg:gap-10 mt-6 lg:mt-8 flex-wrap`}
+          >
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
@@ -42,7 +43,7 @@ const SupportLayout = () => {
                 className={({ isActive }) =>
                   `flex items-center gap-2 sm:gap-3 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 rounded-xl font-semibold text-base sm:text-lg lg:text-xl transition-all duration-200 whitespace-nowrap ${
                     isActive
-                      ? neumorphStyles.active
+                      ? neumorphStyles.smallInset
                       : `${neumorphStyles.small} ${neumorphStyles.hover} text-[#252422]`
                   }`
                 }
@@ -60,7 +61,6 @@ const SupportLayout = () => {
         </div>
       </div>
 
-      {/* 메인 컨텐츠 영역 */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         <div
           className={`w-full ${neumorphStyles.base} ${neumorphStyles.hover} rounded-2xl p-6`}

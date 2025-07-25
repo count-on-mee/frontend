@@ -13,7 +13,7 @@ export default function Header() {
     { to: '/spot', label: 'spot' },
     { to: '/curation', label: 'curation' },
     { to: '/com/calendar', label: 'count on me' },
-    { to: '/support', label: 'support' },
+    { to: '/support/faq', label: 'support' },
   ];
   const mobileMenuClass =
     'flex flex-col items-center text-background-light text-shadow-header font-medium text-2xl';
