@@ -2,8 +2,8 @@ import axios from 'axios';
 import { tokenStorage } from './tokenStorage';
 
 const api = axios.create({
-  // baseURL: 'https://api.countonme.site',
-  baseURL: 'http://localhost:8888',
+  baseURL: 'https://api.countonme.site',
+  // baseURL: 'http://localhost:8888',
   withCredentials: true,
 });
 
