@@ -16,7 +16,6 @@ function OAuthCallbackPage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('accessToken');
-    // console.log(token);
 
     if (token) {
       setAuth({

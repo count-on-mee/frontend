@@ -8,7 +8,6 @@ import CurationUploader from '../components/curation/CurationUploader';
 import { FaRegPenToSquare } from 'react-icons/fa6';
 import { useState, useEffect, useRef } from 'react';
 import authAtom from '../recoil/auth';
-import curationsAtom from '../recoil/curations';
 import { getRecoil } from 'recoil-nexus';
 import api from '../utils/axiosInstance';
 import userAtom from '../recoil/user';
@@ -21,13 +20,13 @@ import { useSearch } from '../hooks/useSearch';
 import { useNavigate } from 'react-router-dom';
 
 export default function CurationPage() {
-  const [curations, setCurations] = useRecoilState(curationsAtom);
+  const [curations, setCurations] = useState([]);
   const [selectedCuration, setSelectedCuration] =
     useRecoilState(selectedCurationAtom);
   const [selectedCurationSpot, setSelectedCurationSpot] = useRecoilState(
     selectedCurationSpotAtom,
   );
-  const setScrapState = useSetRecoilState(scrapStateAtom)
+  const setScrapState = useSetRecoilState(scrapStateAtom);
   const [isUploaderOpen, setIsUploaderOpen] = useState(null);
   const [curationMarkers, setCurationMarkers] =
     useRecoilState(curationMarkersAtom);
@@ -45,14 +44,18 @@ export default function CurationPage() {
 
   const fetchCuration = async () => {
     try {
-      const response = await api.get('/curations', {
-      });
+      const response = await api.get('/curations', {});
 
       const data = response.data;
-      // console.log(data);
-      if (curations.length !== data.length) {
-        setCurations(data);
-      }
+      setCurations((prev) => {
+        if (
+          prev.length !== data.length ||
+          prev.some((p, i) => p.isScraped !== data[i].isScraped)
+        ) {
+          return data.map((c) => ({ ...c }));
+        }
+        return prev;
+      });
     } catch (error) {
       console.error('Failed to fetch curation:', error);
     }
@@ -74,25 +77,22 @@ export default function CurationPage() {
     }));
 
     setCurationMarkers(markers);
-    // console.log(curationMarkers);
   }, [selectedCuration]);
 
   useEffect(() => {
     const initial = {};
-    // console.log(selectedCuration);
     if (Array.isArray(selectedCuration?.spots)) {
       selectedCuration.spots.forEach((spot) => {
-      initial[spot.spotId] = {
-        isScraped: spot.isScraped,
-        scrapCount: spot.scrapedCount,
-      };
-    });
-  }
-    setScrapState(initial); // useSetRecoilState(scrapStateAtom)
-}, [selectedCuration]);
+        initial[spot.spotId] = {
+          isScraped: spot.isScraped,
+          scrapCount: spot.scrapedCount,
+        };
+      });
+    }
+    setScrapState(initial);
+  }, [selectedCuration]);
 
   const handleScrapClick = async (curation) => {
-    // event.stopPropagation();
     if (!user) {
       navigate('/login-notice');
       return;
@@ -102,9 +102,6 @@ export default function CurationPage() {
       console.warn('curation이 null입니다.');
       return;
     }
-
-    // console.log(curation.curationId);
-
     try {
       const token = getRecoil(authAtom).accessToken;
       const method = curation.isScraped ? 'DELETE' : 'POST';
@@ -113,13 +110,12 @@ export default function CurationPage() {
         method,
         headers: { Authorization: `Bearer ${token}` },
       });
-      // console.log("token:", token);
 
       setCurations((prev) => {
         const updatedCurations = Array.isArray(prev) ? prev : [];
         return updatedCurations.map((updatedCuration) =>
           updatedCuration.curationId === curation.curationId
-            ? { ...updatedCuration, isScraped: !curation.isScraped }
+            ? { ...updatedCuration, isScraped: !updatedCuration.isScraped }
             : updatedCuration,
         );
       });
@@ -143,7 +139,7 @@ export default function CurationPage() {
       return;
     }
     setIsUploaderOpen(true);
-  }
+  };
 
   return (
     <div className="w-full">

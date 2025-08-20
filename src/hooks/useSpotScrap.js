@@ -21,13 +21,8 @@ export const useSpotScrap = ({
       async (spotId) => {
         const scrapState = await snapshot.getPromise(scrapStateAtom);
         const currentScrap = scrapState[spotId];
-        // console.log(currentScrap);
         const isScraped = currentScrap?.isScraped ?? false;
         const scrapCount = currentScrap?.scrapCount ?? 0;
-
-        // console.log('spotId:', spotId);
-        // console.log('scrapState:', scrapState);
-        // console.log('currentScrap:', currentScrap);
 
         if (!user) {
           navigate('/login-notice');

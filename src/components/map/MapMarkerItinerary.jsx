@@ -7,7 +7,6 @@ import { createCategorySVGMarker } from '../../utils/svgMaker';
 export default function MapMarkerItinerary({ map, markers, showAllDays }) {
   const markersRef = useRef([]);
   const currentPolylineRef = useRef(null);
-  // console.log("markers", markers);
   const setItinerarySpotWithCenter = useSetRecoilState(withCenter);
 
   const handleMarkerClick = (marker) => {
@@ -15,7 +14,6 @@ export default function MapMarkerItinerary({ map, markers, showAllDays }) {
     setTimeout(() => {
       if (map) {
         map.setCenter(marker.postion);
-        // console.log(marker.position);
       }
     }, 300);
   

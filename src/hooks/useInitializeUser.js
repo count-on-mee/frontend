@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import authAtom from '../recoil/auth';
 import userAtom from '../recoil/user';
@@ -26,9 +26,7 @@ const useInitializeUser = () => {
         tokenStorage.setToken(newAccessToken);
         const response = await api.get('users/me');
         setUser(response.data);
-        // console.log(data);
       } catch (error) {
-        // console.error('reissue 실패', error);
         setAuth({ accessToken: null, isAuthenticated: false});
       } } else if (accessToken){
         try {
@@ -39,19 +37,6 @@ const useInitializeUser = () => {
         }
       }
     }
-    // const fetchUser = async () => {
-    //   console.log('accessToken:', accessToken);
-    //   if (accessToken) {
-    //     try {
-    //       const response = await api.get('users/me');
-    //       console.log('유저:', response.data);
-    //       setUser(response.data);
-    //       console.log("유저정보확인:", response.data);
-    //     } catch (error) {
-    //       console.error('Failed to fetch user:', error);
-    //     }
-    //   }
-    // };
     initializeAuth();
   }, []);
 };

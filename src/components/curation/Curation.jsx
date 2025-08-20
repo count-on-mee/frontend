@@ -20,15 +20,11 @@ export default function Curation({
     curation;
   const isDetail = varient === 'detail';
 
-  // console.log('curation', curation);
-  // console.log('curationId', curation?.curationId);
-
   return (
     <div className="container px-2" onClick={onClick}>
       <div className="relative">
         <img
           src={curation.imgUrl || defaultImage}
-          // src='https://www.midascad.com/hubfs/image-png-Feb-22-2024-11-28-44-2386-PM.png'
           className={`object-cover w-full ${isDetail ? 'aspect-4/3' : 'aspect-3/4'} mx-auto rounded-2xl box-shadow`}
           alt={curation.name}
         />
@@ -40,12 +36,10 @@ export default function Curation({
           onClick={(e) => {
             e.stopPropagation();
             handleScrapClick(curation);
-            // console.log('스크랩:', curation);
           }}
         >
           <BookmarkIcon
             className={`absolute top-5 right-5 w-5 h-5  ${isScraped ? 'fill-[#EB5E28] stroke-[#EB5E28]' : 'stroke-white'}`}
-            // className={`absolute top-5 right-5 w-5 h-5 stroke-white`}
           />
         </button>
       </div>

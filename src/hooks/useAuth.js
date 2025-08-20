@@ -6,12 +6,10 @@ import { tokenStorage } from '../utils/tokenStorage.js';
 import { useResetUserAtoms } from '../utils/resetUserAtoms.js';
 
 export default function useAuth() {
-  // console.log('useAuth호출');
   const setAuth = useSetRecoilState(authAtom);
   const resetUserAtoms = useResetUserAtoms();
 
   const login = (accessToken) => {
-    // console.log('로그인시도');
     setAuth({
       accessToken,
       isAuthenticated: true,

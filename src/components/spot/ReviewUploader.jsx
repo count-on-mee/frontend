@@ -14,21 +14,17 @@ export default function ReviewUploader({
   selectedSpot,
   fetchPhotoDump,
 }) {
-  // if (!isOpen) return null;
-
   const user = useRecoilValue(userAtom);
   const [newPhotos, setNewPhotos] = useState([]);
   const [newText, setNewText] = useState('');
   const [error, setError] = useState(false);
   const spot = selectedSpot;
-  // console.log(spot);
   const handleUpload = (files) => {
     const updatePhotos = Array.from(files).map((file, index) => ({
       id: index,
       file,
       preview: URL.createObjectURL(file),
     }));
-    // console.log(updatePhotos);
     setNewPhotos(updatePhotos);
   };
 
@@ -41,15 +37,12 @@ export default function ReviewUploader({
   }, []);
 
   const handleSave = async () => {
-    // console.log('handleSave 시작');
     const formData = new FormData();
     formData.append('userId', user.userId);
     newPhotos.forEach((photo) => {
-      // console.log('사진 추가 중:', photo);
       formData.append('reviewImgs', photo.file);
     });
     formData.append('content', newText);
-    // console.log([...formData.entries()]);
     try {
       const token = getRecoil(authAtom).accessToken;
       const response = await api.post(
@@ -61,8 +54,6 @@ export default function ReviewUploader({
           },
         },
       );
-      // console.log('응답:', response);
-      // console.log('저장 완료');
       fetchPhotoDump();
       onClose();
     } catch (error) {
@@ -71,10 +62,8 @@ export default function ReviewUploader({
   };
 
   const handleRemovePhoto = (index) => {
-    // console.log('삭제index:', index);
     const updatedPhotos = [...newPhotos];
     const removed = updatedPhotos.splice(index, 1)[0];
-    // console.log(updatedPhotos);
     if (removed?.preview) {
       URL.revokeObjectURL(removed.preview);
     }
@@ -108,16 +97,6 @@ export default function ReviewUploader({
       setNewText(value);
     }
   };
-
-  // const handleDragEnter = (e) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  // };
-
-  // const handleDragLeave = (e) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  // };
 
   return !isOpen ? null : (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
