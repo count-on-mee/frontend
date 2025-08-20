@@ -6,7 +6,7 @@ import { createCategorySVGMarker } from '../../utils/svgMaker';
 
 export default function MapMarkerItinerary({ map, markers, showAllDays }) {
   const markersRef = useRef([]);
-  const currentPolylineRef = useRef(null);
+  const currentPolylineRef = useRef([]);
   const setItinerarySpotWithCenter = useSetRecoilState(withCenter);
 
   const handleMarkerClick = (marker) => {
@@ -34,7 +34,6 @@ export default function MapMarkerItinerary({ map, markers, showAllDays }) {
 
   useEffect(() => {
   if (!window.naver || !map || !markers) {
-    console.log('초기화 조건 때문에 useEffect return됨');
     return;
   }});
 
@@ -100,7 +99,12 @@ export default function MapMarkerItinerary({ map, markers, showAllDays }) {
     map.fitBounds(bounds);
 
     if (currentPolylineRef.current) {
-      currentPolylineRef.current.setMap(null);
+      currentPolylineRef.current.forEach(polyline => {
+        if(polyline && typeof polyline.setMap === 'function') {
+          polyline.setMap(null);
+        }
+      });
+      currentPolylineRef.current = [];
       }
 
     if(!showAllDays) {
@@ -112,7 +116,7 @@ export default function MapMarkerItinerary({ map, markers, showAllDays }) {
         strokeStyle: 'solid',
         map: map
       });
-      currentPolylineRef.current = newPolyline;
+      currentPolylineRef.current.push(newPolyline);
       } else {
         const groupedByDay = markers.reduce((acc, marker) => {
           if(!acc[marker.day]) acc[marker.day] = [];
@@ -125,12 +129,13 @@ export default function MapMarkerItinerary({ map, markers, showAllDays }) {
         }, {});
 
       Object.entries(groupedByDay).forEach(([day, dayLatLngs]) => {
-        new naver.maps.Polyline({
+        const dayPolyline = new naver.maps.Polyline({
           path: dayLatLngs,
           strokeColor: getDayColor(day),
           strokeWeight: 2,
           map,
         });
+        currentPolylineRef.current.push(dayPolyline);
       });  
     }
   }, [markers, showAllDays]);
