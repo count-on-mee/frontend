@@ -18,7 +18,6 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
   const setZoom = useSetRecoilState(zoomAtom);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const handleSearch = useSearchSpots();
-  // console.log(markers);
 
   useEffect(() => {
     const mapOptions = {
@@ -37,7 +36,6 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
 
     mapRef.current = new naver.maps.Map('map', mapOptions);
     handleLocateMe();
-    // console.log(filteredMarkers);
   }, []);
 
   const handleZoomIn = useCallback(() => {
@@ -66,7 +64,6 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
       const newCenter = mapRef.current.getCenter();
        if (newCenter && typeof newCenter.lat === 'function' && typeof newCenter.lng === 'function') {
         setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });}
-      // setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
     }
   };
 
@@ -85,11 +82,6 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
       );
     }
   }, [setCenter]);
-
-  // const handleMarkerClick = (marker) => {
-  //   setSelectedSpotWithCenter(marker);
-  //   // navigate('/spot');
-  // };
 
   // 이동할 때 handleSearch 불러오지 않도록 idle 사용
   useEffect(() => {
@@ -119,17 +111,14 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
       'center_changed',
       handleCenterChanged,
     );
-    // const clickListener = naver.maps.Event.addListener(markers, 'click', handleMarkerClick);
 
     return () => {
       naver.maps.Event.removeListener(zoomListener);
       naver.maps.Event.removeListener(centerListener);
-      // naver.maps.Evnet.removeListener(clickListener);
     };
   }, []);
 
   const handleFilter = (category) => {
-    // console.log("Clicked category:", category);
     setActiveCategories((prev) => {
       if (prev.includes(category)) {
         // 이미 포함 → 제거
@@ -153,9 +142,7 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
           />
           <MapMarkerSpot
             markers={filteredMarkers}
-            // markers={markers}
             map={mapRef.current}
-            // position={position}
           />
           <FilterPanel onFilter={handleFilter} activeCategories={activeCategories}/>
           <MapResearch />
@@ -174,7 +161,6 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
           <MapMarkerCuration
           markers={markers}
           map={mapRef.current}
-          // position={position}
           />
         </div>
       );

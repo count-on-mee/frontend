@@ -1,7 +1,6 @@
 import Modal from 'react-modal';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Searchbar from '../ui/Searchbar';
 import { getRecoil } from 'recoil-nexus';
 import authAtom from '../../recoil/auth';
@@ -10,7 +9,6 @@ import { useRecoilState } from 'recoil';
 import scrappedSpotsAtom from '../../recoil/scrapedSpot';
 import SpotCart from './SpotCart';
 import defaultImage from '../../assets/icon.png';
-// import { useSpotSearch } from '../../hooks/useSearch';
 
 Modal.setAppElement('#root');
 
@@ -22,7 +20,6 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
   const [scrapedSpots, setScrapedSpots] = useRecoilState(scrappedSpotsAtom);
   const [cartSpots, setCartSpots] = useState([]);
   const categories = ['여행', '식당', '카페', '자연'];
-  const navigate = useNavigate();
   const token = authAtom.accessToken;
 
   const handleAddToCart = (spot) => {
@@ -34,7 +31,6 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
         return [...prev, spot]; // 추가
       }
     });
-    // console.log(cartSpots);
   };
 
   const handleDelete = (spotScrapId) => {
@@ -51,7 +47,6 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
         return [...prev, category];
       }
     });
-    // console.log(selectedCategories);
   };
 
   const handleClose = () => {
@@ -86,8 +81,6 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
       return;
     }
 
-    // console.log(payload);
-
     try {
       const token = getRecoil(authAtom).accessToken;
       const response = await api.post('/curations', payload, {
@@ -120,7 +113,6 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
         },
       });
       const data = await response.data;
-      //   console.log(data);
       setScrapedSpots(data);
     } catch (error) {
       console.error('Failed to fetch scraped spots:', error);
@@ -128,7 +120,6 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
   };
 
   useEffect(() => {
-    if (!token) return;
     fetchScrapedSpots();
   }, []);
 
@@ -207,18 +198,6 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
                     {category}
                   </button>
                 ))}
-                {/* <button className={`box-shadow mr-5 px-2 py-1  rounded-2xl ${selectedCategories.includes("여행" ? "bg-primary" : "")}`}
-                onClick={() => handleCategoryClick("여행")}
-                >여행</button>
-                <button className={`box-shadow mr-5 px-2 py-1  rounded-2xl ${selectedCategories.includes("식당" ? "bg-primary" : "")}`}
-                onClick={() => handleCategoryClick("식당")}
-                >식당</button>
-                <button className={`box-shadow mr-5 px-2 py-1  rounded-2xl ${selectedCategories.includes("카페" ? "bg-primary" : "")}`}
-                onClick={() => handleCategoryClick("카페")}
-                >카페</button>
-                <button className={`box-shadow mr-5 px-2 py-1  rounded-2xl ${selectedCategories.includes("자연" ? "bg-primary" : "")}`}
-                onClick={() => handleCategoryClick("자연")}
-                >자연</button> */}
               </div>
             </div>
           </div>

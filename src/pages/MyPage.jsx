@@ -8,7 +8,7 @@ import updateUser from '../components/user/UpdateUser';
 import { getRecoil } from 'recoil-nexus';
 import authAtom from '../recoil/auth';
 import api from '../utils/axiosInstance';
-import defaultImage from '../assets/logo.png';
+import defaultImage from '../assets/icon.png';
 import MyTripList from '../components/user/MyTripList';
 import Modal from 'react-modal';
 import { useNavigate } from 'react-router-dom';
@@ -48,7 +48,6 @@ export default function MyPage() {
         },
       });
       const data = await response.data;
-      // console.log(data);
       setScrapedSpots(data);
     } catch (error) {
       console.error('Failed to fetch scraped spots:', error);
@@ -64,7 +63,6 @@ export default function MyPage() {
         },
       });
       const data = await response.data;
-      // console.log(data);
       setScrapedCurations(data);
     } catch (error) {
       console.error('Failed to fetch scraped curations:', error);

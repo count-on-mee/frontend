@@ -1,14 +1,11 @@
 import SpotDetail from '../components/spot/SpotDetail';
 import SpotList from '../components/spot/SpotList';
 import Map from '../components/map/Map';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { getRecoil } from 'recoil-nexus';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import selectedSpotAtom from '../recoil/selectedSpot';
 import spotMarkersAtom from '../recoil/spotMarkers';
 import userAtom from '../recoil/user';
-import authAtom from '../recoil/auth';
 import { useRef, useState, useEffect } from 'react';
-import api from '../utils/axiosInstance';
 import scrapStateAtom from '../recoil/scrapState';
 import { useSpotScrap } from '../hooks/useSpotScrap';
 
@@ -41,8 +38,6 @@ export default function SpotPage() {
           setFilteredMarkers(newMarkers);
         }
     }
-      // console.log("ac:", activeCategories);
-      // console.log("fm:", filteredMarkers);
   }, [spotMarkers, activeCategories]);
 
   return (

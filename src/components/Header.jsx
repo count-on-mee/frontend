@@ -23,7 +23,6 @@ export default function Header() {
 
   const user = useRecoilValue(userAtom);
   const navigate = useNavigate();
-  // console.log(user);
   const { logout } = useAuth();
   const handleLogout = async () => {
     await logout();

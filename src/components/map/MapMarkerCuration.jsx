@@ -9,13 +9,6 @@ export default function MapMarkerCuration({ map, markers }) {
 
   const handleMarkerClick = (marker) => {
     setSelectedCurationSpotWithCenter(marker);
-    // setTimeout(() => {
-    //   if (map) {
-    //     map.setCenter(marker.postion);
-    //     console.log(marker.position);
-    //   }
-    // }, 300);
-    // navigate('/spot');
   };
 
   const isLatLngObject = (pos) =>
@@ -60,6 +53,5 @@ export default function MapMarkerCuration({ map, markers }) {
     latLngArray.forEach((latLng) => bounds.extend(latLng));
 
     map.fitBounds(bounds);
-    // console.log(markers);
   }, [markers]);
 }
