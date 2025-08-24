@@ -2,12 +2,19 @@ import React, { useState, useEffect } from 'react';
 import api from '../../utils/axiosInstance';
 import { neumorphStyles, componentStyles } from '../../utils/style';
 import boardIcon from '../../assets/board.png';
+import useAdmin from '../../hooks/useAdmin';
+import NoticeModal from '../../components/support/noticeModal';
 
 const NoticePage = () => {
   const [notices, setNotices] = useState([]);
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState('create');
+  const [editingNotice, setEditingNotice] = useState(null);
+
+  const { isAdmin } = useAdmin();
 
   useEffect(() => {
     fetchNotices();
@@ -21,7 +28,6 @@ const NoticePage = () => {
       setError(null);
     } catch (err) {
       setError('공지사항을 불러오는데 실패했습니다.');
-      console.error('공지사항 조회 오류:', err);
     } finally {
       setLoading(false);
     }
@@ -33,7 +39,27 @@ const NoticePage = () => {
       setSelectedNotice(response.data);
     } catch (err) {
       setError('공지사항 상세 정보를 불러오는데 실패했습니다.');
-      console.error('공지사항 상세 조회 오류:', err);
+    }
+  };
+
+  const handleCreateNotice = () => {
+    setModalMode('create');
+    setEditingNotice(null);
+    setShowModal(true);
+  };
+
+  const handleEditNotice = (notice) => {
+    setModalMode('edit');
+    setEditingNotice(notice);
+    setShowModal(true);
+  };
+
+  const handleModalSuccess = (action) => {
+    fetchNotices();
+    if (action === 'delete') {
+      setSelectedNotice(null);
+    } else if (selectedNotice) {
+      fetchNoticeDetail(selectedNotice.noticeId);
     }
   };
 
@@ -78,16 +104,26 @@ const NoticePage = () => {
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="w-full">
-        <h2
-          className={`text-xl sm:text-2xl lg:text-3xl font-semibold text-[#252422] mb-4 sm:mb-6 px-6 py-3 flex items-center gap-3`}
-        >
-          <img
-            src={boardIcon}
-            alt="공지사항"
-            className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12"
-          />
-          공지사항
-        </h2>
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h2
+            className={`text-xl sm:text-2xl lg:text-3xl font-semibold text-[#252422] px-6 py-3 flex items-center gap-3`}
+          >
+            <img
+              src={boardIcon}
+              alt="공지사항"
+              className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12"
+            />
+            공지사항
+          </h2>
+          {isAdmin && (
+            <button
+              onClick={handleCreateNotice}
+              className={`${neumorphStyles.small} ${neumorphStyles.hover} px-6 py-3 rounded-xl text-[#252422] font-semibold`}
+            >
+              등록
+            </button>
+          )}
+        </div>
 
         {selectedNotice ? (
           <div
@@ -97,12 +133,22 @@ const NoticePage = () => {
               <h3 className="text-lg sm:text-xl font-medium text-[#252422] flex-1 mr-4">
                 {selectedNotice.title}
               </h3>
-              <button
-                onClick={() => setSelectedNotice(null)}
-                className={`text-[#FF8C4B] hover:text-[#D54E23] text-base sm:text-lg flex-shrink-0 ${neumorphStyles.small} ${neumorphStyles.hover} px-4 py-2 rounded-xl`}
-              >
-                ← 목록으로
-              </button>
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <button
+                    onClick={() => handleEditNotice(selectedNotice)}
+                    className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} px-4 py-2 rounded-xl`}
+                  >
+                    수정
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelectedNotice(null)}
+                  className={`text-[#FF8C4B] hover:text-[#D54E23] text-base sm:text-lg flex-shrink-0 ${neumorphStyles.small} ${neumorphStyles.hover} px-4 py-2 rounded-xl`}
+                >
+                  ← 목록으로
+                </button>
+              </div>
             </div>
             <div className="text-base text-gray-500 mb-4">
               {formatDate(selectedNotice.createdAt)}
@@ -163,6 +209,15 @@ const NoticePage = () => {
           </div>
         )}
       </div>
+
+      {/* Notice 모달 */}
+      <NoticeModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        notice={editingNotice}
+        onSuccess={handleModalSuccess}
+        mode={modalMode}
+      />
     </div>
   );
 };

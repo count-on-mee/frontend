@@ -1,11 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  baseStyles,
-  componentStyles,
-  styleUtils,
-  neumorphStyles,
-  modalStyles,
-} from '../utils/style';
+import { styleUtils, neumorphStyles } from '../utils/style';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
 import iconImage from '../assets/logo.png';
@@ -28,8 +22,9 @@ export default function LoginNoticePage() {
         >
           <div
             className={clsx(
-              neumorphStyles.container,
-              'flex flex-col items-center text-center space-y-8',
+              neumorphStyles.base,
+              neumorphStyles.hover,
+              'rounded-2xl p-8 flex flex-col items-center text-center space-y-8',
             )}
           >
             <motion.div
