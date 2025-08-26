@@ -19,7 +19,6 @@ export default function SpotDetail({
   const spot = selectedSpot;
   const auth = useRecoilValue(authAtom);
   const navigate = useNavigate();
-  // console.log(spot);
 
   const fetchPhotoDump = async () => {
     try {
@@ -32,7 +31,6 @@ export default function SpotDetail({
       });
 
       const data = await response.data;
-      // console.log(data);
       setPhotoDump(data);
     } catch (error) {
       console.error('Failed to fetch photo dump:', error);
@@ -42,7 +40,6 @@ export default function SpotDetail({
   useEffect(() => {
     if (spot.spotId) {
       fetchPhotoDump();
-      // console.log(photoDump);
     }
   }, [spot?.spotId]);
 
@@ -50,7 +47,6 @@ export default function SpotDetail({
     setSelectedSpot(null);
   };
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
-  // console.log(selectedSpot);
 
   const handleUploaderOpen = () => {
      if (!auth.accessToken) {

@@ -79,6 +79,8 @@ export const componentStyles = {
   button: {
     primary: 'px-6 py-2.5 bg-[#FF8C4B] text-white rounded-full font-medium',
     secondary: 'px-4 py-2 rounded-full text-lg font-semibold',
+    danger:
+      'px-4 py-2 bg-red-500 text-white rounded-full font-medium hover:bg-red-600',
   },
 
   // 컨테이너 스타일
@@ -335,18 +337,18 @@ export const searchStyles = {
   ),
 };
 
+/**
+ * Neumorphism 스타일
+ */
 export const neumorphStyles = {
-  // 기본 Neumorphism 스타일
   base: 'bg-[#f0f0f3] shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff]',
-  // 작은 Neumorphism 스타일
   small: 'bg-[#f0f0f3] shadow-[4px_4px_8px_#d1d1d1,-4px_-4px_8px_#ffffff]',
-  // 작은 inset Neumorphism 스타일
+  medium: 'bg-[#f0f0f3] shadow-[6px_6px_12px_#d1d1d1,-6px_-6px_12px_#ffffff]',
+  large: 'bg-[#f0f0f3] shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff]',
   smallInset:
     'bg-[#f0f0f3] shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]',
-  // 매우 작은 inset Neumorphism 스타일
   tinyInset:
     'bg-[#f0f0f3] shadow-[inset_2px_2px_4px_#d1d1d1,inset_-2px_-2px_4px_#ffffff]',
-  // hover 효과가 있는 Neumorphism 스타일
   hover:
     'hover:shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-200',
 };
@@ -456,6 +458,9 @@ export const dateRangePickerStyles = {
   ],
 };
 
+/**
+ * 레이아웃 관련 스타일
+ */
 export const layoutStyles = {
   flex: {
     center: 'flex items-center justify-center',
@@ -468,6 +473,9 @@ export const layoutStyles = {
   },
 };
 
+/**
+ * 애니메이션 관련 스타일
+ */
 export const animationStyles = {
   fadeIn: {
     initial: { opacity: 0, y: 20 },
@@ -601,10 +609,10 @@ export const itineraryModalStyles = {
   ),
 };
 
+// 모든 스타일을 하나의 객체로 내보내기
 export default {
-  baseStyles,
-  componentStyles,
-  styleUtils,
+  ...componentStyles,
+  ...styleUtils,
   scrapListStyles,
   modalStyles,
   searchStyles,

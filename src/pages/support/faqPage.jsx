@@ -6,6 +6,8 @@ import {
   layoutStyles,
 } from '../../utils/style';
 import questionIcon from '../../assets/question.png';
+import useAdmin from '../../hooks/useAdmin';
+import FaqModal from '../../components/support/faqModal';
 
 const FaqPage = () => {
   const [faqs, setFaqs] = useState([]);
@@ -13,6 +15,11 @@ const FaqPage = () => {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [expandedFaqs, setExpandedFaqs] = useState(new Set());
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState('create');
+  const [editingFaq, setEditingFaq] = useState(null);
+
+  const { isAdmin } = useAdmin();
 
   const categories = [
     { value: 'ALL', label: '전체' },
@@ -70,6 +77,22 @@ const FaqPage = () => {
     });
   };
 
+  const handleCreateFaq = () => {
+    setModalMode('create');
+    setEditingFaq(null);
+    setShowModal(true);
+  };
+
+  const handleEditFaq = (faq) => {
+    setModalMode('edit');
+    setEditingFaq(faq);
+    setShowModal(true);
+  };
+
+  const handleModalSuccess = () => {
+    fetchFaqs();
+  };
+
   const filteredFaqs = useMemo(() => {
     if (!Array.isArray(faqs)) return [];
 
@@ -108,36 +131,46 @@ const FaqPage = () => {
         key={faq.faqId || `faq-${index}`}
         className={`${neumorphStyles.small} ${neumorphStyles.hover} rounded-2xl overflow-hidden`}
       >
-        <button
-          onClick={() => toggleFaq(faq.faqId)}
-          className="w-full text-left p-3 sm:p-4 transition-all duration-200 flex justify-between items-center"
-        >
-          <div className="flex items-center flex-1 min-w-0">
-            <span className="text-base sm:text-lg font-medium text-[#FF8C4B] mr-2 sm:mr-3 flex-shrink-0">
-              Q.
-            </span>
-            <span className="font-medium text-[#252422] text-base sm:text-lg lg:text-xl truncate">
-              {faq.question}
-            </span>
-          </div>
-          <div className="text-gray-400 flex-shrink-0 ml-2">
-            <svg
-              className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${
-                isExpanded ? 'rotate-180' : ''
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div className="flex items-center">
+          <button
+            onClick={() => toggleFaq(faq.faqId)}
+            className="flex-1 text-left p-3 sm:p-4 transition-all duration-200 flex justify-between items-center"
+          >
+            <div className="flex items-center flex-1 min-w-0">
+              <span className="text-base sm:text-lg font-medium text-[#FF8C4B] mr-2 sm:mr-3 flex-shrink-0">
+                Q.
+              </span>
+              <span className="font-medium text-[#252422] text-base sm:text-lg lg:text-xl truncate">
+                {faq.question}
+              </span>
+            </div>
+            <div className="text-gray-400 flex-shrink-0 ml-2">
+              <svg
+                className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${
+                  isExpanded ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </button>
+          {isAdmin && (
+            <button
+              onClick={() => handleEditFaq(faq)}
+              className={`${neumorphStyles.small} ${neumorphStyles.hover} px-3 py-2 rounded-xl text-[#252422] font-semibold mr-2`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-        </button>
+              수정
+            </button>
+          )}
+        </div>
 
         {isExpanded && (
           <div className={`${neumorphStyles.smallInset} p-3 sm:p-4`}>
@@ -178,7 +211,7 @@ const FaqPage = () => {
           </div>
           <button
             onClick={fetchFaqs}
-            className={`${componentStyles.button.primary} ${neumorphStyles.small} ${neumorphStyles.hover}`}
+            className={`${neumorphStyles.small} ${neumorphStyles.hover} px-6 py-3 rounded-xl text-[#252422] font-semibold`}
           >
             다시 시도
           </button>
@@ -208,19 +241,37 @@ const FaqPage = () => {
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="w-full">
-        <h2
-          className={`text-base sm:text-3xl lg:text-4xl font-bold text-[#252422] mb-4 sm:mb-6 px-6 py-3 flex items-center gap-3`}
-        >
-          <img
-            src={questionIcon}
-            alt="자주 묻는 질문"
-            className="w-10 h-10 sm:w-10 sm:h-10 lg:w-12 lg:h-12"
-          />
-          자주 묻는 질문
-        </h2>
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h2
+            className={`text-base sm:text-3xl lg:text-4xl font-bold text-[#252422] px-6 py-3 flex items-center gap-3`}
+          >
+            <img
+              src={questionIcon}
+              alt="자주 묻는 질문"
+              className="w-10 h-10 sm:w-10 sm:h-10 lg:w-12 lg:h-12"
+            />
+            자주 묻는 질문
+          </h2>
+          {isAdmin && (
+            <button
+              onClick={handleCreateFaq}
+              className={`${neumorphStyles.small} ${neumorphStyles.hover} px-6 py-3 rounded-xl text-[#252422] font-semibold`}
+            >
+              FAQ 등록
+            </button>
+          )}
+        </div>
 
         {renderContent()}
       </div>
+
+      <FaqModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        faq={editingFaq}
+        onSuccess={handleModalSuccess}
+        mode={modalMode}
+      />
     </div>
   );
 };

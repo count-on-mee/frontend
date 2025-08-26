@@ -10,18 +10,13 @@ export default function CurationDetail({
   selectedCuration,
   setSelectedCuration,
   handleScrapClick,
-  // handleSpotClick,
 }) {
   const [selectedCurationSpot, setSelectedCurationSpot] = useRecoilState(
     selectedCurationSpotAtom,
   );
   const setSelectedCurationSpotWithCenter = useSetRecoilState(withCenter);
 
-  // console.log(selectedCuration);
-  // console.log(selectedCuration.categories);
-
   const handleSelectSpot = (spot) => {
-    // console.log('SelectedSpot:', spot);
     setSelectedCurationSpot(spot);
   };
 
@@ -59,7 +54,6 @@ export default function CurationDetail({
               e.stopPropagation();
               handleSelectSpot(spot);
               setSelectedCurationSpotWithCenter(spot);
-              // handleSpotClick(spot);
             }}
             className="mx-auto w-5/6 box-shadow bg-background-gray rounded-xl my-3"
           >
@@ -72,14 +66,6 @@ export default function CurationDetail({
               alt={spot.name}
             />
             <p className="inline text-xs font-mixed font-bold">{spot.name}</p>
-            {/* {selectedCurationSpot && (
-              <div className="w-1/2">
-                <SpotDetail
-                  selectedSpot={selectedCurationSpot}
-                  setSelectedSpot={setSelectedCurationSpot}
-                />
-              </div>
-            )} */}
           </div>
         ))}
       </div>

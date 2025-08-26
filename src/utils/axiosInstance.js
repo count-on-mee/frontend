@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { getRecoil } from 'recoil-nexus';
-import authAtom from '../recoil/auth';
 import { tokenStorage } from './tokenStorage';
 
 const api = axios.create({
@@ -11,7 +9,6 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = tokenStorage.getToken();
-  // console.log('axiosInstancetoken:', token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -22,12 +19,10 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    // const accessToken = getAccessToken();
     const wasLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (!wasLoggedIn) {
         if (originalRequest.url === 'auth/reissue') {
-          // return Promise.reject(error);
           return Promise.resolve();
         }
         originalRequest._retry = true;
@@ -37,15 +32,15 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return api(originalRequest);
         } catch (refreshError) {
-            if (refreshError.response?.status === 401) {
-              console.debug(
-                'Token refresh failed with 401, user probably logged out',
-              );
-            } else {
-              console.error('Token refresh failed', refreshError);
-            }
+          if (refreshError.response?.status === 401) {
+            console.debug(
+              'Token refresh failed with 401, user probably logged out',
+            );
+          } else {
+            console.error('Token refresh failed', refreshError);
+          }
         }
-      } 
+      }
     }
   },
 );

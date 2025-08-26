@@ -51,7 +51,6 @@ export default function useSearchSpots() {
         return acc;
       }, {});
       setScrapState(initialScrap);
-      // console.log(scrapState);
     } catch (error) {
       console.error('Search error:', error);
     }

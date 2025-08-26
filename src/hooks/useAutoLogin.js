@@ -23,7 +23,7 @@ export const useAutoLogin = () => {
         const userData = await userRes.data;
         setUser(userData);
       } catch (e) {
-        console.log('자동 로그인 실패: ', e);
+        console.error('자동 로그인 실패: ', e);
       }
     };
 
