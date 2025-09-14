@@ -8,6 +8,8 @@ import userAtom from '../recoil/user';
 import { useRef, useState, useEffect } from 'react';
 import scrapStateAtom from '../recoil/scrapState';
 import { useSpotScrap } from '../hooks/useSpotScrap';
+import { FaRegPenToSquare } from 'react-icons/fa6';
+import SpotUploader from '../components/spot/SpotUploader';
 
 export default function SpotPage() {
   const [selectedSpot, setSelectedSpot] = useRecoilState(selectedSpotAtom);
@@ -17,6 +19,8 @@ export default function SpotPage() {
   const [scrapState, setScrapState] = useRecoilState(scrapStateAtom);
   const [filteredMarkers, setFilteredMarkers] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
+  const [isUploaderOpen, setIsUploaderOpen] = useState(null);
+  const isAdmin = user?.role === "admin"
 
   const handleSpotClick = (spot) => {
     mapRef.current.setCenter(spot.position);
@@ -27,6 +31,16 @@ export default function SpotPage() {
     selectedSpot,
     setSelectedSpot,
   });
+
+  const handleOpenUploader = () => {
+    // if (!user) {
+    //   navigate('/login-notice');
+    //   return;
+    // }
+    setIsUploaderOpen(true);
+  };
+
+  // console.log(user?.role);
 
   useEffect(() => {
     if (spotMarkers?.length > 0){
@@ -64,6 +78,24 @@ export default function SpotPage() {
       <div className={`${selectedSpot ? 'w-1/2' : 'w-3/4'}`}>
         <Map mapRef={mapRef} markers={spotMarkers} markerType="spot" filteredMarkers={filteredMarkers} activeCategories={activeCategories} setActiveCategories={setActiveCategories}/>
       </div>
+      {/* SpotUploader */}
+      {isAdmin && 
+        <div>
+        <div className="fixed bottom-5 right-15">
+        <button
+          className="flex z-50 p-3 text-xl font-bold bg-background-light box-shadow rounded-2xl text-charcoal px-2 hover:bg-primary hover:text-background-light hover:p-5"
+          onClick={handleOpenUploader}
+          >
+          <FaRegPenToSquare className="mx-1 my-1" />
+          <div>Spot 등록</div>
+        </button>
+        </div>
+        <SpotUploader
+          isOpen={isUploaderOpen}
+          onClose={() => setIsUploaderOpen(false)}
+          />
+        </div>
+      }
     </div>
   );
 }
