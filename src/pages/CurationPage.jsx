@@ -56,6 +56,7 @@ export default function CurationPage() {
         }
         return prev;
       });
+      console.log(data);
     } catch (error) {
       console.error('Failed to fetch curation:', error);
     }

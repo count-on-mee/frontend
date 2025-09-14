@@ -1,11 +1,8 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
-import Modal from 'react-modal';
+import { useState, useEffect } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-
-Modal.setAppElement('#root');
 
 const Photodump = ({ photoDump }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,6 +29,21 @@ const Photodump = ({ photoDump }) => {
     slidesToShow: 1,
     slidesToScroll: 1,
   };
+
+  //esc로 모달 닫기
+    useEffect(() => {
+      const handleEsc = (e) => {
+        if (e.key === "Escape" && isModalOpen) closeModal();
+      };
+      window.addEventListener("keydown", handleEsc);
+      return () => window.removeEventListener("keydown", handleEsc);
+    }, [isModalOpen, closeModal]);
+  
+    //스크롤차단
+    useEffect(() => {
+      if (isModalOpen) document.body.style.overflow = "hidden";
+      else document.body.style.overflow = "";
+    }, [isModalOpen]);
 
   return (
     <div>
@@ -63,21 +75,20 @@ const Photodump = ({ photoDump }) => {
       )}
 
       {/* 모달 */}
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={closeModal}
-        contentLabel="Review Images Modal"
-        className="absolute top-1/2 left-1/2 max-w-4xl max-h-[90vh] w-[100vw] bg-white rounded-lg p-6 transform -translate-x-1/2 -translate-y-1/2 outline-none"
-        overlayClassName="fixed inset-0 bg-black/70 z-50 flex justify-center items-center"
-      >
-        <button
-          onClick={closeModal}
-          className="absolute top-4 right-4 text-charcoal font-bold text-lg z-200"
-          aria-label="Close modal"
-        >
-          <XMarkIcon className="w-7 h-7" />
-        </button>
-
+      {isModalOpen && (
+       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
+        <div className="w-full max-w-[100vh] max-h-[90vh] p-6 bg-background-light rounded-lg shadow-lg" onClick={(e) => e.stopPropagation()}>
+          <div className="flex pl-5 justify-between">
+            <p className="text-lg font-bold">Spot Photos</p>
+            <XMarkIcon className="w-6 h-6 cursor-pointer" onClick={closeModal} />
+            {/* <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 text-charcoal font-bold text-lg z-200"
+              aria-label="Close modal"
+            >
+              <XMarkIcon className="w-7 h-7" />
+            </button> */}
+          </div>        
         {selectedReview && (
           <div className="grid grid-cols-2 h-[70vh]">
             {selectedReview.imgUrls.length > 1 ? (
@@ -117,8 +128,11 @@ const Photodump = ({ photoDump }) => {
             </div>
           </div>
         )}
-      </Modal>
-    </div>
+        </div>
+      </div>
+    // </div>
+    )}
+  </div>
   );
 };
 

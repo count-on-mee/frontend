@@ -22,13 +22,15 @@ export default function Curation({
 
   return (
     <div className="container px-2" onClick={onClick}>
-      <div className="relative">
-        <img
+      <div className="relative ">
+        <div className={`${isDetail ? 'aspect-4/3' : 'aspect-3/4'}`}>
+          <img
           src={curation.imgUrl || defaultImage}
-          className={`object-cover w-full ${isDetail ? 'aspect-4/3' : 'aspect-3/4'} mx-auto rounded-2xl box-shadow`}
+          className="absolute object-cover w-full h-full mx-auto rounded-2xl box-shadow inset-0"
           alt={curation.name}
-        />
-        <div className="absolute text-lg text-background-light font-mixed font-extrabold bottom-10 left-5 text-shadow-header bg-charcoal/60 px-2 rounded-2xl">
+          />
+        </div>
+        <div className="absolute text-lg text-background-light font-mixed font-extrabold bottom-5 left-5 text-shadow-header bg-charcoal/60 px-2 rounded-2xl">
           {curation.name}
           {/* curationTitle */}
         </div>
@@ -43,6 +45,10 @@ export default function Curation({
           />
         </button>
       </div>
+      <div className="flex mt-2 p-0">
+          <img src={curation.author.imgUrl} className="border border-slate-500 size-5 rounded-full object-cover mr-2 mb-5 ml-2" alt={curation.author.nickname} />
+          <div>{curation.author.nickname}</div>
+        </div>
     </div>
   );
 }

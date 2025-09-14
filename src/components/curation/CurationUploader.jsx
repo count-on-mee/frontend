@@ -1,16 +1,15 @@
-import Modal from 'react-modal';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
 import Searchbar from '../ui/Searchbar';
 import { getRecoil } from 'recoil-nexus';
 import authAtom from '../../recoil/auth';
 import api from '../../utils/axiosInstance';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import scrappedSpotsAtom from '../../recoil/scrapedSpot';
 import SpotCart from './SpotCart';
 import defaultImage from '../../assets/icon.png';
-
-Modal.setAppElement('#root');
+import userAtom from '../../recoil/user';
+import LoadingPage from '../../pages/LoadingPage';
 
 export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
   const [error, setError] = useState(false);
@@ -20,7 +19,8 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
   const [scrapedSpots, setScrapedSpots] = useRecoilState(scrappedSpotsAtom);
   const [cartSpots, setCartSpots] = useState([]);
   const categories = ['여행', '식당', '카페', '자연'];
-  const token = authAtom.accessToken;
+  const token = getRecoil(authAtom).accessToken;
+  const user = useRecoilState(userAtom);
 
   const handleAddToCart = (spot) => {
     setCartSpots((prev) => {
@@ -88,6 +88,7 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log("scrapedSpots API 응답:", response.data);
       handleClose();
     } catch (error) {
       console.error('저장 중 오류 발생:', error);
@@ -106,7 +107,6 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
 
   const fetchScrapedSpots = async () => {
     try {
-      const token = getRecoil(authAtom).accessToken;
       const response = await api.get('/scraps/spots', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -123,10 +123,25 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
     fetchScrapedSpots();
   }, []);
 
+  //esc로 모달 닫기
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape" && isOpen) onClose();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose]);
+
+  //스크롤차단
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+  }, [isOpen]);
+
   return !isOpen ? null : (
     <div>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="w-full max-w-[100vh] max-h-[90vh] p-6 bg-background-light rounded-lg shadow-lg">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+        <div className="w-full max-w-[100vh] max-h-[90vh] p-6 bg-background-light rounded-lg shadow-lg" onClick={(e) => e.stopPropagation()}>
           <div className="flex pl-5 justify-between">
             <p className="text-2xl font-bold">Post Curation</p>
             <XMarkIcon className="w-6 h-6 cursor-pointer" onClick={onClose} />

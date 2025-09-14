@@ -71,7 +71,8 @@ function useTrip() {
             'include[]': ['itineraries', 'tripDestinations'],
           },
         });
-        return response.data;
+        if (!response.data) return null;
+        else return response.data;
       } catch (error) {
         if (error.response?.status === 404) {
           setError('존재하지 않는 여행입니다.');
