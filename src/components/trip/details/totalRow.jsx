@@ -5,7 +5,7 @@ import { componentStyles } from '../../../utils/style';
 const TotalRow = ({ total, formatNumber }) => {
   return (
     <tr>
-      <td colSpan="2" className="p-3">
+      <td colSpan="3" className="p-3">
         <span className={componentStyles.header}>합계</span>
       </td>
       <td className="p-3 text-right">

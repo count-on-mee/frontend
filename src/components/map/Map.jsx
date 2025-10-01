@@ -13,7 +13,15 @@ import MapResearch from './MapResearch';
 import useSearchSpots from '../../hooks/useSearchSpots';
 import FilterPanel from './FilterPanel';
 
-export default function Map({ mapRef, markerType, markers, filteredMarkers, activeCategories, setActiveCategories, showAllDays }) {
+export default function Map({
+  mapRef,
+  markerType,
+  markers,
+  filteredMarkers,
+  activeCategories,
+  setActiveCategories,
+  showAllDays,
+}) {
   const { naver } = window;
   const [center, setCenter] = useRecoilState(centerAtom);
   const [zoom, setZoom] = useRecoilState(zoomAtom);
@@ -38,9 +46,9 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
 
     mapRef.current = new naver.maps.Map('map', mapOptions);
     handleLocateMe();
-     if (mapRef.current && user) {
-    handleSearch(center, zoom);
-  }
+    if (mapRef.current && user) {
+      handleSearch(center, zoom);
+    }
   }, [user]);
 
   const handleZoomIn = useCallback(() => {
@@ -67,8 +75,9 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
   const handleCenterChanged = () => {
     if (mapRef.current) {
       const newCenter = mapRef.current.getCenter();
-       if (newCenter) {
-        setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });}
+      if (newCenter) {
+        setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
+      }
     }
   };
 
@@ -131,12 +140,20 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
             onLocateMe={handleLocateMe}
             onSearch={handleSearch}
           />
-          <MapMarkerSpot
-            markers={filteredMarkers}
-            map={mapRef.current}
+          <MapMarkerSpot markers={filteredMarkers} map={mapRef.current} />
+          <FilterPanel
+            onFilter={handleFilter}
+            activeCategories={activeCategories}
           />
-          <FilterPanel onFilter={handleFilter} activeCategories={activeCategories}/>
-          <MapResearch handleSearch={handleSearch} center={center} zoom={zoom}/>
+          <FilterPanel
+            onFilter={handleFilter}
+            activeCategories={activeCategories}
+          />
+          <MapResearch
+            handleSearch={handleSearch}
+            center={center}
+            zoom={zoom}
+          />
         </div>
       );
     if (markerType === 'curation')
@@ -149,28 +166,24 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
             onLocateMe={handleLocateMe}
             onSearch={handleSearch}
           />
-          <MapMarkerCuration
-          markers={markers}
-          map={mapRef.current}
-          />
+          <MapMarkerCuration markers={markers} map={mapRef.current} />
         </div>
       );
     if (markerType === 'scrapList')
+      return <MapMarkerScrapList markers={markers} map={mapRef.current} />;
+    if (markerType === 'itinerary')
       return (
-        <MapMarkerScrapList markers={markers} map={mapRef.current}/>
-      );
-    if (markerType === 'itinerary') 
-      return(
         <MapMarkerItinerary
           markers={markers}
           map={mapRef.current}
           showAllDays={showAllDays}
-    />);
+        />
+      );
   };
 
   return (
-    <div className="w-full">
-      <div id="map" className="relative" style={{ width: '100%', height: 'calc(100vh - 80px)' }}>
+    <div className="w-full h-full relative">
+      <div id="map" className="absolute inset-0 w-full h-full">
         {mapRef.current && renderMarkerComponent()}
         {/* <MarkerCluster /> */}
       </div>
