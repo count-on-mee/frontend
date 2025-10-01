@@ -474,14 +474,17 @@ export const layoutStyles = {
 };
 
 /**
- * 애니메이션 관련 스타일
+ * 애니메이션 관련 스타일 (Framer Motion Variants)
  */
 export const animationStyles = {
+  // 기본 페이드인 애니메이션
   fadeIn: {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.3 },
   },
+
+  // 스케일 인 애니메이션
   scaleIn: {
     initial: { scale: 0, opacity: 0 },
     animate: { scale: 1, opacity: 1 },
@@ -492,6 +495,134 @@ export const animationStyles = {
       damping: 20,
       duration: 0.5,
     },
+  },
+
+  // 리스트 컨테이너 애니메이션 (stagger 효과)
+  listContainer: {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  },
+
+  // 리스트 아이템 애니메이션 (spring 효과)
+  listItem: {
+    hidden: {
+      opacity: 0,
+      y: 20,
+      scale: 0.95,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 24,
+      },
+    },
+  },
+
+  // 그리드 아이템 애니메이션 (hover, tap 포함)
+  gridItem: {
+    hidden: {
+      opacity: 0,
+      y: 30,
+      scale: 0.9,
+    },
+    visible: (index = 0) => ({
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 20,
+        delay: index * 0.1,
+      },
+    }),
+  },
+
+  // 백 버튼 애니메이션
+  backButton: {
+    initial: { opacity: 0, x: -20 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: 0.3 },
+  },
+
+  // 슬라이드 업 애니메이션
+  slideUp: {
+    hidden: { opacity: 0, y: -10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.1,
+        duration: 0.4,
+      },
+    },
+  },
+
+  // 타이틀 애니메이션
+  title: {
+    hidden: { opacity: 0, y: -20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: 'easeOut',
+      },
+    },
+  },
+
+  // 플로팅 버튼 애니메이션
+  floatingButton: {
+    initial: {
+      scale: 0,
+      opacity: 0,
+      y: 50,
+    },
+    animate: {
+      scale: 1,
+      opacity: 1,
+      y: 0,
+    },
+    transition: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 20,
+      delay: 0.5,
+    },
+  },
+
+  // 호버 인터랙션
+  hover: {
+    scale: 1.05,
+    y: -5,
+    transition: { type: 'spring', stiffness: 400, damping: 10 },
+  },
+
+  // 탭 인터랙션
+  tap: {
+    scale: 0.95,
+    transition: { type: 'spring', stiffness: 400, damping: 10 },
+  },
+
+  // 부드러운 호버 (작은 스케일)
+  subtleHover: {
+    scale: 1.02,
+    transition: { duration: 0.2 },
+  },
+
+  // 탭 효과 (작은 스케일)
+  subtleTap: {
+    scale: 0.98,
   },
 };
 

@@ -44,7 +44,7 @@ const SettlementRow = ({
 
   return (
     <tr>
-      <td colSpan="2" className={componentStyles.cell}>
+      <td colSpan="3" className={componentStyles.cell}>
         <div className="flex items-center gap-4">
           <span className={componentStyles.header}>정산하기</span>
           <div className="flex items-center gap-2">

@@ -1,4 +1,3 @@
-import Modal from 'react-modal';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
 import Searchbar from '../ui/Searchbar';
@@ -9,10 +8,16 @@ import { useRecoilState } from 'recoil';
 import scrappedSpotsAtom from '../../recoil/scrapedSpot';
 import SpotCart from './SpotCart';
 import defaultImage from '../../assets/icon.png';
+import { neumorphStyles } from '../../utils/style';
 
-Modal.setAppElement('#root');
-
-export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
+export default function CurationUploader({
+  isOpen,
+  onClose,
+  fetchCuration,
+  isEdit = false,
+  editData = null,
+  onSubmit,
+}) {
   const [error, setError] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -20,23 +25,49 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
   const [scrapedSpots, setScrapedSpots] = useRecoilState(scrappedSpotsAtom);
   const [cartSpots, setCartSpots] = useState([]);
   const categories = ['여행', '식당', '카페', '자연'];
-  const token = authAtom.accessToken;
+  const token = getRecoil(authAtom).accessToken;
 
   const handleAddToCart = (spot) => {
     setCartSpots((prev) => {
-      const alreadyIn = prev.some((s) => s.spotScrapId === spot.spotScrapId);
+      // 수정 모드에서는 spotId로, 생성 모드에서는 spotScrapId로 중복 체크
+      const identifier = isEdit ? spot.spotId : spot.spotScrapId;
+      const alreadyIn = prev.some((s) =>
+        isEdit ? s.spotId === identifier : s.spotScrapId === identifier,
+      );
+
       if (alreadyIn) {
-        return prev.filter((s) => s.spotScrapId !== spot.spotScrapId); // 제거
+        // 제거
+        return prev.filter((s) =>
+          isEdit ? s.spotId !== identifier : s.spotScrapId !== identifier,
+        );
       } else {
-        return [...prev, spot]; // 추가
+        // 추가 - 수정 모드에서는 uniqueId 추가
+        const spotToAdd = isEdit
+          ? {
+              ...spot,
+              uniqueId: `new-${spot.spotId}-${Date.now()}`,
+            }
+          : spot;
+        return [...prev, spotToAdd];
       }
     });
   };
 
-  const handleDelete = (spotScrapId) => {
-    setCartSpots((prev) =>
-      prev.filter((spot) => spot.spotScrapId !== spotScrapId),
-    );
+  const handleDelete = (identifier) => {
+    setCartSpots((prev) => {
+      if (isEdit) {
+        // 수정 모드: uniqueId 또는 spotId로 삭제
+        return prev.filter(
+          (spot) =>
+            spot.uniqueId !== identifier &&
+            spot.spotId !== identifier &&
+            spot.spotScrapId !== identifier,
+        );
+      } else {
+        // 생성 모드: spotScrapId로 삭제
+        return prev.filter((spot) => spot.spotScrapId !== identifier);
+      }
+    });
   };
 
   const handleCategoryClick = (category) => {
@@ -76,19 +107,26 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
       return;
     }
 
-    if (categories < 1) {
+    if (selectedCategories.length < 1) {
       alert('카테고리는 최소 1개 이상 선택해야 합니다.');
       return;
     }
 
     try {
-      const token = getRecoil(authAtom).accessToken;
-      const response = await api.post('/curations', payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      handleClose();
+      if (isEdit && onSubmit) {
+        // 수정 모드: 부모 컴포넌트의 onSubmit 함수 호출
+        await onSubmit(payload);
+      } else {
+        // 생성 모드: 기존 로직
+        const token = getRecoil(authAtom).accessToken;
+        const response = await api.post('/curations', payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log('scrapedSpots API 응답:', response.data);
+        handleClose();
+      }
     } catch (error) {
       console.error('저장 중 오류 발생:', error);
     }
@@ -106,7 +144,6 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
 
   const fetchScrapedSpots = async () => {
     try {
-      const token = getRecoil(authAtom).accessToken;
       const response = await api.get('/scraps/spots', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -123,39 +160,106 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
     fetchScrapedSpots();
   }, []);
 
+  // 수정 모드일 때 기존 데이터 로드
+  useEffect(() => {
+    if (isEdit && editData) {
+      setName(editData.name || '');
+      setDescription(editData.description || '');
+      setSelectedCategories(editData.categories || []);
+
+      // 기존 스팟들을 카트에 추가
+      if (editData.spots && Array.isArray(editData.spots)) {
+        const spotsWithOrder = editData.spots.map((spot, index) => ({
+          ...spot,
+          order: spot.order || index + 1,
+          // 수정 모드에서는 spotId를 고유 식별자로 사용
+          uniqueId: spot.spotId || `edit-${spot.spotId}-${index}`,
+        }));
+        setCartSpots(spotsWithOrder);
+      }
+    }
+  }, [isEdit, editData]);
+
+  //esc로 모달 닫기
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape' && isOpen) onClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
+  //스크롤차단
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+  }, [isOpen]);
+
   return !isOpen ? null : (
-    <div>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="w-full max-w-[100vh] max-h-[90vh] p-6 bg-background-light rounded-lg shadow-lg">
-          <div className="flex pl-5 justify-between">
-            <p className="text-2xl font-bold">Post Curation</p>
-            <XMarkIcon className="w-6 h-6 cursor-pointer" onClick={onClose} />
-          </div>
-          <div className="grid grid-cols-2 gap-5">
-            <div className="gap-2">
-              <Searchbar
-                //   value={searchTerm}
-                //   onChange={handleSearch}
-                placeholder="spot search"
-                className="mt-5 w-1/2"
-              />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div
+        className="w-full max-w-6xl h-[90vh] mx-4 bg-[#f0f0f3] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* 헤더 */}
+        <div
+          className={`flex justify-between items-center px-6 py-4 border-b border-gray-200 ${neumorphStyles.smallInset} flex-shrink-0`}
+        >
+          <h2 className="text-2xl font-bold text-[#252422]">
+            {isEdit ? '큐레이션 수정' : '큐레이션 만들기'}
+          </h2>
+          <button
+            onClick={onClose}
+            className={`p-2 rounded-full transition-colors ${neumorphStyles.small} ${neumorphStyles.hover}`}
+          >
+            <XMarkIcon className="w-6 h-6 text-gray-600" />
+          </button>
+        </div>
+
+        {/* 콘텐츠 */}
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+          {/* 스팟 선택 */}
+          <div className="w-full lg:w-1/2 p-6 border-r border-gray-200 overflow-y-auto">
+            <div className="space-y-6">
+              {/* 검색 */}
+              <div>
+                <Searchbar placeholder="스팟 검색" className="w-full" />
+              </div>
+
+              {/* 스팟 리스트 */}
               {scrapedSpots.length > 0 && (
                 <div>
-                  <div className="max-h-[40vh] overflow-y-auto mt-5">
+                  <h3 className="text-lg font-semibold text-[#252422] mb-4">
+                    스크랩한 스팟
+                  </h3>
+                  <div className="max-h-60 overflow-y-auto space-y-2">
                     {scrapedSpots.map((spot) => (
                       <div
                         key={spot.spotScrapId}
                         onClick={() => handleAddToCart(spot)}
-                        className={`${cartSpots.some((s) => s.spotScrapId === spot.spotScrapId) ? 'border border-charcoal' : ''}`}
+                        className={`p-3 rounded-xl cursor-pointer transition-all duration-200 ${
+                          cartSpots.some((s) =>
+                            isEdit
+                              ? s.spotId === spot.spotId
+                              : s.spotScrapId === spot.spotScrapId,
+                          )
+                            ? `${neumorphStyles.smallInset} border-2 border-[#EB5E28]`
+                            : `${neumorphStyles.small} ${neumorphStyles.hover}`
+                        }`}
                       >
-                        <div className="flex py-2">
+                        <div className="flex items-center space-x-3">
                           <img
                             src={spot.imgUrls[0] || defaultImage}
-                            alt={spot.title}
-                            className="w-15 h-15 rounded-lg object-cover"
+                            alt={spot.name}
+                            className="w-12 h-12 rounded-lg object-cover"
                           />
-                          <div className="ml-5 my-auto truncate">
-                            <p>{spot.name}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-[#252422] truncate">
+                              {spot.name}
+                            </p>
+                            <p className="text-sm text-gray-500 truncate">
+                              {spot.address}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -163,52 +267,107 @@ export default function CurationUploader({ isOpen, onClose, fetchCuration }) {
                   </div>
                 </div>
               )}
-              <div className="pt-5 mb-2 text-md font-mixed">
-                2개 이상의 spot을 선택해 주세요!
+
+              {/* 장바구니 */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#252422] mb-4">
+                  선택된 스팟 ({cartSpots.length}개)
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  2개 이상의 스팟을 선택해 주세요!
+                </p>
+                <SpotCart spots={cartSpots} onDelete={handleDelete} />
               </div>
-              <SpotCart spots={cartSpots} onDelete={handleDelete} />
             </div>
-            <div>
-              <div className="mt-5 text-xl font-mixed">Curation Title</div>
-              <textarea
-                className="w-full border-b-2 h-6 resize-none overflow-hidden"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <div className="mt-5 text-xl font-mixed">상세 설명</div>
-              <textarea
-                value={description}
-                onChange={handleChange}
-                className={`resize-none outline-none w-full h-70 mt-5 border-2 p-5 ${error ? 'border-red-500' : 'border-black'}`}
-                placeholder="-리뷰 작성 시 유의사항 한 번 확인하기! &#13;&#13;-리뷰를 보는 모든 사용자와 사업자에게 상처가 되는 욕설, 비방, 명예훼손성 표현은 사용하지 말아주세요."
-              />
-              <p className="text-right">{description.length}/1000</p>
-              {error && (
-                <div className="text-sm text-red-500">
-                  1000자 이내로 입력해주세요
-                </div>
-              )}
-              <div className="flex">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => handleCategoryClick(category)}
-                    className={`box-shadow mr-5 px-2 py-1  rounded-2xl ${selectedCategories.includes(category) ? 'bg-primary' : ''}`}
+          </div>
+
+          {/* 폼 */}
+          <div className="w-full lg:w-1/2 p-6 overflow-y-auto">
+            <div className="space-y-6">
+              {/* 제목 */}
+              <div>
+                <label className="block text-lg font-semibold text-[#252422] mb-2">
+                  큐레이션 제목
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-colors ${neumorphStyles.small} ${neumorphStyles.hover}`}
+                  placeholder="큐레이션 제목을 입력하세요"
+                />
+              </div>
+
+              {/* 설명 */}
+              <div>
+                <label className="block text-lg font-semibold text-[#252422] mb-2">
+                  상세 설명
+                </label>
+                <textarea
+                  value={description}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 rounded-xl border-2 resize-none transition-colors h-32 ${
+                    error ? 'border-red-500' : ''
+                  } ${neumorphStyles.small} ${neumorphStyles.hover}`}
+                  placeholder="큐레이션에 대한 상세한 설명을 작성해주세요"
+                />
+                <div className="flex justify-between items-center mt-2">
+                  <span
+                    className={`text-sm ${error ? 'text-red-500' : 'text-gray-500'}`}
                   >
-                    {category}
-                  </button>
-                ))}
+                    {error
+                      ? '1000자 이내로 입력해주세요'
+                      : `${description.length}/1000`}
+                  </span>
+                </div>
+              </div>
+
+              {/* 카테고리 */}
+              <div>
+                <label className="block text-lg font-semibold text-[#252422] mb-2">
+                  카테고리
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => handleCategoryClick(category)}
+                      className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                        selectedCategories.includes(category)
+                          ? 'bg-[#EB5E28] text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]'
+                          : `${neumorphStyles.small} ${neumorphStyles.hover} text-[#252422]`
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-          <div className="flex justify-end">
-            <button
-              className="w-20 bg-[#EB5E28] font-mixed text-white py-2 rounded-2xl hover:bg-red-500"
-              onClick={() => handleSubmit()}
-            >
-              작성 완료
-            </button>
-          </div>
+        </div>
+
+        {/* 푸터 */}
+        <div
+          className={`flex justify-end px-6 py-4 border-t border-gray-200 ${neumorphStyles.smallInset} flex-shrink-0`}
+        >
+          <button
+            className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 ${
+              cartSpots.length >= 2 &&
+              selectedCategories.length >= 1 &&
+              name.trim()
+                ? 'bg-[#EB5E28] text-white hover:bg-[#D54E23] shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31] hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+            onClick={handleSubmit}
+            disabled={
+              cartSpots.length < 2 ||
+              selectedCategories.length < 1 ||
+              !name.trim()
+            }
+          >
+            {isEdit ? '수정 완료' : '작성 완료'}
+          </button>
         </div>
       </div>
     </div>

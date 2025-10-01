@@ -21,14 +21,18 @@ export default function Curation({
   const isDetail = varient === 'detail';
 
   return (
-    <div className="container px-2" onClick={onClick}>
-      <div className="relative">
-        <img
-          src={curation.imgUrl || defaultImage}
-          className={`object-cover w-full ${isDetail ? 'aspect-4/3' : 'aspect-3/4'} mx-auto rounded-2xl box-shadow`}
-          alt={curation.name}
-        />
-        <div className="absolute text-lg text-background-light font-mixed font-extrabold bottom-10 left-5 text-shadow-header bg-charcoal/60 px-2 rounded-2xl">
+    <div className="w-full px-1" onClick={onClick}>
+      <div className="relative w-full">
+        <div
+          className={`w-full ${isDetail ? 'aspect-4/3' : 'aspect-3/4'} min-h-[200px] sm:min-h-[220px]`}
+        >
+          <img
+            src={curation.imgUrl || defaultImage}
+            className="absolute object-cover w-full h-full mx-auto box-shadow inset-0"
+            alt={curation.name}
+          />
+        </div>
+        <div className="absolute text-sm sm:text-base lg:text-lg text-background-light font-mixed font-extrabold bottom-3 left-3 sm:bottom-4 sm:left-4 lg:bottom-5 lg:left-5 text-shadow-header bg-charcoal/60 px-2">
           {curation.name}
           {/* curationTitle */}
         </div>
@@ -39,9 +43,19 @@ export default function Curation({
           }}
         >
           <BookmarkIcon
-            className={`absolute top-5 right-5 w-5 h-5  ${isScraped ? 'fill-[#EB5E28] stroke-[#EB5E28]' : 'stroke-white'}`}
+            className={`absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-5 lg:right-5 w-4 h-4 sm:w-5 sm:h-5 ${isScraped ? 'fill-[#EB5E28] stroke-[#EB5E28]' : 'stroke-white'}`}
           />
         </button>
+      </div>
+      <div className="flex items-center mt-2 px-1">
+        <img
+          src={curation.author.imgUrl}
+          className="border border-slate-500 size-4 sm:size-5 rounded-full object-cover mr-2"
+          alt={curation.author.nickname}
+        />
+        <div className="text-xs sm:text-sm text-gray-700 truncate">
+          {curation.author.nickname}
+        </div>
       </div>
     </div>
   );

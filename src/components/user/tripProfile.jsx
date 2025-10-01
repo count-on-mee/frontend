@@ -44,8 +44,6 @@ const ParticipantImage = ({ participant }) => {
 };
 
 const TripProfile = ({ participants, loading }) => {
-  console.log('TripProfile props:', { participants, loading });
-
   if (loading) {
     return <div className="text-gray-400 text-sm">로딩 중...</div>;
   }
