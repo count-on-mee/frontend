@@ -15,7 +15,7 @@ const navItems = [
 const SupportLayout = () => {
   return (
     <div className="min-h-screen bg-[#f0f0f3] font-prompt">
-      <div className="w-full bg-[#f0f0f3] mb-6 pt-20 sm:pt-24 lg:pt-28">
+      <div className="w-full bg-[#f0f0f3] pt-12 sm:pt-16 lg:pt-20">
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-3">
           <div className="text-center">
             <div className={`${layoutStyles.flex.center} gap-5 mb-2`}>

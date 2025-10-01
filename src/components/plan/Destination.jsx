@@ -139,13 +139,10 @@ function Destination() {
                     <div className={imageContainerStyles}>
                       <img
                         className="h-full w-full object-cover"
-                        src={
-                          dest.imgUrl ||
-                          `https://loremflickr.com/100/100?random=${5 * idx}`
-                        }
+                        src={dest.imgUrl}
                         alt={dest.name}
                         onError={(e) => {
-                          e.target.src = `https://loremflickr.com/100/100?random=${5 * idx}`;
+                          e.target.src = 'https://picsum.photos/200/200';
                         }}
                       />
                     </div>

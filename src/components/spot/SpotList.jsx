@@ -1,16 +1,14 @@
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import Searchbar from '../ui/Searchbar';
 import Spot from './Spot';
-import spotMarkersAtom from '../../recoil/spotMarkers';
 import { withCenter } from '../../recoil/selectedSpot';
 import { useState, useEffect } from 'react';
 import { useSearch } from '../../hooks/useSearch';
+import { neumorphStyles } from '../../utils/style';
 
 export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
-  // const spots = useRecoilValue(spotMarkersAtom);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const [currentPage, setCurrentPage] = useState(1);
-  // const [currentSpots, setCurrentSpots] = useState([]);
   const spotsPerPage = 15;
   const { searchTerm, handleSearch, filteredItems } = useSearch(spots);
   const isSearching = searchTerm && searchTerm.trim() !== '';
@@ -28,7 +26,7 @@ export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  //페이지 다섯개만 나오도록 그룹화(5페이지씩)
+  // 페이지 그룹화 (5페이지씩)
   const [currentPageGroup, setCurrentPageGroup] = useState(1);
   const pageGroupSize = 5;
   const totalGroups = Math.ceil(totalPages / pageGroupSize);
@@ -51,28 +49,43 @@ export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
   };
 
   return (
-    <div>
-      <Searchbar value={searchTerm} onChange={handleSearch}/>
-      {spots.length === 0 ? (
-        <p className="text-center">스팟을 검색하거나 지도를 움직여 주세요.</p>
-      ) : (
-        <div>
-          {currentItems.map((spot) => (
-            <Spot
-              key={spot.spotId}
-              spot={spot}
-              handleScrapClick={handleSpotScrap}
-              onClick={() => {
-                setSelectedSpotWithCenter(spot);
-                onSpotClick(spot);
-              }}
-            />
-          ))}
-          <div className="text-center py-3">
+    <div className="h-full flex flex-col">
+      <div className="mb-6">
+        <Searchbar value={searchTerm} onChange={handleSearch} />
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        {spots.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500 text-lg">
+              스팟을 검색하거나 지도를 움직여 주세요.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {currentItems.map((spot) => (
+              <Spot
+                key={spot.spotId}
+                spot={spot}
+                handleScrapClick={handleSpotScrap}
+                onClick={() => {
+                  setSelectedSpotWithCenter(spot);
+                  onSpotClick(spot);
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 페이지네이션  */}
+      {spots.length > 0 && (
+        <div className="mt-6 pt-4">
+          <div className="flex justify-center items-center space-x-2">
             <button
               onClick={handlePrevGroup}
               disabled={currentPageGroup === 1}
-              className="mx-1 px-2 py-1 rounded bg-background-light text-[#2E2F35] box-shadow"
+              className={`px-3 py-2 rounded-lg text-[#252422] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${neumorphStyles.small} ${neumorphStyles.hover}`}
             >
               &lt;
             </button>
@@ -84,10 +97,10 @@ export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
                   <button
                     key={pageNumber}
                     onClick={() => paginate(pageNumber)}
-                    className={`mx-1 px-1.5 py-1 rounded box-shadow ${
+                    className={`px-3 py-2 rounded-lg transition-colors ${
                       currentPage === pageNumber
-                        ? 'bg-primary text-background-light'
-                        : 'bg-background-light text-[#2E2F35]'
+                        ? 'bg-[#EB5E28] text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]'
+                        : `${neumorphStyles.small} ${neumorphStyles.hover} text-[#252422]`
                     }`}
                   >
                     {pageNumber}
@@ -98,7 +111,7 @@ export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
             <button
               onClick={handleNextGroup}
               disabled={currentPageGroup === totalGroups}
-              className="mx-1 px-2 py-1 rounded box-shadow bg-background-light text-[#2E2F35]"
+              className={`px-3 py-2 rounded-lg text-[#252422] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${neumorphStyles.small} ${neumorphStyles.hover}`}
             >
               &gt;
             </button>

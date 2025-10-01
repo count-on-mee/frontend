@@ -49,60 +49,68 @@ export default function SpotDetail({
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
 
   const handleUploaderOpen = () => {
-     if (!auth.accessToken) {
+    if (!auth.accessToken) {
       navigate('/login-notice');
       return;
     }
     setIsUploaderOpen(true);
-  }
+  };
   return (
-    <div>
-      <div className="sticky top-0 z-10 flex justify-between bg-background-light">
-        <div className="">
-          <button onClick={handleClose} className="">
-            <ChevronLeftIcon className="w-7 h-7 m-3" />
-          </button>
-        </div>
-        <div className="font-mixed font-semibold text-lg my-3 block truncate">
-          {selectedSpot.name}
-        </div>
-        <div className="">
-          <button onClick={handleClose}>
-            <XMarkIcon className="w-7 h-7 m-3" />
-          </button>
-        </div>
-      </div>
-      <Spot
-        varient="detail"
-        spot={selectedSpot}
-        handleScrapClick={handleSpotScrap}
-      />
-      <div className="mx-5 mt-10 flex justify-between">
-        <div className="text-lg font-bold">후기</div>
+    <div className="h-full flex flex-col">
+      <div className="sticky top-0 z-10 flex justify-between items-center border-b border-gray-200 px-6 py-4">
         <button
-          className="flex bg-background-light box-shadow rounded-2xl text-charcoal px-2 hover:bg-primary hover:text-background-light"
-          onClick={handleUploaderOpen}
+          onClick={handleClose}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
-          <FaRegPenToSquare className="mx-1 my-1" />
-          <div>후기 등록</div>
+          <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
+        </button>
+        <h2 className="font-semibold text-lg text-[#252422] truncate flex-1 text-center px-4">
+          {selectedSpot.name}
+        </h2>
+        <button
+          onClick={handleClose}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <XMarkIcon className="w-6 h-6 text-gray-600" />
         </button>
       </div>
-      <ReviewUploader
-        isOpen={isUploaderOpen}
-        selectedSpot={selectedSpot}
-        setSelectedSpot={setSelectedSpot}
-        onClose={() => setIsUploaderOpen(false)}
-        fetchPhotoDump={fetchPhotoDump}
-      />
-      <div>
-        <PhotoDump
-          selectedSpot={selectedSpot}
-          photoDump={photoDump}
-          setPhotoDump={setPhotoDump}
-        />
-      </div>
 
-      {/* <div>관련된 큐레이션</div> */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          <Spot
+            varient="detail"
+            spot={selectedSpot}
+            handleScrapClick={handleSpotScrap}
+          />
+
+          <div className="mt-8 flex justify-between items-center">
+            <h3 className="text-xl font-bold text-[#252422]">후기</h3>
+            <button
+              className="flex items-center gap-2 px-4 py-2 bg-[#f0f0f3] text-[#252422] rounded-xl font-semibold shadow-sm hover:shadow-md transition-all duration-200 hover:bg-[#EB5E28] hover:text-white"
+              onClick={handleUploaderOpen}
+            >
+              <FaRegPenToSquare className="w-4 h-4" />
+              <span>후기 등록</span>
+            </button>
+          </div>
+
+          <ReviewUploader
+            isOpen={isUploaderOpen}
+            selectedSpot={selectedSpot}
+            setSelectedSpot={setSelectedSpot}
+            onClose={() => setIsUploaderOpen(false)}
+            fetchPhotoDump={fetchPhotoDump}
+          />
+
+          <div className="mt-6">
+            <PhotoDump
+              selectedSpot={selectedSpot}
+              photoDump={photoDump}
+              setPhotoDump={setPhotoDump}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

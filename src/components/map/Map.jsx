@@ -12,7 +12,15 @@ import MapResearch from './MapResearch';
 import useSearchSpots from '../../hooks/useSearchSpots';
 import FilterPanel from './FilterPanel';
 
-export default function Map({ mapRef, markerType, markers, filteredMarkers, activeCategories, setActiveCategories, showAllDays }) {
+export default function Map({
+  mapRef,
+  markerType,
+  markers,
+  filteredMarkers,
+  activeCategories,
+  setActiveCategories,
+  showAllDays,
+}) {
   const { naver } = window;
   const [center, setCenter] = useRecoilState(centerAtom);
   const setZoom = useSetRecoilState(zoomAtom);
@@ -62,8 +70,13 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
   const handleCenterChanged = () => {
     if (mapRef.current) {
       const newCenter = mapRef.current.getCenter();
-       if (newCenter && typeof newCenter.lat === 'function' && typeof newCenter.lng === 'function') {
-        setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });}
+      if (
+        newCenter &&
+        typeof newCenter.lat === 'function' &&
+        typeof newCenter.lng === 'function'
+      ) {
+        setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
+      }
     }
   };
 
@@ -140,11 +153,11 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
             onLocateMe={handleLocateMe}
             onSearch={handleSearch}
           />
-          <MapMarkerSpot
-            markers={filteredMarkers}
-            map={mapRef.current}
+          <MapMarkerSpot markers={filteredMarkers} map={mapRef.current} />
+          <FilterPanel
+            onFilter={handleFilter}
+            activeCategories={activeCategories}
           />
-          <FilterPanel onFilter={handleFilter} activeCategories={activeCategories}/>
           <MapResearch />
         </div>
       );
@@ -158,28 +171,24 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
             onLocateMe={handleLocateMe}
             onSearch={handleSearch}
           />
-          <MapMarkerCuration
-          markers={markers}
-          map={mapRef.current}
-          />
+          <MapMarkerCuration markers={markers} map={mapRef.current} />
         </div>
       );
     if (markerType === 'scrapList')
+      return <MapMarkerScrapList markers={markers} map={mapRef.current} />;
+    if (markerType === 'itinerary')
       return (
-        <MapMarkerScrapList markers={markers} map={mapRef.current}/>
-      );
-    if (markerType === 'itinerary') 
-      return(
         <MapMarkerItinerary
           markers={markers}
           map={mapRef.current}
           showAllDays={showAllDays}
-    />);
+        />
+      );
   };
 
   return (
-    <div className="w-full">
-      <div id="map" className="relative" style={{ width: '100%', height: 'calc(100vh - 80px)' }}>
+    <div className="w-full h-full relative">
+      <div id="map" className="absolute inset-0 w-full h-full">
         {mapRef.current && renderMarkerComponent()}
         {/* <MarkerCluster /> */}
       </div>
