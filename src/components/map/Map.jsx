@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState, act } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import centerAtom from '../../recoil/center';
 import zoomAtom from '../../recoil/zoom';
+import userAtom from '../../recoil/user';
 import { withCenter } from '../../recoil/selectedSpot';
 import MapPanel from './MapPanel';
 import MapMarkerSpot from './MapMarkerSpot';
@@ -15,9 +16,10 @@ import FilterPanel from './FilterPanel';
 export default function Map({ mapRef, markerType, markers, filteredMarkers, activeCategories, setActiveCategories, showAllDays }) {
   const { naver } = window;
   const [center, setCenter] = useRecoilState(centerAtom);
-  const setZoom = useSetRecoilState(zoomAtom);
+  const [zoom, setZoom] = useRecoilState(zoomAtom);
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const handleSearch = useSearchSpots();
+  const user = useRecoilValue(userAtom);
 
   useEffect(() => {
     const mapOptions = {
@@ -36,7 +38,10 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
 
     mapRef.current = new naver.maps.Map('map', mapOptions);
     handleLocateMe();
-  }, []);
+     if (mapRef.current && user) {
+    handleSearch(center, zoom);
+  }
+  }, [user]);
 
   const handleZoomIn = useCallback(() => {
     if (mapRef.current) {
@@ -62,7 +67,7 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
   const handleCenterChanged = () => {
     if (mapRef.current) {
       const newCenter = mapRef.current.getCenter();
-       if (newCenter && typeof newCenter.lat === 'function' && typeof newCenter.lng === 'function') {
+       if (newCenter) {
         setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });}
     }
   };
@@ -81,21 +86,7 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
       );
     }
-  }, [setCenter]);
-
-  // 이동할 때 handleSearch 불러오지 않도록 idle 사용
-  useEffect(() => {
-    if (!mapRef.current) return;
-    if (markerType !== 'spot') return;
-
-    const listener = window.naver.maps.Event.addListener(
-      mapRef.current,
-      'idle',
-      handleSearch,
-    );
-
-    return () => window.naver.maps.Event.removeListener(listener);
-  }, [handleSearch]);
+  }, []);
 
   //eventlinster-zoom_changed, center_changed
   useEffect(() => {
@@ -116,7 +107,7 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
       naver.maps.Event.removeListener(zoomListener);
       naver.maps.Event.removeListener(centerListener);
     };
-  }, []);
+  }, [center, zoom]);
 
   const handleFilter = (category) => {
     setActiveCategories((prev) => {
@@ -145,13 +136,13 @@ export default function Map({ mapRef, markerType, markers, filteredMarkers, acti
             map={mapRef.current}
           />
           <FilterPanel onFilter={handleFilter} activeCategories={activeCategories}/>
-          <MapResearch />
+          <MapResearch handleSearch={handleSearch} center={center} zoom={zoom}/>
         </div>
       );
     if (markerType === 'curation')
       return (
         <div className="w-full">
-          <MapResearch onSearch={handleSearch} />
+          <MapResearch handleSearch={handleSearch} />
           <MapPanel
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
