@@ -123,7 +123,8 @@ export default function SpotUploader({isOpen, onClose}) {
 }, [isOpen]);
 
   return !isOpen ? null : (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+    <div className="absolute inset-0 bg-black/50" onClick={onClose}>
     <div className="w-full max-w-[100vh] max-h-[90vh] p-6 bg-background-light rounded-lg shadow-lg" onClick={(e) => e.stopPropagation()}>
       <div className="flex justify-between">
         <p className="text-2xl font-bold">Spot 등록</p>
@@ -239,5 +240,7 @@ export default function SpotUploader({isOpen, onClose}) {
       </div>
     )}
   </div>
+  </div>
+  
   )
 }
