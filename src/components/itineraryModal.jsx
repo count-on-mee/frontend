@@ -4,6 +4,7 @@ import tripDatesAtom from '../recoil/tripDates/atom';
 import useTripItinerary from '../hooks/useTripItinerary';
 import LoadingSpinner from './loadingSpinner';
 import { itineraryModalStyles } from '../utils/style';
+import DeleteConfirmModal from './common/DeleteConfirmModal';
 import {
   DndContext,
   closestCenter,
@@ -28,7 +29,7 @@ const getSpotId = (spot) => {
   return spot.tripItineraryId || spot.itineraryId || spot.id;
 };
 
-const SortableItem = ({ id, spot, onDelete, loading }) => {
+const SortableItem = ({ id, spot, onDeleteClick, loading }) => {
   const {
     attributes,
     listeners,
@@ -60,7 +61,7 @@ const SortableItem = ({ id, spot, onDelete, loading }) => {
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onDelete(getSpotId(spot));
+          onDeleteClick(getSpotId(spot), spot.spot?.name || spot.name);
         }}
         disabled={loading}
         className={itineraryModalStyles.deleteButton}
@@ -78,6 +79,12 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
   const [loading, setLoading] = useState(false);
   const [pendingMoves, setPendingMoves] = useState([]);
   const [activeId, setActiveId] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    itineraryId: null,
+    spotName: '',
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // DnD Kit 센서 설정
   const sensors = useSensors(
@@ -257,12 +264,23 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
     [loading, safeItinerary],
   );
 
-  const handleDeleteSpot = async (itineraryId) => {
-    setLoading(true);
+  const openDeleteModal = (itineraryId, spotName) => {
+    setDeleteModal({ isOpen: true, itineraryId, spotName });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, itineraryId: null, spotName: '' });
+  };
+
+  const handleDeleteSpot = async () => {
+    if (!deleteModal.itineraryId) return;
+
+    setIsDeleting(true);
     try {
-      await deleteItinerary(itineraryId);
+      await deleteItinerary(deleteModal.itineraryId);
+      closeDeleteModal();
     } finally {
-      setLoading(false);
+      setIsDeleting(false);
     }
   };
 
@@ -391,7 +409,7 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
                             key={id}
                             id={id}
                             spot={spot}
-                            onDelete={handleDeleteSpot}
+                            onDeleteClick={openDeleteModal}
                             loading={loading}
                           />
                         );
@@ -434,6 +452,17 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
 
         {loading && <LoadingSpinner message="최적 경로 재생성 중이에요!" />}
       </div>
+
+      <DeleteConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteSpot}
+        title="일정 삭제"
+        message={`"${deleteModal.spotName}" 일정을 삭제하시겠습니까?`}
+        confirmText="삭제"
+        cancelText="취소"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };

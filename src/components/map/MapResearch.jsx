@@ -1,8 +1,8 @@
-import { useRecoilValue } from "recoil";
-import centerAtom from "../../recoil/center";
-import zoomAtom from "../../recoil/zoom";
+import { useRecoilValue } from 'recoil';
+import centerAtom from '../../recoil/center';
+import zoomAtom from '../../recoil/zoom';
 
-export default function MapResearch({handleSearch, center, zoom}) {
+export default function MapResearch({ handleSearch, center, zoom }) {
   return (
     <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-40">
       <button
@@ -12,6 +12,5 @@ export default function MapResearch({handleSearch, center, zoom}) {
         현 지도에서 검색
       </button>
     </div>
-    
   );
 }

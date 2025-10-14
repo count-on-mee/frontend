@@ -6,6 +6,7 @@ import { neumorphStyles, componentStyles } from '../../utils/style';
 import { ClockIcon, UserIcon } from '@heroicons/react/24/outline';
 import AdminReplyForm from './adminReplyForm';
 import replyIcon from '../../assets/reply.png';
+import DeleteConfirmModal from '../common/DeleteConfirmModal';
 
 const InquiryList = () => {
   const { inquiries, loading, error, deleteInquiry, isAdmin } = useInquiries();
@@ -14,6 +15,12 @@ const InquiryList = () => {
   const [replyInquiry, setReplyInquiry] = useState(null);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    inquiryId: null,
+    inquiryTitle: '',
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
   const getSimplifiedStatus = (inquiry) => {
     if (inquiry.reply) return 'resolved';
     if (inquiry.status === 'COMPLETED') return 'resolved';
@@ -26,14 +33,26 @@ const InquiryList = () => {
     return simplifiedStatus === statusFilter;
   });
 
-  const handleDelete = async (inquiryId) => {
-    if (window.confirm('정말로 이 문의를 삭제하시겠습니까?')) {
-      try {
-        await deleteInquiry(inquiryId);
-      } catch (err) {
-        console.error('문의 삭제 중 오류 발생:', err);
-        alert('문의 삭제 중 오류가 발생했습니다.');
-      }
+  const openDeleteModal = (inquiryId, inquiryTitle) => {
+    setDeleteModal({ isOpen: true, inquiryId, inquiryTitle });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, inquiryId: null, inquiryTitle: '' });
+  };
+
+  const handleDelete = async () => {
+    if (!deleteModal.inquiryId) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteInquiry(deleteModal.inquiryId);
+      closeDeleteModal();
+    } catch (err) {
+      console.error('문의 삭제 중 오류 발생:', err);
+      alert('문의 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -311,6 +330,27 @@ const InquiryList = () => {
                       <img src={replyIcon} alt="답변" className="w-8 h-8" />
                     </button>
                   )}
+                  <button
+                    onClick={() =>
+                      openDeleteModal(inquiry.inquiryId, inquiry.title)
+                    }
+                    className={`p-2 bg-[#f0f0f3] rounded-lg hover:bg-orange-100 transition-colors shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]`}
+                    title="삭제"
+                  >
+                    <svg
+                      className="w-8 h-8 text-[#FF8C4B]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -326,6 +366,17 @@ const InquiryList = () => {
           closeReplyModal();
           window.location.reload();
         }}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDelete}
+        title="문의 삭제"
+        message={`"${deleteModal.inquiryTitle}" 문의를 삭제하시겠습니까?`}
+        confirmText="삭제"
+        cancelText="취소"
+        isLoading={isDeleting}
       />
     </div>
   );

@@ -169,37 +169,32 @@ export const scrapListStyles = {
   // 이미지 컨테이너
   imageContainer: clsx(
     'aspect-square w-full rounded-lg overflow-hidden',
-    'transition-all duration-700',
+    'transition-all duration-1000 ease-out',
     'relative group',
   ),
 
   // 스팟 카드
   spotCard: clsx(
     'rounded-lg overflow-hidden',
-    'transition-all duration-700',
-    'hover:shadow-lg',
+    'transition-all duration-1000 ease-out',
     'flex flex-col',
     baseStyles.shadow,
     baseStyles.hoverShadow,
   ),
 
-  // 섹션 컨테이너
+  // 섹션 컨테이너 (모달창 효과)
   sectionContainer: clsx(
-    'relative transition-all duration-700',
+    'relative transition-all duration-1000 ease-out',
     'group',
-    'hover:fixed hover:inset-0 hover:m-auto hover:w-[90%] hover:h-[90%] hover:z-50',
-    'hover:bg-background-gray hover:rounded-lg hover:shadow-2xl',
-    'hover:p-6 hover:overflow-y-auto',
-    'hover:scale-[1.01]',
     baseStyles.shadow,
   ),
 
   // 큐레이션 이미지
   curationImage: clsx(
     'w-full aspect-[3/4] rounded-lg overflow-hidden cursor-pointer',
-    'transition-all duration-700 ease-in-out hover:scale-102',
+    'transition-all duration-1000 ease-out',
     baseStyles.shadow,
-    'hover:shadow-xl relative',
+    'relative',
   ),
 
   // 선택 버튼

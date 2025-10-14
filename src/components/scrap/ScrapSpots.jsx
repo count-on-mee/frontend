@@ -1,31 +1,60 @@
+import { useState } from 'react';
 import { scrapListStyles } from '../../utils/style';
 import defaultImage from '../../assets/icon.png';
 
-// 스팟 카드 컴포넌트
-const SpotCard = ({ spot, isSelected, onToggleSelection }) => (
-  <div className={scrapListStyles.spotCard}>
-    <div className={scrapListStyles.imageContainer}>
-      <img
-        src={spot.imgUrls?.[0] || defaultImage}
-        alt={spot.name}
-        className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-    </div>
-    <div className={scrapListStyles.infoContainer}>
-      <h3 className={scrapListStyles.name}>{spot.name}</h3>
-      <p className={scrapListStyles.address}>{spot.address}</p>
-      <button
-        onClick={() => onToggleSelection(spot)}
-        className={scrapListStyles.selectionButton(isSelected)}
-      >
-        {isSelected ? '선택' : '선택'}
-      </button>
-    </div>
-  </div>
-);
+const SpotCard = ({ spot, isSelected, onToggleSelection }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState(null);
 
-// 섹션 헤더 컴포넌트
+  const handleMouseEnter = () => {
+    const timeout = setTimeout(() => {
+      setIsHovered(true);
+    }, 1500);
+    setHoverTimeout(timeout);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
+    }
+    setIsHovered(false);
+  };
+
+  return (
+    <div
+      className={scrapListStyles.spotCard}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className={scrapListStyles.imageContainer}>
+        <img
+          src={spot.imgUrls?.[0] || defaultImage}
+          alt={spot.name}
+          className={`w-full h-full object-cover transition-transform duration-1000 ease-out ${
+            isHovered ? 'scale-105' : 'scale-100'
+          }`}
+        />
+        <div
+          className={`absolute inset-0 bg-black transition-opacity duration-800 ease-out ${
+            isHovered ? 'opacity-20' : 'opacity-0'
+          }`}
+        ></div>
+      </div>
+      <div className={scrapListStyles.infoContainer}>
+        <h3 className={scrapListStyles.name}>{spot.name}</h3>
+        <p className={scrapListStyles.address}>{spot.address}</p>
+        <button
+          onClick={() => onToggleSelection(spot)}
+          className={scrapListStyles.selectionButton(isSelected)}
+        >
+          {isSelected ? '선택' : '선택'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const SectionHeader = ({ title }) => (
   <div className={scrapListStyles.sectionHeader}>
     <h3 className={scrapListStyles.sectionHeaderTitle}>{title}</h3>
@@ -39,11 +68,37 @@ export default function ScrapSpots({
   selectedSpots,
   onToggleSelection,
 }) {
+  const [isSectionHovered, setIsSectionHovered] = useState(false);
+  const [sectionHoverTimeout, setSectionHoverTimeout] = useState(null);
+
+  const handleSectionMouseEnter = () => {
+    const timeout = setTimeout(() => {
+      setIsSectionHovered(true);
+    }, 2000);
+    setSectionHoverTimeout(timeout);
+  };
+
+  const handleSectionMouseLeave = () => {
+    if (sectionHoverTimeout) {
+      clearTimeout(sectionHoverTimeout);
+      setSectionHoverTimeout(null);
+    }
+    setIsSectionHovered(false);
+  };
+
   return (
     <div className="mt-8">
       <SectionHeader title="스크랩한 장소" />
-      <div className={scrapListStyles.sectionContainer}>
-        <div className="group-hover:opacity-100 opacity-100 transition-opacity duration-500">
+      <div
+        className={
+          isSectionHovered
+            ? 'fixed inset-0 m-auto w-[90%] h-[90%] z-50 bg-background-gray rounded-lg shadow-2xl p-6 overflow-y-auto backdrop-blur-sm transition-all duration-1000 ease-out'
+            : `${scrapListStyles.sectionContainer}`
+        }
+        onMouseEnter={handleSectionMouseEnter}
+        onMouseLeave={handleSectionMouseLeave}
+      >
+        <div className="opacity-100 transition-opacity duration-1000 ease-out">
           {loading ? (
             <div className="text-center py-4">로딩 중...</div>
           ) : error ? (

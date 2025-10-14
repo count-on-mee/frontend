@@ -3,10 +3,17 @@ import api from '../../utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { XMarkIcon, PencilIcon, StarIcon } from '@heroicons/react/24/outline';
 import defaultImage from '../../assets/icon.png';
+import DeleteConfirmModal from '../../components/common/DeleteConfirmModal';
 
 function MyPageReview() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    reviewId: null,
+    reviewContent: '',
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
   const fetchMyReviews = async () => {
@@ -27,13 +34,23 @@ function MyPageReview() {
     }
   };
 
-  const deleteReview = async (event, reviewId) => {
+  const openDeleteModal = (event, reviewId, reviewContent) => {
     event.stopPropagation();
-    if (!window.confirm('정말로 삭제하시겠습니까?')) return;
+    setDeleteModal({ isOpen: true, reviewId, reviewContent });
+  };
 
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, reviewId: null, reviewContent: '' });
+  };
+
+  const deleteReview = async () => {
+    if (!deleteModal.reviewId) return;
+
+    setIsDeleting(true);
     try {
-      await api.delete(`/spots/reviews/${reviewId}`);
+      await api.delete(`/spots/reviews/${deleteModal.reviewId}`);
       fetchMyReviews();
+      closeDeleteModal();
     } catch (error) {
       console.error('Failed to delete review:', error);
       if (error.response?.status === 401) {
@@ -42,6 +59,8 @@ function MyPageReview() {
       } else {
         alert('리뷰 삭제에 실패했습니다.');
       }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -118,10 +137,14 @@ function MyPageReview() {
                         <button
                           className="p-1.5 bg-[#f0f0f3] rounded-full shadow-[4px_4px_8px_#d1d1d1,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d1d1,inset_-2px_-2px_4px_#ffffff] opacity-0 group-hover:opacity-100 transition-all duration-300"
                           onClick={(event) =>
-                            deleteReview(event, review.spotReviewId)
+                            openDeleteModal(
+                              event,
+                              review.spotReviewId,
+                              review.content,
+                            )
                           }
                         >
-                          <XMarkIcon className="w-3.5 h-3.5 text-red-500" />
+                          <XMarkIcon className="w-3.5 h-3.5 text-[#FF8C4B]" />
                         </button>
                       </div>
                     </div>
@@ -149,6 +172,18 @@ function MyPageReview() {
           </div>
         )}
       </div>
+
+      {/* 삭제 확인 모달 */}
+      <DeleteConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={deleteReview}
+        title="리뷰 삭제"
+        message={`이 리뷰를 삭제하시겠습니까?`}
+        confirmText="삭제"
+        cancelText="취소"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
