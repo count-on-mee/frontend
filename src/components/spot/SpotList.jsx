@@ -3,14 +3,14 @@ import Searchbar from '../ui/Searchbar';
 import Spot from './Spot';
 import { withCenter } from '../../recoil/selectedSpot';
 import { useState, useEffect } from 'react';
-import { useSearch } from '../../hooks/useSearch';
+import { useSpotSearch } from '../../hooks/useSearch';
 import { neumorphStyles } from '../../utils/style';
 
 export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const [currentPage, setCurrentPage] = useState(1);
   const spotsPerPage = 15;
-  const { searchTerm, handleSearch, filteredItems } = useSearch(spots);
+  const { searchTerm, handleSearch, filteredItems } = useSpotSearch(spots);
   const isSearching = searchTerm && searchTerm.trim() !== '';
   const sourcedItems = isSearching ? filteredItems : spots;
   const indexOfLastSpot = currentPage * spotsPerPage;

@@ -8,10 +8,17 @@ import {
   BookmarkIcon,
 } from '@heroicons/react/24/outline';
 import defaultImage from '../../assets/icon.png';
+import DeleteConfirmModal from '../../components/common/DeleteConfirmModal';
 
 function MyPageCuration() {
   const [curations, setCurations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    curationId: null,
+    curationName: '',
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
   const fetchMyCurations = async () => {
@@ -32,13 +39,23 @@ function MyPageCuration() {
     }
   };
 
-  const deleteCuration = async (event, curationId) => {
+  const openDeleteModal = (event, curationId, curationName) => {
     event.stopPropagation();
-    if (!window.confirm('정말로 삭제하시겠습니까?')) return;
+    setDeleteModal({ isOpen: true, curationId, curationName });
+  };
 
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, curationId: null, curationName: '' });
+  };
+
+  const deleteCuration = async () => {
+    if (!deleteModal.curationId) return;
+
+    setIsDeleting(true);
     try {
-      await api.delete(`/curations/${curationId}`);
+      await api.delete(`/curations/${deleteModal.curationId}`);
       fetchMyCurations();
+      closeDeleteModal();
     } catch (error) {
       console.error('Failed to delete curation:', error);
       if (error.response?.status === 401) {
@@ -47,6 +64,8 @@ function MyPageCuration() {
       } else {
         alert('큐레이션 삭제에 실패했습니다.');
       }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -126,12 +145,16 @@ function MyPageCuration() {
                         <PencilIcon className="w-5 h-5 text-[#666] group-hover:text-blue-600" />
                       </button>
                       <button
-                        className="p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-red-50 transition-all duration-300"
+                        className="p-3 bg-[#f0f0f3] backdrop-blur-sm rounded-full shadow-lg hover:bg-orange-50 transition-all duration-300"
                         onClick={(event) =>
-                          deleteCuration(event, curation.curationId)
+                          openDeleteModal(
+                            event,
+                            curation.curationId,
+                            curation.name,
+                          )
                         }
                       >
-                        <XMarkIcon className="w-5 h-5 text-red-500 group-hover:text-red-700" />
+                        <XMarkIcon className="w-5 h-5 text-[#FF8C4B] group-hover:text-[#D54E23]" />
                       </button>
                     </div>
                   </div>
@@ -173,6 +196,17 @@ function MyPageCuration() {
           </div>
         )}
       </div>
+
+      <DeleteConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={deleteCuration}
+        title="큐레이션 삭제"
+        message={`"${deleteModal.curationName}" 큐레이션을 삭제하시겠습니까?`}
+        confirmText="삭제"
+        cancelText="취소"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

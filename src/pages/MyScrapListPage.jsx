@@ -126,7 +126,6 @@ export default function MyScrapListPage() {
         },
       });
 
-      // 상태 초기화
       setSelectedDestinations([]);
       setTripDates({
         startDate: null,
@@ -134,7 +133,6 @@ export default function MyScrapListPage() {
       });
       setSelectedSpots([]);
 
-      // URL 변경
       navigate(`/trip/${trip.tripId}/itinerary`);
     } catch (error) {
       console.error('여행 생성 실패:', error);
@@ -260,9 +258,7 @@ export default function MyScrapListPage() {
           </div>
 
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-            {/* 왼쪽: 스팟과 큐레이션 */}
-            <div className="w-full md:w-1/2 flex-grow overflow-y-auto px-8 py-8 border-b md:border-b-0 md:border-r border-gray-200">
-              {/* 서치바 */}
+            <div className="w-full md:w-1/2 overflow-y-auto px-8 py-8 border-b md:border-b-0 md:border-r border-gray-200">
               <div className="w-full mb-8">
                 <Searchbar
                   value={searchTerm}
@@ -272,7 +268,6 @@ export default function MyScrapListPage() {
                 />
               </div>
 
-              {/* 스크랩된 스팟 */}
               <ScrapSpots
                 spots={sortedSpots}
                 loading={spotsLoading}
@@ -281,7 +276,6 @@ export default function MyScrapListPage() {
                 onToggleSelection={toggleSelection}
               />
 
-              {/* 스크랩된 큐레이션 */}
               <ScrapCurations
                 curations={scrapedCurations}
                 loading={curationsLoading}
@@ -290,15 +284,13 @@ export default function MyScrapListPage() {
               />
             </div>
 
-            {/* 오른쪽 섹션: 지도 */}
-            <div className="w-full md:w-1/2 h-[300px] relative px-8 py-8">
+            <div className="w-full md:w-1/2 relative px-8 py-8">
               <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                 <Map markers={markers} mapRef={mapRef} markerType="scrapList" />
               </div>
             </div>
           </div>
 
-          {/* 하단 여행 시작 버튼 */}
           <div className="p-6 border-t border-gray-200 flex justify-center">
             <button
               onClick={handleStartTrip}

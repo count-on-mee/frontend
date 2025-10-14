@@ -55,19 +55,22 @@ export default function CurationUploader({
 
   const handleDelete = (identifier) => {
     setCartSpots((prev) => {
-      if (isEdit) {
-        // 수정 모드: uniqueId 또는 spotId로 삭제
-        return prev.filter(
-          (spot) =>
-            spot.uniqueId !== identifier &&
-            spot.spotId !== identifier &&
-            spot.spotScrapId !== identifier,
+      return prev.filter((spot) => {
+        const spotUniqueId = spot.uniqueId;
+        const spotId = spot.spotId;
+        const spotScrapId = spot.spotScrapId;
+
+        return (
+          spotUniqueId !== identifier &&
+          spotId !== identifier &&
+          spotScrapId !== identifier
         );
-      } else {
-        // 생성 모드: spotScrapId로 삭제
-        return prev.filter((spot) => spot.spotScrapId !== identifier);
-      }
+      });
     });
+  };
+
+  const handleReorder = (newSpots) => {
+    setCartSpots(newSpots);
   };
 
   const handleCategoryClick = (category) => {
@@ -276,7 +279,11 @@ export default function CurationUploader({
                 <p className="text-sm text-gray-600 mb-4">
                   2개 이상의 스팟을 선택해 주세요!
                 </p>
-                <SpotCart spots={cartSpots} onDelete={handleDelete} />
+                <SpotCart
+                  spots={cartSpots}
+                  onDelete={handleDelete}
+                  onReorder={handleReorder}
+                />
               </div>
             </div>
           </div>
