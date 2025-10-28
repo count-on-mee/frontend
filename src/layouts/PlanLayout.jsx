@@ -1,15 +1,16 @@
 import { Outlet } from 'react-router-dom';
+import TripJoinCode from '../components/common/tripJoinCode';
 
 function PlanLayout() {
   return (
     <div
-      className="fixed inset-0 z-40 overflow-hidden"
+      className="fixed inset-0 z-40 overflow-hidden bg-[#f0f0f3]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="plan-layout-title"
-      style={{ top: '80px' }} // 헤더 높이만큼 아래에서 시작
+      style={{ top: '80px' }}
     >
-      <div className="flex items-center justify-center h-full p-4 sm:p-6">
+      <div className="flex items-center justify-center h-full p-6 md:p-8">
         <div
           className="fixed inset-0 transition-opacity"
           aria-hidden="true"
@@ -18,15 +19,12 @@ function PlanLayout() {
           <div className="absolute inset-0 bg-background opacity-70 backdrop-filter backdrop-blur-xl"></div>
         </div>
 
-        <div
-          className="bg-background-gray rounded-lg shadow-xl w-full max-w-3xl aspect-square relative z-10 flex flex-col"
-          id="plan-layout-title"
-        >
-          <div className="flex-grow overflow-hidden p-6">
-            <Outlet />
-          </div>
+        <div className="w-full max-w-[900px] aspect-square relative z-10">
+          <Outlet />
         </div>
       </div>
+
+      <TripJoinCode />
     </div>
   );
 }
