@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import useSocket from '../hooks/useSocket';
 import useTrip from '../hooks/useTrip';
 import TripProfile from '../components/user/tripProfile';
+import Invitation from '../components/invitation';
 
 const baseShadowStyles =
   'shadow-[4px_4px_8px_rgba(0,0,0,0.1),-4px_-4px_8px_rgba(255,255,255,0.8)]';
@@ -17,7 +18,7 @@ const navLinkStyles = (isActive) =>
     'text-[#2c3e50] font-medium',
     isActive
       ? 'bg-[#EB5E28] text-white shadow-[inset_4px_4px_8px_rgba(0,0,0,0.2)]'
-      : 'bg-white',
+      : 'bg-[#f0f0f3]',
     !isActive && baseShadowStyles,
     !isActive && hoverShadowStyles,
   );
@@ -52,11 +53,15 @@ const TripLayout = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#fafafa] font-prompt">
+    <div className="min-h-screen w-full bg-[#f0f0f3] font-prompt">
       <div className="h-16"></div>
       <nav className="w-full">
         <div className="max-w-[90%] mx-auto px-4 py-4">
-          <div className="flex justify-center items-center relative">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <Invitation tripId={tripId} />
+            </div>
+
             <div className="flex space-x-8">
               <Link
                 to={`/trip/${tripId}/itinerary`}
@@ -72,13 +77,11 @@ const TripLayout = () => {
               </Link>
             </div>
 
-            <div className="absolute right-1/4">
-              <div className="scale-125">
-                <TripProfile
-                  participants={tripData?.participants}
-                  loading={loading}
-                />
-              </div>
+            <div className="scale-125">
+              <TripProfile
+                participants={tripData?.participants}
+                loading={loading}
+              />
             </div>
           </div>
         </div>

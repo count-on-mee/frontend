@@ -44,14 +44,8 @@ export default function SpotPage() {
   });
 
   const handleOpenUploader = () => {
-    // if (!user) {
-    //   navigate('/login-notice');
-    //   return;
-    // }
     setIsUploaderOpen(true);
   };
-
-  // console.log(user?.role);
 
   // URL 파라미터로 받은 spotId에 해당하는 스팟을 선택
   useEffect(() => {
@@ -207,15 +201,15 @@ export default function SpotPage() {
   }, [selectedSpot, spotMarkers]);
 
   return (
-    <div className="min-h-screen bg-[#f0f0f3] font-prompt">
+    <div className="min-h-[calc(100vh-80px)] bg-[#f0f0f3] font-prompt">
       {/* 헤더 */}
-      <div className="w-full bg-[#f0f0f3]  pt-8 sm:pt-4 lg:pt-8">
+      <div className="w-full bg-[#f0f0f3] pt-4 sm:pt-6 lg:pt-8">
         <div className="w-full px-8 sm:px-12 lg:px-16 py-6 lg:py-3"></div>
       </div>
       {/* 메인 콘텐츠 */}
       <div className="w-full px-8 sm:px-12 lg:px-16 pb-8">
         <div className="max-w-8xl mx-auto">
-          <div className="w-full flex flex-col lg:flex-row h-[calc(100vh-200px)] gap-6">
+          <div className="w-full flex flex-col lg:flex-row h-[calc(100vh-280px)] gap-6">
             {/* 스팟 리스트 */}
             <div
               className={`w-full lg:w-1/4 overflow-y-auto h-full rounded-2xl ${neumorphStyles.base}`}
@@ -245,7 +239,7 @@ export default function SpotPage() {
             {/* 지도 레이아웃 */}
             <div
               className={`w-full ${selectedSpot ? 'lg:w-1/2' : 'lg:w-3/4'} rounded-2xl ${neumorphStyles.base} overflow-hidden relative`}
-              style={{ height: 'calc(100vh - 200px)' }}
+              style={{ height: 'calc(100vh - 280px)' }}
             >
               <Map
                 mapRef={mapRef}

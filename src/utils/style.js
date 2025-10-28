@@ -18,7 +18,7 @@ export const baseStyles = {
 export const componentStyles = {
   // 입력 필드
   input: clsx(
-    'w-full bg-[var(--color-background-gray)] rounded-full px-4 py-2 text-lg',
+    'w-full bg-[#f0f0f3] rounded-full px-4 py-2 text-lg',
     'focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]',
     baseStyles.shadow,
     baseStyles.hoverShadow,
@@ -27,14 +27,14 @@ export const componentStyles = {
   // 헤더
   header: clsx(
     'inline-block px-4 py-2 rounded-full font-bold text-lg',
-    'bg-[var(--color-background-gray)] text-[#252422]',
+    'bg-[#f0f0f3] text-[#252422]',
     baseStyles.shadow,
   ),
 
   // 카테고리
   category: clsx(
     'inline-flex items-center whitespace-nowrap px-4 py-2 rounded-full text-lg font-semibold',
-    'bg-[var(--color-background-gray)]',
+    'bg-[#f0f0f3]',
     baseStyles.shadow,
     'text-[var(--color-primary)]',
   ),
@@ -46,23 +46,20 @@ export const componentStyles = {
   ),
 
   // 카테고리 구분선
-  divider: clsx(
-    'h-1 my-3 bg-[var(--color-background-gray)] rounded-full',
-    baseStyles.insetShadow,
-  ),
+  divider: clsx('h-1 my-3 bg-[#f0f0f3] rounded-full', baseStyles.insetShadow),
 
   // 삭제 버튼
   deleteButton: clsx(
     'text-[var(--color-primary)] hover:text-[#D54E23] transition-colors duration-200',
     'p-2 flex items-center justify-center w-8 h-8 rounded-full',
-    'bg-[var(--color-background-gray)]',
+    'bg-[#f0f0f3]',
     baseStyles.shadow,
     baseStyles.hoverShadow,
   ),
 
   // placeholder 입력 필드
   placeholderInput: clsx(
-    'w-full bg-[var(--color-background-gray)] rounded-full px-4 py-2 text-lg',
+    'w-full bg-[#f0f0f3] rounded-full px-4 py-2 text-lg',
     'border-2 border-[var(--color-primary)] text-[var(--color-primary)]',
     'focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]',
     baseStyles.shadow,
@@ -118,7 +115,7 @@ export const styleUtils = {
         ? isDisabled
           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
           : 'bg-[var(--color-primary)] text-white hover:bg-[#D54E23]'
-        : 'bg-[var(--color-background-gray)] hover:bg-[#E0DFDE]',
+        : 'bg-[#f0f0f3] hover:bg-[#E0DFDE]',
       sizeStyles[size],
       'font-semibold',
       baseStyles.hoverShadow,
@@ -132,7 +129,7 @@ export const styleUtils = {
     'w-full mt-2 py-3 text-[#252422] hover:bg-[#E0DFDE] text-lg',
     'flex items-center justify-center gap-2',
     baseStyles.hoverShadow,
-    'bg-[var(--color-background-gray)]',
+    'bg-[#f0f0f3]',
   ),
 
   // 완료 버튼
@@ -161,7 +158,7 @@ export const styleUtils = {
 export const scrapListStyles = {
   // 스팟 항목
   spotItem: clsx(
-    'border-b border-[#252422] bg-[var(--color-background-gray)]',
+    'border-b border-[#252422] bg-[#f0f0f3]',
     'px-5 py-4 text-sm',
     'transition-all duration-700',
   ),
@@ -204,7 +201,7 @@ export const scrapListStyles = {
       baseStyles.shadow,
       isSelected
         ? 'bg-[var(--color-primary)] text-white'
-        : 'bg-[var(--color-background-gray)] text-[#252422]',
+        : 'bg-[#f0f0f3] text-[#252422]',
       'px-3 py-1 text-sm font-semibold',
       baseStyles.hoverShadow,
     ),
@@ -220,9 +217,7 @@ export const scrapListStyles = {
   ),
 
   // 섹션 헤더
-  sectionHeader: clsx(
-    'top-0 bg-background-gray py-4 mb-6 border-b border-gray-200 z-10',
-  ),
+  sectionHeader: clsx('top-0 bg-[#f0f0f3] py-4 mb-6 z-10'),
   sectionHeaderTitle: clsx('text-lg sm:text-xl font-semibold text-[#252422]'),
 
   // 검색 입력 필드
@@ -232,7 +227,7 @@ export const scrapListStyles = {
   grid: clsx('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3'),
 
   // 스팟 카드 컨테이너
-  cardContainer: clsx('bg-background-gray rounded-lg p-6 shadow-lg'),
+  cardContainer: clsx('bg-[#f0f0f3] rounded-lg p-6 shadow-lg'),
 
   // 빈 상태 메시지
   emptyMessage: clsx('text-center py-8 text-gray-500'),
@@ -259,7 +254,7 @@ export const modalStyles = {
 
   // 모달 컨테이너
   container: clsx(
-    'relative z-10 bg-background-gray rounded-lg shadow-xl',
+    'relative z-10 bg-[#f0f0f3] rounded-lg shadow-xl',
     'w-full max-w-7xl h-[calc(100vh-8rem)]',
     'flex flex-col',
     baseStyles.shadow,
@@ -318,7 +313,7 @@ export const searchStyles = {
     'h-12',
   ),
   input: clsx(
-    'w-full bg-[var(--color-background-gray)]',
+    'w-full bg-[#f0f0f3]',
     'pl-12 pr-3',
     'focus:outline-none',
     'text-[#252422]',
@@ -336,10 +331,10 @@ export const searchStyles = {
  * Neumorphism 스타일
  */
 export const neumorphStyles = {
-  base: 'bg-[#f0f0f3] shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff]',
+  base: 'bg-[#f0f0f3] shadow-[8px_8px_16px_#b5b5b5,-8px_-8px_16px_#ffffff]',
   small: 'bg-[#f0f0f3] shadow-[4px_4px_8px_#d1d1d1,-4px_-4px_8px_#ffffff]',
   medium: 'bg-[#f0f0f3] shadow-[6px_6px_12px_#d1d1d1,-6px_-6px_12px_#ffffff]',
-  large: 'bg-[#f0f0f3] shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff]',
+  large: 'bg-[#f0f0f3] shadow-[8px_8px_16px_#b5b5b5,-8px_-8px_16px_#ffffff]',
   smallInset:
     'bg-[#f0f0f3] shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]',
   tinyInset:

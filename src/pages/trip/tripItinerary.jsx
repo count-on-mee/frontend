@@ -11,7 +11,6 @@ import { useRecoilState } from 'recoil';
 import useTrip from '../../hooks/useTrip';
 import useTripItinerary from '../../hooks/useTripItinerary';
 import ItineraryModal from '../../components/itineraryModal';
-import Invitation from '../../components/invitation';
 import TransportationInfo from '../../components/transportationInfo';
 import RecoilDateRangePicker from '../../components/datePickers/recoilDateRangePicker';
 import LoadingSpinner from '../../components/loadingSpinner';
@@ -222,14 +221,8 @@ const TripItinerary = () => {
           <div
             className={`${layoutStyles.flex.between} ${layoutStyles.spacing.section} mt-8 `}
           >
-            <div
-              className={`${componentStyles.container.base} ${neumorphStyles.base} text-[var(--color-primary)] ${neumorphStyles.hover} flex items-center gap-3`}
-            >
-              <img src={koreaMap} alt="Korea Map" className="w-15 h-15" />
-              <Invitation tripId={tripId} />
-            </div>
             <button
-              onClick={() => setShowAllDays(prev => !prev)}
+              onClick={() => setShowAllDays((prev) => !prev)}
               className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} ${showAllDays ? 'text-[var(--color-primary)]' : 'text-gray-600'}`}
             >
               {showAllDays ? 'Day 보기' : '전체 보기'}
@@ -248,7 +241,10 @@ const TripItinerary = () => {
               <DayButton
                 key={day}
                 active={activeDay === day}
-                onClick={() => {setActiveDay(day); setShowAllDays(false)}}
+                onClick={() => {
+                  setActiveDay(day);
+                  setShowAllDays(false);
+                }}
               >
                 Day{day}
               </DayButton>
