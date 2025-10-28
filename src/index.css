@@ -88,7 +88,7 @@ body {
 }
 
 .react-datepicker {
-  @apply bg-[#E9E8E5] font-prompt rounded-lg shadow-lg max-w-md mx-auto;
+  @apply bg-[#E9E8E5] font-['Prompt'] rounded-lg shadow-lg max-w-md mx-auto;
 }
 
 .react-datepicker__header {
@@ -114,9 +114,9 @@ body {
 }
 
 .react-datepicker__day--selected {
-  @apply bg-[#D54E23] rounded-full !important;
+  @apply bg-[#D54E23] rounded-full;
 }
 .react-datepicker__day:hover,
 .react-datepicker__day--keyboard-selected {
-  @apply bg-[#D54E23] opacity-70 rounded-full !important;
+  @apply bg-[#D54E23] opacity-70 rounded-full;
 }
