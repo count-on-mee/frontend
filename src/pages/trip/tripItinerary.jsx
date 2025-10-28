@@ -26,6 +26,7 @@ import {
 } from '../../utils/style';
 import Map from '../../components/map/Map';
 
+
 const DayButton = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
@@ -129,12 +130,17 @@ const TripItinerary = () => {
     dayItem.list.map((item) => ({
       ...item.spot,
       day: dayItem.day,
-      position: {
-        lat: item.spot.location.lat,
-        lng: item.spot.location.lng,
-      },
+      position: new naver.maps.LatLng(
+      item.spot.location.lat,
+      item.spot.location.lng)
     })),
   );
+  
+  const handleSpotClick = (spot) => {
+  if (!mapRef.current || !spot?.spot?.location) return;
+  const { lat, lng } = spot.spot.location;
+  mapRef.current.setCenter({ lat, lng });
+};
 
   const filteredMarkers = markers.filter((marker) => marker.day === activeDay);
   const markersToSend = showAllDays ? markers : filteredMarkers;
@@ -229,12 +235,6 @@ const TripItinerary = () => {
               <Invitation tripId={tripId} />
             </div>
             <button
-              onClick={() => setShowAllDays(prev => !prev)}
-              className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} ${showAllDays ? 'text-[var(--color-primary)]' : 'text-gray-600'}`}
-            >
-              {showAllDays ? 'Day 보기' : '전체 보기'}
-            </button>
-            <button
               onClick={() => setShowModal(true)}
               className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} text-[var(--color-primary)]`}
             >
@@ -284,6 +284,7 @@ const TripItinerary = () => {
                     >
                       <div
                         className={`${layoutStyles.flex.gap} p-6 ${neumorphStyles.base} ${neumorphStyles.hover}`}
+                        onClick={() => handleSpotClick(item)}
                       >
                         <motion.div
                           key={item.order}
@@ -329,13 +330,21 @@ const TripItinerary = () => {
             )}
           </div>
         </div>
-        <div className="w-1/2 h-[500px] overflow-hidden sticky top-30">
+        <div className="w-1/2 h-[500px] flex flex-col overflow-hidden sticky top-30">
           <Map
             mapRef={mapRef}
             markers={markersToSend}
             showAllDays={showAllDays}
             markerType="itinerary"
           />
+          <div className='flex justify-end p-2'>
+            <button
+              onClick={() => setShowAllDays(prev => !prev)}
+              className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} ${showAllDays ? 'text-[var(--color-primary)]' : 'text-gray-600'}`}
+            >
+              {showAllDays ? 'Day 보기' : '전체 보기'}
+            </button>
+          </div>
         </div>
       </div>
       <ItineraryModal
