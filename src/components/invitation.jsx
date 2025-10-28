@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import axiosInstance from '../utils/axiosInstance';
-import { motion } from 'framer-motion';
+import koreaMap from '../assets/Korea.png';
+import { neumorphStyles } from '../utils/style';
 
 const Invitation = ({ tripId }) => {
   const [invitationCode, setInvitationCode] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 
   const handleInvite = async () => {
     try {
       const res = await axiosInstance.post(`/trips/${tripId}/invitations`);
       if (res.data && res.data.invitationCode) {
-        setInvitationCode(res.data.invitationCode);
-        setCopied(false);
+        const code = res.data.invitationCode;
+        setInvitationCode(code);
+        navigator.clipboard.writeText(code);
+        setShowCopiedMessage(true);
+        setTimeout(() => {
+          setShowCopiedMessage(false);
+        }, 3000);
       } else {
         throw new Error('초대 코드를 받지 못했습니다.');
       }
@@ -21,36 +27,42 @@ const Invitation = ({ tripId }) => {
     }
   };
 
-  const handleCopy = () => {
-    if (invitationCode) {
-      navigator.clipboard.writeText(invitationCode);
-      setCopied(true);
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center w-full">
-      <button
-        onClick={handleInvite}
-        className="w-full text-center px-4 py-1 bg-gray-100 text-primary rounded-md hover:bg-gray-200 transition-colors duration-200"
-      >
-        친구 초대하기
-      </button>
-      {invitationCode && (
-        <div className="flex flex-col items-center mt-2">
-          <span className="text-gray-700">초대 코드: {invitationCode}</span>
-          <button
-            onClick={handleCopy}
-            className={`mt-2 px-4 py-2 rounded-md transition-all duration-200 ${
-              copied
-                ? 'bg-gray-200 text-gray-700'
-                : 'bg-gray-100 text-primary hover:bg-gray-200'
-            }`}
-          >
-            {copied ? '복사됨' : '복사'}
-          </button>
-        </div>
-      )}
+    <div className="flex items-center gap-3">
+      <img src={koreaMap} alt="Korea Map" className="w-15 h-15" />
+      <div className="flex flex-col gap-2">
+        <button
+          onClick={handleInvite}
+          className={`px-6 py-3 text-base text-primary rounded-full transition-all duration-200 ${neumorphStyles.small} ${neumorphStyles.hover}`}
+        >
+          친구 초대하기
+        </button>
+        {invitationCode && (
+          <div className="mt-2 space-y-2">
+            <div className="flex items-center gap-2 p-3  rounded-lg">
+              <span className="text-gray-600 text-sm font-medium">
+                초대 코드:
+              </span>
+              <span className="text-primary font-bold tracking-wider">
+                {invitationCode}
+              </span>
+            </div>
+            {showCopiedMessage && (
+              <div
+                className={`flex items-center justify-center gap-2 transition-all duration-300 ${
+                  showCopiedMessage
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 -translate-y-2'
+                }`}
+              >
+                <span className="text-sm text-[#FF8C4B] font-medium">
+                  클립보드에 복사되었습니다!
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

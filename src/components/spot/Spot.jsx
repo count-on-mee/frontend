@@ -24,21 +24,25 @@ export default function Spot({ handleScrapClick, spot, onClick, varient }) {
       <Carousel imgUrls={imgUrls} spot={spot} />
       <div className="p-4 relative">
         <button
-          className={`absolute top-4 right-4 z-10 p-2 rounded-full transition-all duration-200 ${neumorphStyles.small} ${neumorphStyles.hover}`}
+          className={`absolute top-4 right-4 z-10 flex flex-col items-center gap-1 transition-all duration-200`}
           onClick={(e) => {
             e.stopPropagation();
             handleScrapClick(spot.spotId);
           }}
         >
-          <BookmarkIcon
-            className={`w-5 h-5 transition-colors ${isScraped ? 'fill-[#EB5E28] stroke-[#EB5E28]' : 'text-gray-400 hover:text-[#EB5E28]'}`}
-          />
+          <div
+            className={`p-2 rounded-full ${neumorphStyles.small} ${neumorphStyles.hover}`}
+          >
+            <BookmarkIcon
+              className={`w-5 h-5 transition-colors ${isScraped ? 'fill-[#EB5E28] stroke-[#EB5E28]' : 'text-gray-400 hover:text-[#EB5E28]'}`}
+            />
+          </div>
+          <span className="text-xs text-gray-600 font-medium">
+            {scrapCount}
+          </span>
         </button>
         <h3 className="text-lg font-bold text-[#252422] mb-2 pr-12">{name}</h3>
         {isDetail && <p className="text-sm text-gray-600 mb-3">{address}</p>}
-        <p className="text-sm text-gray-500 mb-3">
-          {scrapCount}명이 스크랩했어요.
-        </p>
         <Hashtag category={categories} />
       </div>
     </div>

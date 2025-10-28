@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import tripDatesAtom from '../../recoil/tripDates';
 import RecoilDateRangePicker from '../datePickers/recoilDateRangePicker';
+import { neumorphStyles } from '../../utils/style';
 
 function Calendar() {
   const navigate = useNavigate();
@@ -11,17 +12,17 @@ function Calendar() {
   }, [navigate]);
 
   return (
-    <div className="bg-[#EBEAE9] font-prompt h-full flex flex-col p-4">
-      <div className="flex-grow overflow-y-auto">
-        <RecoilDateRangePicker
-          atom={tripDatesAtom}
-          showCompleteButton={true}
-          onComplete={createEvent}
-          completeButtonText="완료"
-          size="default"
-          allowPastDates={false}
-        />
-      </div>
+    <div
+      className={`${neumorphStyles.base} ${neumorphStyles.hover} rounded-2xl p-6 font-prompt h-full flex flex-col`}
+    >
+      <RecoilDateRangePicker
+        atom={tripDatesAtom}
+        showCompleteButton={true}
+        onComplete={createEvent}
+        completeButtonText="완료"
+        size="default"
+        allowPastDates={false}
+      />
     </div>
   );
 }

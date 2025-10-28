@@ -71,7 +71,7 @@ function DateRangePicker({
   );
 
   return (
-    <div className="bg-[#EBEAE9] font-prompt h-full flex flex-col">
+    <div className="bg-[#f0f0f3] font-prompt h-full flex flex-col">
       <div className="flex-grow overflow-y-auto">
         <div className={dateRangePickerStyles.headerSize[size].container}>
           <button

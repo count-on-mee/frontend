@@ -4,13 +4,18 @@ import { useRecoilState } from 'recoil';
 import selectedDestinationsAtom from '../../recoil/selectedDestinations';
 import useDestinations from '../../hooks/useDestinations';
 import { useListSearch } from '../../hooks/useSearch';
-import { baseStyles, componentStyles, styleUtils } from '../../utils/style';
+import {
+  baseStyles,
+  componentStyles,
+  styleUtils,
+  neumorphStyles,
+} from '../../utils/style';
 import clsx from 'clsx';
 import Searchbar from '../ui/Searchbar';
 
 // 목적지 항목 스타일
 const destinationItemStyles = clsx(
-  'border-b border-[#252422]/10 bg-[var(--color-background-gray)]',
+  'border-b border-[#252422]/10 bg-[#f0f0f3]',
   'px-5 py-5 text-base',
 );
 
@@ -27,7 +32,7 @@ const selectionButtonStyles = (isSelected) =>
     baseStyles.shadow,
     isSelected
       ? 'bg-[var(--color-primary)] text-white'
-      : 'bg-[var(--color-background-gray)] text-[#252422]',
+      : 'bg-[#f0f0f3] text-[#252422]',
     'px-5 py-2 text-base font-semibold',
     baseStyles.hoverShadow,
   );
@@ -71,7 +76,7 @@ function Destination() {
 
   if (loading) {
     return (
-      <div className="bg-[var(--color-background-gray)] font-prompt h-full flex flex-col items-center justify-center">
+      <div className="bg-[#f0f0f3] font-prompt h-full flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
         <p className="mt-4 text-[#252422]">목적지를 불러오는 중...</p>
       </div>
@@ -80,7 +85,7 @@ function Destination() {
 
   if (error) {
     return (
-      <div className="bg-[var(--color-background-gray)] font-prompt h-full flex flex-col items-center justify-center">
+      <div className="bg-[#f0f0f3] font-prompt h-full flex flex-col items-center justify-center">
         <p className="text-red-500 mb-4">에러가 발생했습니다: {error}</p>
         <button
           onClick={() => window.location.reload()}
@@ -97,8 +102,10 @@ function Destination() {
   }
 
   return (
-    <div className="bg-[var(--color-background-gray)] font-prompt h-full flex flex-col">
-      <div className="flex items-center justify-between p-8">
+    <div
+      className={`${neumorphStyles.base} ${neumorphStyles.hover} rounded-2xl p-6 font-prompt h-full flex flex-col`}
+    >
+      <div className="flex items-center justify-between">
         <button onClick={goBack} className={styleUtils.closeButton}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +125,7 @@ function Destination() {
         <h2 className={componentStyles.header}>어디로 떠나시나요?</h2>
         <div className="w-8"></div>
       </div>
-      <div className="w-4/5 mx-auto py-8">
+      <div className="w-4/5 mx-auto py-6">
         <Searchbar
           value={searchTerm}
           onChange={handleSearch}
@@ -126,10 +133,7 @@ function Destination() {
           size="lg"
         />
       </div>
-      <div
-        className="overflow-y-auto rounded-lg mb-8 mx-8"
-        style={{ maxHeight: '400px' }}
-      >
+      <div className="flex-grow overflow-y-auto mb-4 mx-8">
         <table className="w-full">
           <tbody className="text-[#252422]">
             {filteredDestinations.map((dest, idx) => (
@@ -181,7 +185,7 @@ function Destination() {
           </tbody>
         </table>
       </div>
-      <div className="flex justify-center mb-8">
+      <div className="flex justify-center py-4">
         <button
           onClick={handleNext}
           className={styleUtils.buttonStyle('primary', false, 'lg')}

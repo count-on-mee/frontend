@@ -10,12 +10,19 @@ import {
 import TripProfile from '../../components/user/tripProfile';
 import useTrip from '../../hooks/useTrip';
 import { componentStyles, styleUtils, neumorphStyles } from '../../utils/style';
+import DeleteConfirmModal from '../../components/common/DeleteConfirmModal';
 
 function MyPageTripList() {
   const [tripList, setTripList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tripDetails, setTripDetails] = useState({});
   const [isSectionHovered, setIsSectionHovered] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    tripId: null,
+    tripTitle: '',
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
   const { getTrip } = useTrip();
 
@@ -55,13 +62,23 @@ function MyPageTripList() {
     }
   };
 
-  const deleteTripList = async (event, tripId) => {
+  const openDeleteModal = (event, tripId, tripTitle) => {
     event.stopPropagation();
-    const confirmed = window.confirm('정말 삭제하시겠습니까?');
-    if (!confirmed) return; // 취소 누르면 삭제 취소
+    setDeleteModal({ isOpen: true, tripId, tripTitle });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, tripId: null, tripTitle: '' });
+  };
+
+  const deleteTripList = async () => {
+    if (!deleteModal.tripId) return;
+
+    setIsDeleting(true);
     try {
-      await api.delete(`/trips/${tripId}`);
+      await api.delete(`/trips/${deleteModal.tripId}`);
       fetchTripList();
+      closeDeleteModal();
     } catch (error) {
       console.error('Failed to delete trip list:', error);
       if (error.response?.status === 401) {
@@ -70,6 +87,8 @@ function MyPageTripList() {
       } else {
         alert('여행 삭제에 실패했습니다.');
       }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -169,9 +188,9 @@ function MyPageTripList() {
                           </div>
 
                           <button
-                            className={`${componentStyles.deleteButton} opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10`}
+                            className="p-2 flex items-center justify-center w-10 h-10 rounded-full bg-[#f0f0f3] text-[#FF8C4B] hover:text-[#D54E23] transition-all duration-200 shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] opacity-0 group-hover:opacity-100"
                             onClick={(event) =>
-                              deleteTripList(event, trip.tripId)
+                              openDeleteModal(event, trip.tripId, trip.title)
                             }
                           >
                             <XMarkIcon className="w-7 h-7" />
@@ -197,6 +216,18 @@ function MyPageTripList() {
           </div>
         )}
       </div>
+
+      {/* 삭제 확인 모달 */}
+      <DeleteConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={deleteTripList}
+        title="여행 삭제"
+        message={`"${deleteModal.tripTitle}" 여행을 삭제하시겠습니까?`}
+        confirmText="삭제"
+        cancelText="취소"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

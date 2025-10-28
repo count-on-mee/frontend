@@ -1,5 +1,4 @@
 import ProfileImage from './ProfileImage';
-import UploadImages from '../ui/UploadImages';
 import { PencilSquareIcon, CheckIcon } from '@heroicons/react/24/outline';
 import userAtom from '../../recoil/user';
 import { useRecoilValue } from 'recoil';
@@ -21,14 +20,13 @@ export default function ProfileSection({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 현재 경로에서 선택된 메뉴 결정
   const getSelectedMenu = () => {
     const path = location.pathname;
     if (path === '/mypage/triplist') return 'triplist';
     if (path === '/mypage/scrap') return 'scrap';
     if (path === '/mypage/curation') return 'curation';
     if (path === '/mypage/review') return 'review';
-    return 'scrap'; // 기본값
+    return 'scrap';
   };
 
   const selectedMenu = getSelectedMenu();
@@ -63,45 +61,48 @@ export default function ProfileSection({
   return (
     <div className="font-mixed box-content w-1/4 text-center text-2xl bg-[#f0f0f3] min-h-screen">
       <div className="px-8 py-12">
-        <div className="relative w-1/2 mx-auto h-1/5 mb-8">
-          <ProfileImage user={user} />
-          <div className="absolute top-25 left-30">
-            <UploadImages mode="single" onUpload={handleImageChange} />
-          </div>
+        <div className="w-1/2 mx-auto mb-8">
+          <ProfileImage user={user} onImageChange={handleImageChange} />
         </div>
 
-        <div className="flex justify-center w-full mb-8">
+        <div className="flex justify-center w-full mb-6">
           <div className="inline-flex flex-row items-center mx-auto">
             {user && isEditing ? (
-              <>
+              <div className="flex items-center bg-[#f0f0f3] rounded-xl p-2 shadow-[6px_6px_12px_#d1d1d1,-6px_-6px_12px_#ffffff]">
                 <input
-                  className="w-2/3 ml-10 border-b-2 bg-[#FFFCF2] border-[#403D39] rounded-lg px-3 py-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="bg-[#f0f0f3] border-none outline-none text-2xl font-bold font-mixed text-gray-700 px-3 py-1 rounded-lg shadow-[inset_3px_3px_6px_#d1d1d1,inset_-3px_-3px_6px_#ffffff] focus:shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-200"
                   type="text"
                   name="nickname"
                   value={nickname}
                   onChange={handleNicknameChange}
+                  placeholder="닉네임을 입력하세요"
                 />
-              </>
+                <button
+                  className="flex-shrink-0 ml-2 p-1.5 rounded-full shadow-[6px_6px_12px_#d1d1d1,-6px_-6px_12px_#ffffff] hover:shadow-[inset_3px_3px_6px_#d1d1d1,inset_-3px_-3px_6px_#ffffff] transition-all duration-200"
+                  onClick={handleSave}
+                >
+                  <CheckIcon className="w-5 h-5 text-[#FF8C4B]" />
+                </button>
+              </div>
             ) : (
-              <div className="text-3xl font-bold font-mixed text-gray-700">
-                {user?.nickname}
+              <div className="flex items-center bg-[#f0f0f3] rounded-xl p-2 shadow-[6px_6px_12px_#d1d1d1,-6px_-6px_12px_#ffffff]">
+                <div className="text-2xl font-bold font-mixed text-gray-700 px-3 py-1">
+                  {user?.nickname}
+                </div>
+                <button
+                  className="flex-shrink-0 ml-2 p-1.5 rounded-full shadow-[6px_6px_12px_#d1d1d1,-6px_-6px_12px_#ffffff] hover:shadow-[inset_3px_3px_6px_#d1d1d1,inset_-3px_-3px_6px_#ffffff] transition-all duration-200"
+                  onClick={handleEdit}
+                >
+                  <PencilSquareIcon className="w-5 h-5 text-gray-600" />
+                </button>
               </div>
             )}
-            <button
-              className="flex-shrink-0 ml-2 p-2 rounded-full shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff] hover:shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-200"
-              onClick={isEditing ? handleSave : handleEdit}
-            >
-              {isEditing ? (
-                <CheckIcon className="w-6 h-6 text-green-600" />
-              ) : (
-                <PencilSquareIcon className="w-6 h-6 text-gray-600" />
-              )}
-            </button>
           </div>
-          {error && <p className="block mt-3 text-sm text-red-500">{error}</p>}
+          {error && (
+            <p className="block mt-2 text-base text-red-500">{error}</p>
+          )}
         </div>
 
-        {/* 새로운 메뉴 구조 */}
         <div className="space-y-6">
           {menuItems.map((category) => (
             <div
@@ -115,7 +116,7 @@ export default function ProfileSection({
                   className="w-6 h-6 mr-3"
                 />
                 <h3
-                  className="text-lg font-bold text-gray-700"
+                  className="text-xl font-bold text-gray-700"
                   style={{ color: category.color }}
                 >
                   {category.title}
@@ -142,7 +143,7 @@ export default function ProfileSection({
                         className="w-2 h-2 rounded-full mr-3"
                         style={{ backgroundColor: category.color }}
                       ></div>
-                      <span className="text-sm font-medium text-gray-600">
+                      <span className="text-base font-medium text-gray-600">
                         {item.title}
                       </span>
                     </div>
