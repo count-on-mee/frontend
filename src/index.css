@@ -5,14 +5,13 @@
   src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/goorm-sans-code.woff2')
     format('woff2');
   unicode-range: U+AC00-D7AF;
-  unicode-range: U+AC00-D7AF;
 }
 
 @import 'tailwindcss';
 
 @theme {
   --color-background-light: #fafafa;
-  --color-background-gray: #ebeae9;
+  --color-background-gray: #f0f0f3;
   --color-primary: #eb5e28;
   --color-charcoal: #403d39;
 }
@@ -35,11 +34,11 @@
       -2px -2px 2px rgba(255, 255, 255, 0.35);
   }
   .vertical-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
 }
 
 @layer components {
@@ -57,17 +56,17 @@ body {
 }
 
 .slick-slide {
-  display: flex !important;       
-  align-items: center !important;          
-  justify-content: center;        
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center;
 }
 
 /* .slick-slide img {
   object-fit: contain;           
 } */
 
-.slick-track{
-  height: 100%
+.slick-track {
+  height: 100%;
 }
 
 /* ::-webkit-scrollbar {
@@ -121,13 +120,3 @@ body {
 .react-datepicker__day--keyboard-selected {
   @apply bg-[#D54E23] opacity-70 rounded-full !important;
 }
-.react-datepicker__day:hover {
-  @apply bg-[#D54E23] rounded-full !important; /* Ensure it applies the same background color 
-}
-.react-datepicker__day--in-selecting-range {
-  @apply bg-[#D54E23]  opacity-70 rounded-full !important; /* Ensure it applies the same background color 
-}
-.react-datepicker__day--in-range {
-  @apply bg-transparent text-black  opacity-70 rounded-full !important; /* Ensure it applies the same background color 
-} 
-*/
