@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 export default function LoginPage() {
 
-  const baseURL = 'https://api.countonme.site';
+  const baseURL = 'https://api.countonme.me';
   // const baseURL = 'http://localhost:8888';
 
   const handleNaverLogin = () => {
