@@ -7,6 +7,7 @@ import SupportLayout from './layouts/supportLayout';
 import Calendar from './components/plan/Calendar';
 import Destination from './components/plan/Destination';
 import Header from './components/Header';
+import Footer from './components/footer';
 import SpotPage from './pages/SpotPage';
 import CurationPage from './pages/CurationPage';
 import CurationEditPage from './pages/curationEditPage';
@@ -82,6 +83,7 @@ function App() {
               </Route>
             </Routes>
           </main>
+          <Footer />
         </div>
       </RecoilRoot>
     </React.StrictMode>

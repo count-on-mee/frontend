@@ -11,8 +11,6 @@ import { FaRegPenToSquare } from 'react-icons/fa6';
 import SpotUploader from '../components/spot/SpotUploader';
 import { useParams } from 'react-router-dom';
 import api from '../utils/axiosInstance';
-import { getRecoil } from 'recoil-nexus';
-import authAtom from '../recoil/auth';
 
 export default function ScrapSpotPage() {
   const { spotId } = useParams();
@@ -42,12 +40,7 @@ export default function ScrapSpotPage() {
   const fetchScrapedSpots = async () => {
     try {
       setLoading(true);
-      const token = getRecoil(authAtom).accessToken;
-      const response = await api.get('/scraps/spots', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get('/scraps/spots');
       const data = await response.data;
 
       // 스팟 데이터를 SpotPage에서 사용하는 형태로 변환

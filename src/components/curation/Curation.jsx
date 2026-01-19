@@ -3,8 +3,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import userAtom from '../../recoil/user';
 import curationsAtom from '../../recoil/curations';
 import selectedCurationAtom from '../../recoil/selectedCuration';
-import defaultImage from '../../assets/icon.png';
-import authAtom from '../../recoil/auth';
+import defaultImage from '../../assets/logo.png';
 
 export default function Curation({
   curation,
@@ -32,9 +31,8 @@ export default function Curation({
             alt={curation.name}
           />
         </div>
-        <div className="absolute text-sm sm:text-base lg:text-lg text-background-light font-mixed font-extrabold bottom-3 left-3 sm:bottom-4 sm:left-4 lg:bottom-5 lg:left-5 text-shadow-header bg-charcoal/60 px-2">
+        <div className="absolute text-lg sm:text-xl lg:text-2xl text-white font-mixed font-semibold bottom-8 right-3 sm:bottom-10 sm:right-4 lg:bottom-12 lg:right-5 text-right px-3 sm:px-4 lg:px-5">
           {curation.name}
-          {/* curationTitle */}
         </div>
         <button
           onClick={(e) => {

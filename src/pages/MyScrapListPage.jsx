@@ -5,7 +5,7 @@ import authAtom from '../recoil/auth';
 import selectedSpotsAtom from '../recoil/selectedSpots';
 import selectedDestinationsAtom from '../recoil/selectedDestinations';
 import tripDatesAtom from '../recoil/tripDates';
-import defaultImage from '../assets/icon.png';
+import defaultImage from '../assets/logo.png';
 import CurationModal from '../components/plan/CurationModal';
 import LoadingSpinner from '../components/loadingSpinner';
 import clsx from 'clsx';

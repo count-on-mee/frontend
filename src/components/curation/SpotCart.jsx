@@ -1,5 +1,5 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import defaultImage from '../../assets/icon.png';
+import defaultImage from '../../assets/logo.png';
 import { neumorphStyles } from '../../utils/style';
 import {
   DndContext,

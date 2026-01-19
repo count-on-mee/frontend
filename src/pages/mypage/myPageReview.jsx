@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { XMarkIcon, PencilIcon, StarIcon } from '@heroicons/react/24/outline';
-import defaultImage from '../../assets/icon.png';
+import defaultImage from '../../assets/logo.png';
 import DeleteConfirmModal from '../../components/common/DeleteConfirmModal';
 
 function MyPageReview() {

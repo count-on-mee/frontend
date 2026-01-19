@@ -3,30 +3,32 @@ import Searchbar from '../ui/Searchbar';
 import Spot from './Spot';
 import { withCenter } from '../../recoil/selectedSpot';
 import { useState, useEffect } from 'react';
-import { useSpotSearch } from '../../hooks/useSearch';
 import { neumorphStyles } from '../../utils/style';
 
-export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
+export default function SpotList({
+  handleSpotScrap,
+  onSpotClick,
+  spots,
+  searchTerm = '',
+  onSearchChange,
+  onSearchSubmit,
+}) {
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
   const [currentPage, setCurrentPage] = useState(1);
   const spotsPerPage = 15;
-  const { searchTerm, handleSearch, filteredItems } = useSpotSearch(spots);
-  const isSearching = searchTerm && searchTerm.trim() !== '';
-  const sourcedItems = isSearching ? filteredItems : spots;
   const indexOfLastSpot = currentPage * spotsPerPage;
   const indexOfFirstSpot = indexOfLastSpot - spotsPerPage;
-  const currentItems = sourcedItems.slice(indexOfFirstSpot, indexOfLastSpot);
+  const currentItems = spots.slice(indexOfFirstSpot, indexOfLastSpot);
 
-  const totalItems = sourcedItems.length;
+  const totalItems = spots.length;
   const totalPages = Math.ceil(totalItems / spotsPerPage);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [spots]);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  // 페이지 그룹화 (5페이지씩)
   const [currentPageGroup, setCurrentPageGroup] = useState(1);
   const pageGroupSize = 5;
   const totalGroups = Math.ceil(totalPages / pageGroupSize);
@@ -51,7 +53,12 @@ export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
   return (
     <div className="h-full flex flex-col">
       <div className="mb-6">
-        <Searchbar value={searchTerm} onChange={handleSearch} />
+        <Searchbar
+          value={searchTerm}
+          onChange={onSearchChange}
+          onSubmit={onSearchSubmit}
+          placeholder="Spot명으로 검색..."
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -78,7 +85,6 @@ export default function SpotList({ handleSpotScrap, onSpotClick, spots }) {
         )}
       </div>
 
-      {/* 페이지네이션  */}
       {spots.length > 0 && (
         <div className="mt-6 pt-4">
           <div className="flex justify-center items-center space-x-2">

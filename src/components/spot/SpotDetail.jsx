@@ -4,7 +4,6 @@ import { XMarkIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
 import ReviewUploader from './ReviewUploader';
 import PhotoDump from './PhotoDump';
-import { getRecoil } from 'recoil-nexus';
 import authAtom from '../../recoil/auth';
 import api from '../../utils/axiosInstance';
 import { useRecoilValue } from 'recoil';
@@ -22,13 +21,7 @@ export default function SpotDetail({
 
   const fetchPhotoDump = async () => {
     try {
-      const token = getRecoil(authAtom).accessToken;
-      const response = await api(`spots/${spot.spotId}/reviews`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get(`spots/${spot.spotId}/reviews`);
 
       const data = await response.data;
       setPhotoDump(data);

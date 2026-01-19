@@ -8,8 +8,8 @@ const CurationCard = ({ curation, onClick }) => (
       alt={curation.name}
       className="w-full h-full object-cover"
     />
-    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-      <h4 className="text-white text-xs sm:text-sm font-medium">
+    <div className="absolute bottom-0 right-0 p-2 text-right">
+      <h4 className="text-white text-base sm:text-lg font-medium">
         {curation.name}
       </h4>
     </div>
