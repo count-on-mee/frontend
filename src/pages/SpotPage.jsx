@@ -5,16 +5,14 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import selectedSpotAtom from '../recoil/selectedSpot';
 import spotMarkersAtom from '../recoil/spotMarkers';
 import userAtom from '../recoil/user';
-import { useRef, useState, useEffect } from 'react';
-import scrapStateAtom from '../recoil/scrapState';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useSpotScrap } from '../hooks/useSpotScrap';
 import { FaRegPenToSquare } from 'react-icons/fa6';
 import SpotUploader from '../components/spot/SpotUploader';
 import { useParams, useLocation } from 'react-router-dom';
 import api from '../utils/axiosInstance';
-import { getRecoil } from 'recoil-nexus';
-import authAtom from '../recoil/auth';
 import { neumorphStyles } from '../utils/style';
+import { formatSpotData, formatSpotsData } from '../utils/spotUtils';
 
 export default function SpotPage() {
   const { spotId } = useParams();
@@ -27,14 +25,56 @@ export default function SpotPage() {
   const mapRef = useRef(null);
   const [spotMarkers, setSpotMarkers] = useRecoilState(spotMarkersAtom);
   const user = useRecoilValue(userAtom);
-  const [scrapState, setScrapState] = useRecoilState(scrapStateAtom);
-  const [filteredMarkers, setFilteredMarkers] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
   const [isUploaderOpen, setIsUploaderOpen] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const isAdmin = user?.role === 'admin';
+  const abortControllerRef = useRef(null);
+  const searchRequestIdRef = useRef(0);
+
+  const selectSpot = (spot) => {
+    setSelectedSpot(spot);
+    if (spot) mapRef.current?.setCenter(spot.position);
+  };
 
   const handleSpotClick = (spot) => {
-    mapRef.current.setCenter(spot.position);
+    mapRef.current?.setCenter(spot.position);
+  };
+
+  const handleSearchSpots = async (searchValue) => {
+    if (!searchValue || searchValue.trim() === '') {
+      return;
+    }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    searchRequestIdRef.current += 1;
+    const currentRequestId = searchRequestIdRef.current;
+
+    try {
+      const response = await api.get('/spots/search', {
+        params: { name: searchValue.trim() },
+        signal: abortController.signal,
+      });
+
+      if (abortController.signal.aborted || currentRequestId !== searchRequestIdRef.current) return;
+
+      const formattedSpots = formatSpotsData(response.data || []);
+      setSpotMarkers(formattedSpots);
+      selectSpot(formattedSpots[0] || null);
+    } catch (error) {
+      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') return;
+      if (currentRequestId !== searchRequestIdRef.current) return;
+
+      console.error('Failed to search spots:', error);
+      setSpotMarkers([]);
+      setSelectedSpot(null);
+    }
   };
 
   const { handleSpotScrap } = useSpotScrap({
@@ -47,101 +87,49 @@ export default function SpotPage() {
     setIsUploaderOpen(true);
   };
 
-  // URL 파라미터로 받은 spotId에 해당하는 스팟을 선택
   useEffect(() => {
-    if (spotId && spotMarkers?.length > 0) {
-      const targetSpot = spotMarkers.find(
-        (spot) => spot.spotId === parseInt(spotId),
-      );
-      if (targetSpot) {
-        setSelectedSpot(targetSpot);
-        if (mapRef.current) {
-          mapRef.current.setCenter(targetSpot.position);
-        }
-      }
+    if (!spotId) return;
+
+    const targetSpot = spotMarkers?.find(
+      (spot) => spot.spotId === parseInt(spotId),
+    );
+
+    if (targetSpot) {
+      selectSpot(targetSpot);
+      return;
     }
-  }, [spotId, spotMarkers]);
 
-  // spotId가 있지만 spotMarkers에 없는 경우 개별 spot 정보를 가져오기
-  useEffect(() => {
     const fetchSpotById = async () => {
-      if (
-        spotId &&
-        (!spotMarkers?.length ||
-          !spotMarkers.find((spot) => spot.spotId === parseInt(spotId)))
-      ) {
-        try {
-          const response = await api.get(`/spots/${spotId}`);
-          const spotData = response.data;
+      try {
+        const response = await api.get(`/spots/${spotId}`);
+        const formattedSpot = formatSpotData(response.data);
 
-          // spot 데이터를 필요한 형태로 변환
-          const formattedSpot = {
-            ...spotData,
-            position: {
-              lat: spotData.location.lat,
-              lng: spotData.location.lng,
-            },
-            imgUrls: spotData.imgUrls || [],
-            categories: spotData.categories || [],
-          };
+        setSpotMarkers((prev) => {
+          const exists = prev?.find(
+            (spot) => spot.spotId === formattedSpot.spotId,
+          );
+          return exists ? prev : [...(prev || []), formattedSpot];
+        });
 
-          // 개별로 가져온 spot을 spotMarkers에 추가하여 마커로 표시
-          setSpotMarkers((prev) => {
-            const exists = prev.find(
-              (spot) => spot.spotId === formattedSpot.spotId,
-            );
-            if (!exists) {
-              return [...prev, formattedSpot];
-            }
-            return prev;
-          });
-
-          setSelectedSpot(formattedSpot);
-          if (mapRef.current) {
-            mapRef.current.setCenter(formattedSpot.position);
-          }
-        } catch (error) {
-          console.error('Failed to fetch spot:', error);
-        }
+        selectSpot(formattedSpot);
+      } catch (error) {
+        console.error('Failed to fetch spot:', error);
       }
     };
 
     fetchSpotById();
   }, [spotId, spotMarkers]);
-
-  // 스크랩에서 온 경우에만 스크랩된 spot들을 가져와서 리스트에 표시
   useEffect(() => {
+    if (!isFromScrap) return;
+
     const fetchScrapedSpots = async () => {
-      if (!isFromScrap) return; // 스크랩에서 온 경우에만 실행
-
       try {
-        const token = getRecoil(authAtom).accessToken;
-        if (!token) return;
-
-        const response = await api.get('/scraps/spots', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const scrapedSpots = response.data;
-
-        // 스크랩된 spot들을 필요한 형태로 변환
-        const formattedScrapedSpots = scrapedSpots.map((scrap) => ({
-          spotId: scrap.spotId,
-          name: scrap.name,
-          address: scrap.address,
-          position: {
-            lat: scrap.location.lat,
-            lng: scrap.location.lng,
-          },
-          imgUrls: scrap.imgUrls || [],
-          categories: scrap.categories || [],
+        const response = await api.get('/scraps/spots');
+        const formattedSpots = formatSpotsData(response.data).map((spot) => ({
+          ...spot,
           isScraped: true,
-          tel: scrap.tel,
         }));
-
-        // 스크랩된 spot들로 spotMarkers를 대체
-        setSpotMarkers(formattedScrapedSpots);
+        setSpotMarkers(formattedSpots);
       } catch (error) {
         console.error('Failed to fetch scraped spots:', error);
       }
@@ -150,67 +138,39 @@ export default function SpotPage() {
     fetchScrapedSpots();
   }, [isFromScrap]);
 
-  useEffect(() => {
-    if (spotMarkers?.length > 0) {
-      let filteredSpots = spotMarkers;
+  const filteredMarkers = useMemo(() => {
+    if (!spotMarkers?.length) return [];
 
-      // 카테고리 필터 적용
-      if (activeCategories?.length > 0) {
-        filteredSpots = spotMarkers.filter(
-          (marker) =>
-            Array.isArray(marker.categories) &&
-            Array.isArray(activeCategories) &&
-            activeCategories.some((category) =>
-              marker.categories.includes(category),
-            ),
-        );
-      }
-
-      // 스크랩에서 온 경우에만 스크랩된 spot들을 우선적으로 정렬
-      if (isFromScrap) {
-        const sortedSpots = [...filteredSpots].sort((a, b) => {
-          if (a.isScraped && !b.isScraped) return -1;
-          if (!a.isScraped && b.isScraped) return 1;
-          return 0;
-        });
-        setFilteredMarkers(sortedSpots);
-      } else {
-        setFilteredMarkers(filteredSpots);
-      }
+    let filtered = spotMarkers;
+    if (activeCategories?.length > 0) {
+      filtered = spotMarkers.filter(
+        (marker) =>
+          Array.isArray(marker.categories) &&
+          activeCategories.some((cat) => marker.categories.includes(cat)),
+      );
     }
+
+    if (isFromScrap) {
+      return [...filtered].sort((a, b) => {
+        if (a.isScraped && !b.isScraped) return -1;
+        if (!a.isScraped && b.isScraped) return 1;
+        return 0;
+      });
+    }
+
+    return filtered;
   }, [spotMarkers, activeCategories, isFromScrap]);
 
-  // selectedSpot이 있지만 spotMarkers에 없는 경우 filteredMarkers에 추가
-  useEffect(() => {
-    if (selectedSpot && spotMarkers?.length > 0) {
-      const spotExists = spotMarkers.find(
-        (spot) => spot.spotId === selectedSpot.spotId,
-      );
-      if (spotExists) {
-        setFilteredMarkers((prev) => {
-          const exists = prev.find(
-            (spot) => spot.spotId === selectedSpot.spotId,
-          );
-          if (!exists) {
-            return [...prev, selectedSpot];
-          }
-          return prev;
-        });
-      }
-    }
-  }, [selectedSpot, spotMarkers]);
+  useEffect(() => () => abortControllerRef.current?.abort(), []);
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-[#f0f0f3] font-prompt">
-      {/* 헤더 */}
       <div className="w-full bg-[#f0f0f3] pt-4 sm:pt-6 lg:pt-8">
         <div className="w-full px-8 sm:px-12 lg:px-16 py-6 lg:py-3"></div>
       </div>
-      {/* 메인 콘텐츠 */}
       <div className="w-full px-8 sm:px-12 lg:px-16 pb-8">
         <div className="max-w-8xl mx-auto">
-          <div className="w-full flex flex-col lg:flex-row h-[calc(100vh-280px)] gap-6">
-            {/* 스팟 리스트 */}
+          <div className="w-full flex flex-col lg:flex-row h-[calc(100vh-200px)] gap-6">
             <div
               className={`w-full lg:w-1/4 overflow-y-auto h-full rounded-2xl ${neumorphStyles.base}`}
             >
@@ -219,11 +179,12 @@ export default function SpotPage() {
                   onSpotClick={handleSpotClick}
                   handleSpotScrap={handleSpotScrap}
                   spots={filteredMarkers}
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  onSearchSubmit={handleSearchSpots}
                 />
               </div>
             </div>
-
-            {/* 스팟 상세 */}
             {selectedSpot && (
               <div
                 className={`w-full lg:w-1/4 overflow-y-auto h-full rounded-2xl ${neumorphStyles.base}`}
@@ -236,10 +197,9 @@ export default function SpotPage() {
               </div>
             )}
 
-            {/* 지도 레이아웃 */}
             <div
               className={`w-full ${selectedSpot ? 'lg:w-1/2' : 'lg:w-3/4'} rounded-2xl ${neumorphStyles.base} overflow-hidden relative`}
-              style={{ height: 'calc(100vh - 280px)' }}
+              style={{ height: 'calc(100vh - 200px)' }}
             >
               <Map
                 mapRef={mapRef}
@@ -253,8 +213,6 @@ export default function SpotPage() {
           </div>
         </div>
       </div>
-
-      {/* 스팟 업로더 */}
       {isAdmin && (
         <div>
           <div className="fixed bottom-6 right-6">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { scrapListStyles } from '../../utils/style';
-import defaultImage from '../../assets/icon.png';
+import defaultImage from '../../assets/logo.png';
 
 const SpotCard = ({ spot, isSelected, onToggleSelection }) => {
   const [isHovered, setIsHovered] = useState(false);

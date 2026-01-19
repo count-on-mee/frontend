@@ -15,7 +15,7 @@ import TransportationInfo from '../../components/transportationInfo';
 import RecoilDateRangePicker from '../../components/datePickers/recoilDateRangePicker';
 import LoadingSpinner from '../../components/loadingSpinner';
 import tripDatesAtom from '../../recoil/tripDates/atom';
-import defaultImage from '../../assets/icon.png';
+import defaultImage from '../../assets/logo.png';
 import koreaMap from '../../assets/Korea.png';
 import {
   neumorphStyles,
@@ -24,7 +24,6 @@ import {
   animationStyles,
 } from '../../utils/style';
 import Map from '../../components/map/Map';
-
 
 const DayButton = ({ active, onClick, children }) => (
   <button
@@ -130,16 +129,17 @@ const TripItinerary = () => {
       ...item.spot,
       day: dayItem.day,
       position: new naver.maps.LatLng(
-      item.spot.location.lat,
-      item.spot.location.lng)
+        item.spot.location.lat,
+        item.spot.location.lng,
+      ),
     })),
   );
-  
+
   const handleSpotClick = (spot) => {
-  if (!mapRef.current || !spot?.spot?.location) return;
-  const { lat, lng } = spot.spot.location;
-  mapRef.current.setCenter({ lat, lng });
-};
+    if (!mapRef.current || !spot?.spot?.location) return;
+    const { lat, lng } = spot.spot.location;
+    mapRef.current.setCenter({ lat, lng });
+  };
 
   const filteredMarkers = markers.filter((marker) => marker.day === activeDay);
   const markersToSend = showAllDays ? markers : filteredMarkers;
@@ -333,9 +333,9 @@ const TripItinerary = () => {
             showAllDays={showAllDays}
             markerType="itinerary"
           />
-          <div className='flex justify-end p-2'>
+          <div className="flex justify-end p-2">
             <button
-              onClick={() => setShowAllDays(prev => !prev)}
+              onClick={() => setShowAllDays((prev) => !prev)}
               className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} ${showAllDays ? 'text-[var(--color-primary)]' : 'text-gray-600'}`}
             >
               {showAllDays ? 'Day 보기' : '전체 보기'}

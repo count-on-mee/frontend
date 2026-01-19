@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
+import logoImage from '../assets/textIcon.png';
 
 export default function LoginPage() {
-
   const baseURL = 'https://api.countonme.me';
   // const baseURL = 'http://localhost:8888';
 
@@ -54,7 +54,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-[#fafafa] relative overflow-hidden">
+    <div className="w-screen h-screen flex items-center justify-center bg-[#f0f0f3] relative overflow-hidden">
       {/* 로그인 카드 */}
       <motion.div
         className="w-full max-w-2xl z-10"
@@ -69,11 +69,7 @@ export default function LoginPage() {
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
           >
-            <img
-              src="src/assets/logo.png"
-              alt="Logo"
-              className="mx-auto h-32 w-auto"
-            />
+            <img alt="logo" src={logoImage} className="mx-auto h-52 w-auto" />
           </motion.div>
           <motion.p className="text-xl text-gray-600" variants={itemVariants}>
             감도높은 여행의 시작
@@ -82,7 +78,7 @@ export default function LoginPage() {
 
         {/* 로그인 카드 */}
         <motion.div
-          className="bg-white/90 rounded-3xl shadow-2xl p-12 backdrop-blur-sm"
+          className="bg-white/10 rounded-3xl shadow-2xl p-12 backdrop-blur-sm"
           variants={itemVariants}
           whileHover={{ y: -8 }}
           transition={{ duration: 0.3 }}

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { XMarkIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { getRecoil } from 'recoil-nexus';
+
 import UploadImages from '../components/ui/UploadImages';
-import authAtom from '../recoil/auth';
+
 import api from '../utils/axiosInstance';
-import defaultImage from '../assets/icon.png';
+import defaultImage from '../assets/logo.png';
 import { neumorphStyles, styleUtils } from '../utils/style';
 
 export default function ReviewEditPage() {
@@ -118,10 +118,7 @@ export default function ReviewEditPage() {
     newPhotos.forEach((photo) => formData.append('reviewImgs', photo.file));
 
     try {
-      const token = getRecoil(authAtom).accessToken;
-      await api.patch(`/spots/reviews/${reviewId}`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.patch(`/spots/reviews/${reviewId}`, formData);
       alert('리뷰가 수정되었습니다.');
       navigate('/mypage/review');
     } catch (error) {

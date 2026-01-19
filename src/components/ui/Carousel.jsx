@@ -1,6 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-import defaultImage from '../../assets/icon.png';
+import defaultImage from '../../assets/logo.png';
 
 function Carousel({ imgUrls, spot }) {
   const [currentIndex, setCurrentIndex] = useState(0);

@@ -4,8 +4,6 @@ import UploadImages from '../ui/UploadImages';
 import Hashtag from '../ui/Hashtag';
 import { useRecoilValue } from 'recoil';
 import userAtom from '../../recoil/user';
-import authAtom from '../../recoil/auth';
-import { getRecoil } from 'recoil-nexus';
 import api from '../../utils/axiosInstance';
 
 export default function ReviewUploader({
@@ -44,15 +42,9 @@ export default function ReviewUploader({
     });
     formData.append('content', newText);
     try {
-      const token = getRecoil(authAtom).accessToken;
       const response = await api.post(
         `/spots/${spot.spotId}/reviews`,
         formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
       );
       fetchPhotoDump();
       onClose();

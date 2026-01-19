@@ -7,7 +7,7 @@ import {
   EyeIcon,
   BookmarkIcon,
 } from '@heroicons/react/24/outline';
-import defaultImage from '../../assets/icon.png';
+import defaultImage from '../../assets/logo.png';
 import DeleteConfirmModal from '../../components/common/DeleteConfirmModal';
 
 function MyPageCuration() {

@@ -1,6 +1,4 @@
-import { getRecoil } from 'recoil-nexus';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import authAtom from '../recoil/auth';
 import api from '../utils/axiosInstance';
 import markersAtom from '../recoil/spotMarkers';
 import scrapStateAtom from '../recoil/scrapState';
@@ -11,7 +9,6 @@ export default function useSearchSpots() {
   const scrapState = useRecoilValue(scrapStateAtom);
 
   return async function handleSearch(center, zoom) {
-    const token = getRecoil(authAtom).accessToken;
     try {
       const response = await api.get('/spots', {
         params: { lat: center.lat, lng: center.lng, zoom },
