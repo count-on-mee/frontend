@@ -1,14 +1,17 @@
-import { getRecoil } from "recoil-nexus";
-import authAtom from "../recoil/auth";
-import { tokenStorage } from "../utils/tokenStorage";
+import { useEffect } from 'react';
+import { useSetRecoilState } from 'recoil';
+import authAtom from '../recoil/auth';
+import userAtom from '../recoil/user';
+import { tokenStorage } from '../utils/tokenStorage';
+import api from '../utils/axiosInstance';
 
 export const useAutoLogin = () => {
   const setAuth = useSetRecoilState(authAtom);
   const setUser = useSetRecoilState(userAtom);
-  const token = getRecoil(authAtom).accessToken;
   
   useEffect(() => {
     const reissue = async () => {
+      const token = tokenStorage.getToken();
       if (token) return;
       try {
         const res = await api.post('/auth/reissue');

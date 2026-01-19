@@ -4,7 +4,7 @@ import { setRecoil } from "recoil-nexus";
 import authAtom from '../recoil/auth';
 
 const api = axios.create({
-  baseURL: 'https://api.countonme.site',
+  baseURL: 'https://api.countonme.me',
   // baseURL: 'http://localhost:8888',
   withCredentials: true,
 });

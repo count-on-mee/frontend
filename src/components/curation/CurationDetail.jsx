@@ -4,7 +4,7 @@ import Curation from './Curation';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import selectedCurationSpotAtom from '../../recoil/selectedCurationSpot';
 import { withCenter } from '../../recoil/selectedCurationSpot';
-import defaultImage from '../../assets/icon.png';
+import defaultImage from '../../assets/logo.png';
 import Hashtag from '../ui/Hashtag';
 import { neumorphStyles, animationStyles } from '../../utils/style';
 

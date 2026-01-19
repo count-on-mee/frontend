@@ -7,8 +7,6 @@ import selectedCurationSpotAtom from '../recoil/selectedCurationSpot';
 import CurationUploader from '../components/curation/CurationUploader';
 import { FaRegPenToSquare } from 'react-icons/fa6';
 import { useState, useEffect, useRef } from 'react';
-import authAtom from '../recoil/auth';
-import { getRecoil } from 'recoil-nexus';
 import api from '../utils/axiosInstance';
 import userAtom from '../recoil/user';
 import curationMarkersAtom from '../recoil/curationMarkers';
@@ -117,12 +115,10 @@ export default function CurationPage() {
       return;
     }
     try {
-      const token = getRecoil(authAtom).accessToken;
       const method = curation.isScraped ? 'DELETE' : 'POST';
       await api({
         url: `/scraps/curations/${curation.curationId}`,
         method,
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       setCurations((prev) => {

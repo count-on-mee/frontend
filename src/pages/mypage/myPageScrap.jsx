@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { getRecoil } from 'recoil-nexus';
-import authAtom from '../../recoil/auth';
 import api from '../../utils/axiosInstance';
-import defaultImage from '../../assets/icon.png';
+import defaultImage from '../../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 import { animationStyles } from '../../utils/style';
 
@@ -18,12 +16,7 @@ function MyPageScrap() {
 
   const fetchScrapedSpots = async () => {
     try {
-      const token = getRecoil(authAtom).accessToken;
-      const response = await api.get('/scraps/spots', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get('/scraps/spots');
       const data = await response.data;
       setScrapedSpots(data);
     } catch (error) {
@@ -33,12 +26,7 @@ function MyPageScrap() {
 
   const fetchScrapedCurations = async () => {
     try {
-      const token = getRecoil(authAtom).accessToken;
-      const response = await api.get('/scraps/curations', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get('/scraps/curations');
       const data = await response.data;
       setScrapedCurations(data);
     } catch (error) {
@@ -54,12 +42,7 @@ function MyPageScrap() {
   const handleSpotScrap = async (event, spotId) => {
     event.stopPropagation();
     try {
-      const token = getRecoil(authAtom).accessToken;
-      const response = await api.delete(`/scraps/spots/${spotId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.delete(`/scraps/spots/${spotId}`);
       fetchScrapedSpots();
     } catch (error) {
       console.error('스크랩 취소 에러:', error);
@@ -69,12 +52,7 @@ function MyPageScrap() {
   const handleCurationScrap = async (event, curationId) => {
     event.stopPropagation();
     try {
-      const token = getRecoil(authAtom).accessToken;
-      const response = await api.delete(`/scraps/curations/${curationId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.delete(`/scraps/curations/${curationId}`);
       fetchScrapedCurations();
     } catch (error) {
       console.error('스크랩 취소 에러:', error);

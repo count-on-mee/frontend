@@ -1,13 +1,11 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
 import Searchbar from '../ui/Searchbar';
-import { getRecoil } from 'recoil-nexus';
-import authAtom from '../../recoil/auth';
 import api from '../../utils/axiosInstance';
 import { useRecoilState } from 'recoil';
 import scrappedSpotsAtom from '../../recoil/scrapedSpot';
 import SpotCart from './SpotCart';
-import defaultImage from '../../assets/icon.png';
+import defaultImage from '../../assets/logo.png';
 import { neumorphStyles } from '../../utils/style';
 
 export default function CurationUploader({
@@ -25,7 +23,6 @@ export default function CurationUploader({
   const [scrapedSpots, setScrapedSpots] = useRecoilState(scrappedSpotsAtom);
   const [cartSpots, setCartSpots] = useState([]);
   const categories = ['여행', '식당', '카페', '자연'];
-  const token = getRecoil(authAtom).accessToken;
 
   const handleAddToCart = (spot) => {
     setCartSpots((prev) => {
@@ -36,7 +33,6 @@ export default function CurationUploader({
       );
 
       if (alreadyIn) {
-        // 제거
         return prev.filter((s) =>
           isEdit ? s.spotId !== identifier : s.spotScrapId !== identifier,
         );
@@ -120,13 +116,8 @@ export default function CurationUploader({
         // 수정 모드: 부모 컴포넌트의 onSubmit 함수 호출
         await onSubmit(payload);
       } else {
-        // 생성 모드: 기존 로직
-        const token = getRecoil(authAtom).accessToken;
-        const response = await api.post('/curations', payload, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+
+        const response = await api.post('/curations', payload);
         console.log('scrapedSpots API 응답:', response.data);
         handleClose();
       }
@@ -147,11 +138,7 @@ export default function CurationUploader({
 
   const fetchScrapedSpots = async () => {
     try {
-      const response = await api.get('/scraps/spots', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get('/scraps/spots');
       const data = await response.data;
       setScrapedSpots(data);
     } catch (error) {
@@ -163,7 +150,6 @@ export default function CurationUploader({
     fetchScrapedSpots();
   }, []);
 
-  // 수정 모드일 때 기존 데이터 로드
   useEffect(() => {
     if (isEdit && editData) {
       setName(editData.name || '');
@@ -204,9 +190,8 @@ export default function CurationUploader({
         className="w-full max-w-6xl h-[90vh] mx-4 bg-[#f0f0f3] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 헤더 */}
         <div
-          className={`flex justify-between items-center px-6 py-4 border-b border-gray-200 ${neumorphStyles.smallInset} flex-shrink-0`}
+          className="flex justify-between items-center px-6 py-4 flex-shrink-0"
         >
           <h2 className="text-2xl font-bold text-[#252422]">
             {isEdit ? '큐레이션 수정' : '큐레이션 만들기'}
@@ -219,17 +204,14 @@ export default function CurationUploader({
           </button>
         </div>
 
-        {/* 콘텐츠 */}
+
         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-          {/* 스팟 선택 */}
-          <div className="w-full lg:w-1/2 p-6 border-r border-gray-200 overflow-y-auto">
+
+          <div className="w-full lg:w-1/2 p-6 overflow-y-auto">
             <div className="space-y-6">
-              {/* 검색 */}
               <div>
                 <Searchbar placeholder="스팟 검색" className="w-full" />
               </div>
-
-              {/* 스팟 리스트 */}
               {scrapedSpots.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-[#252422] mb-4">
@@ -246,7 +228,7 @@ export default function CurationUploader({
                               ? s.spotId === spot.spotId
                               : s.spotScrapId === spot.spotScrapId,
                           )
-                            ? `${neumorphStyles.smallInset} border-2 border-[#EB5E28]`
+                            ? `${neumorphStyles.smallInset} border-2 border-[#FF8C4B]`
                             : `${neumorphStyles.small} ${neumorphStyles.hover}`
                         }`}
                       >
@@ -271,7 +253,6 @@ export default function CurationUploader({
                 </div>
               )}
 
-              {/* 장바구니 */}
               <div>
                 <h3 className="text-lg font-semibold text-[#252422] mb-4">
                   선택된 스팟 ({cartSpots.length}개)
@@ -305,7 +286,6 @@ export default function CurationUploader({
                 />
               </div>
 
-              {/* 설명 */}
               <div>
                 <label className="block text-lg font-semibold text-[#252422] mb-2">
                   상세 설명
@@ -329,7 +309,6 @@ export default function CurationUploader({
                 </div>
               </div>
 
-              {/* 카테고리 */}
               <div>
                 <label className="block text-lg font-semibold text-[#252422] mb-2">
                   카테고리
@@ -341,7 +320,7 @@ export default function CurationUploader({
                       onClick={() => handleCategoryClick(category)}
                       className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
                         selectedCategories.includes(category)
-                          ? 'bg-[#EB5E28] text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]'
+                          ? 'bg-[#FF8C4B] text-white shadow-[inset_3px_3px_6px_#d46a2a,inset_-3px_-3px_6px_#ffae6c]'
                           : `${neumorphStyles.small} ${neumorphStyles.hover} text-[#252422]`
                       }`}
                     >
@@ -354,16 +333,15 @@ export default function CurationUploader({
           </div>
         </div>
 
-        {/* 푸터 */}
         <div
-          className={`flex justify-end px-6 py-4 border-t border-gray-200 ${neumorphStyles.smallInset} flex-shrink-0`}
+          className="flex justify-end px-6 py-4 flex-shrink-0"
         >
           <button
             className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 ${
               cartSpots.length >= 2 &&
               selectedCategories.length >= 1 &&
               name.trim()
-                ? 'bg-[#EB5E28] text-white hover:bg-[#D54E23] shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31] hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]'
+                ? 'bg-[#FF8C4B] text-white hover:bg-[#D46A2A] shadow-[3px_3px_6px_#d46a2a,-3px_-3px_6px_#ffae6c] hover:shadow-[inset_3px_3px_6px_#d46a2a,inset_-3px_-3px_6px_#ffae6c]'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
             onClick={handleSubmit}
