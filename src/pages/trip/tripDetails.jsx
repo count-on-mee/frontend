@@ -1,10 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
 import useTripDetails from '../../hooks/useTripDetails';
-import Expenses from '../../components/trip/details/expenses';
-import Accommodation from '../../components/trip/details/accommodation';
-import TodoList from '../../components/trip/details/todolist';
-import AllInOneView from '../../components/trip/details/allInOneView';
+import AccountBook from '../../components/trip/expense/accountBook';
+import Accommodation from '../../components/trip/accommodation';
+import TodoList from '../../components/trip/todolist';
+import AllInOneView from '../../components/trip/allInOneView';
 import { neumorphStyles } from '../../utils/style';
 import expenseIcon from '../../assets/expense.png';
 import hotelIcon from '../../assets/hotel.png';
@@ -13,62 +13,51 @@ import documentIcon from '../../assets/document.png';
 
 const TripDetails = () => {
   const { tripId } = useParams();
-  const { socket, isConnected } = useOutletContext();
-  const socketRef = useRef(null);
+  const { socket, tripData } = useOutletContext();
   const [selectedTab, setSelectedTab] = useState('expenses');
 
   const {
     expenses,
+    statistics,
     accommodations,
     tasks,
-    numberOfPeople,
     loading,
     error,
     setExpenses,
     setAccommodations,
     setTasks,
-    setNumberOfPeople,
     participantCount,
     setParticipantCount,
+    refetch,
   } = useTripDetails(tripId);
 
-  // 소켓 인스턴스를 ref에 저장
-  if (socket && !socketRef.current) {
-    socketRef.current = socket;
-  }
+  const tabs = useMemo(
+    () => [
+      { id: 'expenses', title: '비용', icon: expenseIcon },
+      { id: 'accommodation', title: '숙소', icon: hotelIcon },
+      { id: 'todo', title: '할 일', icon: todolistIcon },
+      { id: 'all', title: '한눈에 보기', icon: documentIcon },
+    ],
+    [],
+  );
 
-  if (loading) {
-    return <div>로딩 중...</div>;
-  }
-
-  if (error) {
-    return <div>에러가 발생했습니다: {error.message}</div>;
-  }
-
-  const tabs = [
-    { id: 'expenses', title: '비용', icon: expenseIcon },
-    { id: 'accommodation', title: '숙소', icon: hotelIcon },
-    { id: 'todo', title: '할 일', icon: todolistIcon },
-    { id: 'all', title: '한눈에 보기', icon: documentIcon },
-  ];
-
-  const renderContent = () => {
+  const renderContent = useMemo(() => {
     switch (selectedTab) {
       case 'expenses':
         return (
-          <Expenses
-            socket={socketRef.current}
+          <AccountBook
+            socket={socket}
             tripId={tripId}
-            initialExpenses={expenses}
-            setExpenses={setExpenses}
-            participantCount={participantCount}
-            setParticipantCount={setParticipantCount}
+            expenses={expenses}
+            statistics={statistics}
+            participants={tripData?.participants || []}
+            onExpenseUpdate={refetch}
           />
         );
       case 'accommodation':
         return (
           <Accommodation
-            socket={socketRef.current}
+            socket={socket}
             tripId={tripId}
             initialAccommodations={accommodations}
             setAccommodations={setAccommodations}
@@ -77,7 +66,7 @@ const TripDetails = () => {
       case 'todo':
         return (
           <TodoList
-            socket={socketRef.current}
+            socket={socket}
             tripId={tripId}
             tasks={tasks}
             setTasks={setTasks}
@@ -86,7 +75,7 @@ const TripDetails = () => {
       case 'all':
         return (
           <AllInOneView
-            socket={socketRef.current}
+            socket={socket}
             tripId={tripId}
             expenses={expenses}
             accommodations={accommodations}
@@ -101,7 +90,40 @@ const TripDetails = () => {
       default:
         return null;
     }
-  };
+  }, [
+    selectedTab,
+    socket,
+    tripId,
+    expenses,
+    statistics,
+    accommodations,
+    tasks,
+    tripData?.participants,
+    participantCount,
+    refetch,
+    setAccommodations,
+    setTasks,
+    setExpenses,
+    setParticipantCount,
+  ]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-gray-400 text-lg">로딩 중...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-red-500 text-lg">
+          에러가 발생했습니다: {error.message || '알 수 없는 오류'}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full bg-[#f0f0f3]">
@@ -146,7 +168,7 @@ const TripDetails = () => {
         <div
           className={`h-full ${neumorphStyles.base} rounded-2xl p-6 overflow-y-auto`}
         >
-          {renderContent()}
+          {renderContent}
         </div>
       </div>
     </div>

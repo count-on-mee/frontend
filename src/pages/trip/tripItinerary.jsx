@@ -30,7 +30,7 @@ const DayButton = ({ active, onClick, children }) => (
     onClick={onClick}
     className={`px-4 py-2 rounded-full text-base font-medium ${
       active
-        ? 'bg-[#FF8C4B] text-[var(--color-primary)]'
+        ? 'bg-[#f5861d] text-white'
         : 'bg-[#f0f0f3] text-gray-600'
     } ${neumorphStyles.small} ${neumorphStyles.hover}`}
   >
@@ -285,7 +285,7 @@ const TripItinerary = () => {
                         <motion.div
                           key={item.order}
                           {...animationStyles.scaleIn}
-                          className={`w-8 h-8 rounded-full bg-[#FF8C4B] text-[var(--color-primary)] flex items-center justify-center font-bold ${neumorphStyles.tinyInset} ${neumorphStyles.hover}`}
+                          className={`w-8 h-8 rounded-full bg-[#f5861d] text-white flex items-center justify-center font-bold ${neumorphStyles.tinyInset} ${neumorphStyles.hover}`}
                         >
                           {item.order}
                         </motion.div>

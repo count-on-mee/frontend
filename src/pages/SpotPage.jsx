@@ -217,7 +217,7 @@ export default function SpotPage() {
         <div>
           <div className="fixed bottom-6 right-6">
             <button
-              className="group relative flex items-center gap-3 z-50 px-6 py-4 bg-[#f0f0f3] text-[#252422] rounded-2xl font-semibold text-lg shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.5)] hover:shadow-[inset_8px_8px_16px_rgba(163,177,198,0.4),inset_-8px_-8px_16px_rgba(255,255,255,0.7)] active:shadow-[inset_4px_4px_8px_rgba(163,177,198,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] transition-all duration-300 ease-out hover:scale-105 active:scale-95 border-2 border-transparent hover:border-[#EB5E28] hover:border-opacity-60"
+              className="group relative flex items-center gap-3 z-50 px-6 py-4 bg-[#f0f0f3] text-[#252422] rounded-2xl font-semibold text-lg shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.5)] hover:shadow-[inset_8px_8px_16px_rgba(163,177,198,0.4),inset_-8px_-8px_16px_rgba(255,255,255,0.7)] active:shadow-[inset_4px_4px_8px_rgba(163,177,198,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] transition-all duration-300 ease-out hover:scale-105 active:scale-95 border-2 border-transparent hover:border-[#f5861d] hover:border-opacity-60"
               onClick={handleOpenUploader}
             >
               <FaRegPenToSquare className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" />

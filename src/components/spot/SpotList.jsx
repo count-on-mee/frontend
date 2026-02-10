@@ -105,7 +105,7 @@ export default function SpotList({
                     onClick={() => paginate(pageNumber)}
                     className={`px-3 py-2 rounded-lg transition-colors ${
                       currentPage === pageNumber
-                        ? 'bg-[#EB5E28] text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]'
+                        ? 'bg-[#f5861d] text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]'
                         : `${neumorphStyles.small} ${neumorphStyles.hover} text-[#252422]`
                     }`}
                   >

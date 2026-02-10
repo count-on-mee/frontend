@@ -10,10 +10,8 @@ const SettlementRow = ({
   onParticipantCountChange,
   socket,
 }) => {
-  // 소켓 이벤트를 debounce로 감싸기
   const debouncedSocketEmit = useSocketDebounce(socket, 800);
 
-  // 소켓 이벤트 리스너 추가
   useEffect(() => {
     if (!socket) return;
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { componentStyles, styleUtils } from '../../../utils/style';
-import { useSocketDebounce } from '../../../utils/debounce';
+import { componentStyles, styleUtils } from '../../utils/style';
+import { useSocketDebounce } from '../../utils/debounce';
 import clsx from 'clsx';
 
 const TodoList = ({ tasks, socket, tripId }) => {

@@ -99,26 +99,24 @@ export const componentStyles = {
  * 동적으로 조건부 함수들
  */
 export const styleUtils = {
-  // 버튼 스타일 생성
+  // 버튼 스타일 생성 
   buttonStyle: (isConfirm = false, isDisabled = false, size = 'md') => {
     const sizeStyles = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-4 py-2 text-base',
-      lg: 'px-6 py-3 text-lg',
-      xl: 'px-8 py-4 text-xl',
+      sm: 'py-2 px-4 text-sm',
+      md: 'py-3 px-6 text-base',
+      lg: 'py-4 px-8 text-lg',
+      xl: 'py-4 px-8 text-xl',
     };
 
     return clsx(
       baseStyles.button,
-      baseStyles.shadow,
+      'rounded-full transition-all duration-200 font-semibold',
       isConfirm
         ? isDisabled
           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          : 'bg-[var(--color-primary)] text-white hover:bg-[#D54E23]'
-        : 'bg-[#f0f0f3] hover:bg-[#E0DFDE]',
+          : 'bg-[#f5861d] text-white hover:bg-[#d46a0f] shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b] hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]'
+        : 'bg-[#f0f0f3] text-[#252422] shadow-[2px_2px_4px_#d1d1d1,-2px_-2px_4px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d1d1,inset_-2px_-2px_4px_#ffffff]',
       sizeStyles[size],
-      'font-semibold',
-      baseStyles.hoverShadow,
     );
   },
 
@@ -135,11 +133,10 @@ export const styleUtils = {
   // 완료 버튼
   confirmButtonStyle: clsx(
     baseStyles.button,
-    baseStyles.shadow,
+    'rounded-full transition-all duration-200 font-semibold',
     'w-full mt-2 py-3 text-white text-lg',
     'flex items-center justify-center gap-2',
-    baseStyles.hoverShadow,
-    'bg-[var(--color-primary)] hover:bg-[#D54E23]',
+    'bg-[#f5861d] hover:bg-[#d46a0f] shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b] hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
   ),
 
   // 행 스타일 생성
@@ -198,22 +195,31 @@ export const scrapListStyles = {
   selectionButton: (isSelected) =>
     clsx(
       baseStyles.button,
-      baseStyles.shadow,
+      'rounded-full transition-all duration-200 font-semibold',
       isSelected
-        ? 'bg-[var(--color-primary)] text-white'
-        : 'bg-[#f0f0f3] text-[#252422]',
-      'px-3 py-1 text-sm font-semibold',
-      baseStyles.hoverShadow,
+        ? 'bg-[#f5861d] text-white shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b] hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]'
+        : 'bg-[#f0f0f3] text-[#252422] shadow-[2px_2px_4px_#d1d1d1,-2px_-2px_4px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d1d1,inset_-2px_-2px_4px_#ffffff]',
+      'px-3 py-1 text-sm',
     ),
+
+  // 선택된 상태 주황색 버튼 스타일
+  selectedOrangeButton: clsx(
+    'bg-[#f5861d] text-white transition-all duration-200 font-medium',
+    'shadow-[2px_2px_4px_#b85a0f,-1px_-1px_2px_#ffc085]',
+    'hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
+  ),
+
+  // ExpenseModal 전용 주황색 버튼 스타일 (그림자 없음)
+  expenseModalOrangeButton: clsx(
+    'bg-[#f5861d] text-white transition-all duration-200 font-medium',
+  ),
 
   // 여행 시작 버튼
   startTripButton: clsx(
     baseStyles.button,
-    baseStyles.shadow,
-    'bg-[var(--color-primary)] text-white font-semibold',
-    'py-3 px-8 hover:bg-[#D54E23]',
-    'transition-colors duration-300',
-    baseStyles.hoverShadow,
+    'rounded-full transition-all duration-200 font-semibold',
+    'bg-[#f5861d] text-white hover:bg-[#d46a0f]',
+    'py-3 px-8 shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b] hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
   ),
 
   // 섹션 헤더
@@ -331,16 +337,48 @@ export const searchStyles = {
  * Neumorphism 스타일
  */
 export const neumorphStyles = {
-  base: 'bg-[#f0f0f3] shadow-[8px_8px_16px_#b5b5b5,-8px_-8px_16px_#ffffff]',
-  small: 'bg-[#f0f0f3] shadow-[4px_4px_8px_#d1d1d1,-4px_-4px_8px_#ffffff]',
-  medium: 'bg-[#f0f0f3] shadow-[6px_6px_12px_#d1d1d1,-6px_-6px_12px_#ffffff]',
-  large: 'bg-[#f0f0f3] shadow-[8px_8px_16px_#b5b5b5,-8px_-8px_16px_#ffffff]',
+  base: 'bg-[#f0f0f3] shadow-[2px_2px_4px_#b5b5b5,-2px_-2px_4px_#ffffff]',
+  small: 'bg-[#f0f0f3] shadow-[1px_1px_2px_#d1d1d1,-1px_-1px_2px_#ffffff]',
+  medium: 'bg-[#f0f0f3] shadow-[1.5px_1.5px_3px_#d1d1d1,-1.5px_-1.5px_3px_#ffffff]',
+  large: 'bg-[#f0f0f3] shadow-[2px_2px_4px_#b5b5b5,-2px_-2px_4px_#ffffff]',
   smallInset:
-    'bg-[#f0f0f3] shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]',
+    'bg-[#f0f0f3] shadow-[inset_1px_1px_2px_#d1d1d1,inset_-1px_-1px_2px_#ffffff]',
   tinyInset:
-    'bg-[#f0f0f3] shadow-[inset_2px_2px_4px_#d1d1d1,inset_-2px_-2px_4px_#ffffff]',
+    'bg-[#f0f0f3] shadow-[inset_0.5px_0.5px_1px_#d1d1d1,inset_-0.5px_-0.5px_1px_#ffffff]',
   hover:
-    'hover:shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-200',
+    'hover:shadow-[inset_1px_1px_2px_#d1d1d1,inset_-1px_-1px_2px_#ffffff] transition-all duration-200',
+};
+
+/**
+ * 탭 버튼 스타일
+ */
+export const tabButtonStyles = {
+  base: clsx(
+    'w-full text-center px-4 py-3 rounded-full transition-all duration-200',
+  ),
+  active: clsx(
+    'shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]',
+  ),
+  inactive: clsx(
+    'hover:shadow-[4px_4px_8px_#d1d1d1,-4px_-4px_8px_#ffffff]',
+  ),
+  inactiveWithNeumorph: clsx(
+    'shadow-[2px_2px_4px_#d1d1d1,-2px_-2px_4px_#ffffff]',
+    'hover:shadow-[2px_2px_4px_#d1d1d1,-2px_-2px_4px_#ffffff]',
+  ),
+  getStyles: (isActive, withNeumorph = false) => ({
+    className: clsx(
+      tabButtonStyles.base,
+      isActive
+        ? tabButtonStyles.active
+        : withNeumorph
+          ? tabButtonStyles.inactiveWithNeumorph
+          : tabButtonStyles.inactive,
+    ),
+    style: {
+      backgroundColor: isActive ? '#f0f0f3' : withNeumorph ? '#f0f0f3' : 'transparent',
+    },
+  }),
 };
 
 /**
@@ -365,10 +403,10 @@ export const dateRangePickerStyles = {
 
   // 선택된 날짜 스타일
   selectedDate:
-    'bg-primary text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
+    'bg-[#f5861d] text-white shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
 
   // 날짜 범위 내 스타일
-  dateRange: 'bg-primary/30 text-primary',
+  dateRange: 'bg-[#f5861d]/30 text-[#f5861d]',
 
   // 비활성화된 날짜 스타일
   disabledDate: 'text-gray-400 cursor-not-allowed shadow-none',
@@ -398,14 +436,14 @@ export const dateRangePickerStyles = {
   headerSize: {
     small: {
       container: 'flex items-center p-4',
-      month: 'block text-2xl text-[#EB5E28] drop-shadow-[3px_3px_6px_#b8b8b8]',
-      year: 'block text-lg text-[#EB5E28] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      month: 'block text-2xl text-[#f5861d] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      year: 'block text-lg text-[#f5861d] drop-shadow-[3px_3px_6px_#b8b8b8]',
       icon: 'w-5 h-5',
     },
     default: {
       container: 'flex items-center p-8',
-      month: 'block text-7xl text-[#EB5E28] drop-shadow-[3px_3px_6px_#b8b8b8]',
-      year: 'block text-3xl text-[#EB5E28] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      month: 'block text-7xl text-[#f5861d] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      year: 'block text-3xl text-[#f5861d] drop-shadow-[3px_3px_6px_#b8b8b8]',
       icon: 'w-8 h-8',
     },
   },
@@ -425,9 +463,9 @@ export const dateRangePickerStyles = {
   // 완료 버튼 크기별 클래스
   completeButtonSize: {
     small:
-      'w-full py-2 px-4 bg-primary text-white rounded-full hover:bg-[#D54E23] transition-all duration-200 text-sm shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31] hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
+      'w-full py-2 px-4 bg-[#f5861d] text-white rounded-full hover:bg-[#d46a0f] transition-all duration-200 text-sm shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b] hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
     default:
-      'w-full py-4 px-6 bg-primary text-white rounded-full hover:bg-[#D54E23] transition-all duration-200 text-xl shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31] hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
+      'w-full py-4 px-6 bg-[#f5861d] text-white rounded-full hover:bg-[#d46a0f] transition-all duration-200 text-xl shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b] hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
   },
 
   // 완료 텍스트 크기별 클래스
@@ -710,10 +748,10 @@ export const itineraryModalStyles = {
   // 완료 버튼
   completeButton: clsx(
     'min-w-[180px] text-xl py-3.5 rounded-xl',
-    'bg-[#FF8C4B] text-white font-bold',
-    'shadow-[3px_3px_6px_#c44e1f,-3px_-3px_6px_#ff6c31]',
-    'hover:shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]',
-    'hover:bg-[#D54E23]',
+    'bg-[#f5861d] text-white font-bold',
+    'shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b]',
+    'hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
+    'hover:bg-[#d46a0f]',
     'transition-all duration-200',
     'border-none cursor-pointer',
   ),
@@ -738,6 +776,7 @@ export default {
   modalStyles,
   searchStyles,
   neumorphStyles,
+  tabButtonStyles,
   dateRangePickerStyles,
   layoutStyles,
   animationStyles,
