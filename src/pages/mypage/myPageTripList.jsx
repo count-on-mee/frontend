@@ -227,6 +227,7 @@ function MyPageTripList() {
         confirmText="삭제"
         cancelText="취소"
         isLoading={isDeleting}
+        variant="trip"
       />
     </div>
   );

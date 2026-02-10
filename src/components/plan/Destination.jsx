@@ -9,6 +9,7 @@ import {
   componentStyles,
   styleUtils,
   neumorphStyles,
+  scrapListStyles,
 } from '../../utils/style';
 import clsx from 'clsx';
 import Searchbar from '../ui/Searchbar';
@@ -25,17 +26,6 @@ const imageContainerStyles = clsx(
   'h-16 w-16 flex-shrink-0 rounded-full overflow-hidden',
 );
 
-// 선택 버튼 스타일
-const selectionButtonStyles = (isSelected) =>
-  clsx(
-    baseStyles.button,
-    baseStyles.shadow,
-    isSelected
-      ? 'bg-[var(--color-primary)] text-white'
-      : 'bg-[#f0f0f3] text-[#252422]',
-    'px-5 py-2 text-base font-semibold',
-    baseStyles.hoverShadow,
-  );
 
 function Destination() {
   const navigate = useNavigate();
@@ -166,10 +156,13 @@ function Destination() {
                   <div className="flex justify-end">
                     <button
                       onClick={() => toggleSelection(dest)}
-                      className={selectionButtonStyles(
-                        selectedDestinations.some(
-                          (d) => d.tripDestinationId === dest.tripDestinationId,
+                      className={clsx(
+                        scrapListStyles.selectionButton(
+                          selectedDestinations.some(
+                            (d) => d.tripDestinationId === dest.tripDestinationId,
+                          ),
                         ),
+                        'px-5 py-2 text-base',
                       )}
                     >
                       {selectedDestinations.some(

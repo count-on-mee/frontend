@@ -42,14 +42,14 @@ function SortableSpotItem({ spot, index, onDelete }) {
       style={style}
       className={`flex items-center space-x-3 p-3 rounded-xl cursor-grab active:cursor-grabbing ${
         isDragging
-          ? 'shadow-lg border-2 border-[#EB5E28]'
+          ? 'shadow-lg border-2 border-[#f5861d]'
           : `${neumorphStyles.small} ${neumorphStyles.hover}`
       }`}
       {...attributes}
       {...listeners}
     >
       <div className="flex-shrink-0">
-        <span className="w-8 h-8 bg-[#EB5E28] text-white rounded-full flex items-center justify-center text-sm font-semibold">
+        <span className="w-8 h-8 bg-[#f5861d] text-white rounded-full flex items-center justify-center text-sm font-semibold">
           {index + 1}
         </span>
       </div>

@@ -161,7 +161,7 @@ export default function ReviewUploader({
           </div>
         </div>
         <button
-          className="w-full bg-[#EB5E28] font-mixed text-white py-2 rounded hover:bg-red-500"
+          className="w-full bg-[#f5861d] font-mixed text-white py-2 rounded hover:bg-red-500"
           onClick={() => {
             handleSave();
           }}

@@ -1,10 +1,10 @@
 import React from 'react';
-import Expenses from './expenses';
+import Expenses from './expense/expenses';
 import Accommodation from './accommodation';
 import TodoList from './todolist';
-import expenseIcon from '../../../assets/expense.png';
-import hotelIcon from '../../../assets/hotel.png';
-import todolistIcon from '../../../assets/todolist.png';
+import expenseIcon from '../../assets/expense.png';
+import hotelIcon from '../../assets/hotel.png';
+import todolistIcon from '../../assets/todolist.png';
 
 const AllInOneView = ({
   socket,

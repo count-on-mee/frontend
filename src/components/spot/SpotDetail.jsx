@@ -79,7 +79,7 @@ export default function SpotDetail({
           <div className="mt-8 flex justify-between items-center">
             <h3 className="text-xl font-bold text-[#252422]">후기</h3>
             <button
-              className="flex items-center gap-2 px-4 py-2 bg-[#f0f0f3] text-[#252422] rounded-xl font-semibold shadow-sm hover:shadow-md transition-all duration-200 hover:bg-[#EB5E28] hover:text-white"
+              className="flex items-center gap-2 px-4 py-2 bg-[#f0f0f3] text-[#252422] rounded-xl font-semibold shadow-sm hover:shadow-md transition-all duration-200 hover:bg-[#f5861d] hover:text-white"
               onClick={handleUploaderOpen}
             >
               <FaRegPenToSquare className="w-4 h-4" />

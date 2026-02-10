@@ -14,6 +14,7 @@ const DeleteConfirmModal = ({
   confirmText = '삭제',
   cancelText = '취소',
   isLoading = false,
+  variant = 'default',
 }) => {
   useEffect(() => {
     const handleEsc = (e) => {
@@ -49,13 +50,15 @@ const DeleteConfirmModal = ({
     onConfirm();
   };
 
+  const modalShadow = variant === 'trip' ? neumorphStyles.small : neumorphStyles.large;
+
   return (
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
       <div
-        className={`${neumorphStyles.large} rounded-3xl p-8 w-full max-w-md`}
+        className={`${modalShadow} rounded-3xl p-8 w-full max-w-md`}
       >
         {/* 헤더 */}
         <div className="flex justify-between items-center mb-6">

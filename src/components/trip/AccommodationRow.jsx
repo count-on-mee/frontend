@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
-import { componentStyles } from '../../../utils/style';
-import LocalDateRangePicker from '../../datePickers/localDateRangePicker';
+import { componentStyles } from '../../utils/style';
+import LocalDateRangePicker from '../datePickers/localDateRangePicker';
 
 function formatNumberWithCommas(value) {
   if (typeof value !== 'string') return value;

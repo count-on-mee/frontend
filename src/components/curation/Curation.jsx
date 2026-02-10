@@ -41,7 +41,7 @@ export default function Curation({
           }}
         >
           <BookmarkIcon
-            className={`absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-5 lg:right-5 w-4 h-4 sm:w-5 sm:h-5 ${isScraped ? 'fill-[#EB5E28] stroke-[#EB5E28]' : 'stroke-white'}`}
+            className={`absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-5 lg:right-5 w-4 h-4 sm:w-5 sm:h-5 ${isScraped ? 'fill-[#f5861d] stroke-[#f5861d]' : 'stroke-white'}`}
           />
         </button>
       </div>

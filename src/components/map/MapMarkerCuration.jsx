@@ -24,7 +24,7 @@ export default function MapMarkerCuration({ map, markers }) {
       const lat = getLat(markerData.position);
       const lng = getLng(markerData.position);
       const icon = numbersIcon[index];
-      const iconURL = createCategorySVGMarker(icon, '#eb5e28');
+      const iconURL = createCategorySVGMarker(icon, '#f5861d');
       const marker = new naver.maps.Marker({
         position: new naver.maps.LatLng(lat, lng),
         icon: {
