@@ -61,7 +61,7 @@ export default function TripJoinCode() {
         isOpen={inviteModalOpen}
         onRequestClose={closeModal}
         contentLabel="Trip Join Code Modal"
-        className={`absolute top-1/2 left-1/2 max-w-md w-[90vw] ${neumorphStyles.base} rounded-2xl p-6 transform -translate-x-1/2 -translate-y-1/2 outline-none`}
+        className={`absolute top-1/2 left-1/2 max-w-md w-[90vw] bg-[#f0f0f3] shadow-[0.5px_0.5px_1px_#d1d1d1,-0.5px_-0.5px_1px_#ffffff] rounded-2xl p-6 transform -translate-x-1/2 -translate-y-1/2 outline-none`}
         overlayClassName="fixed inset-0 bg-black/40 z-50 flex justify-center items-center"
       >
         <button
@@ -78,7 +78,7 @@ export default function TripJoinCode() {
           type="text"
           value={inviteCode}
           onChange={(e) => setInviteCode(e.target.value)}
-          className={`w-full p-3 rounded-full mb-4 ${neumorphStyles.small} focus:outline-none focus:ring-2 focus:ring-[#EB5E28]`}
+          className={`w-full p-3 rounded-full mb-4 ${neumorphStyles.small} focus:outline-none focus:ring-2 focus:ring-[#f5861d]`}
           placeholder="초대 코드를 입력하세요"
         />
         <div className="flex justify-end">

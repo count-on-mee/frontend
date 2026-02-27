@@ -12,7 +12,7 @@ import {
 } from '../../../constants/expenseConstants';
 import ExpenseRow from './expenseRow';
 
-import TotalRow from './totalRow';
+import TotalRow from '../totalRow';
 import SettlementRow from './settlementRow';
 
 const EXPENSE_TYPES = {
@@ -192,6 +192,12 @@ const ExpensesSection = memo(
       const value = parseInt(e.target.value) || 1;
       const validValue = Math.max(1, value);
       setParticipantCount(validValue);
+
+      if (socket && socket.connected) {
+        debouncedSocketEmit('updateParticipantCount', {
+          participantFields: { count: validValue },
+        });
+      }
     };
 
     return (

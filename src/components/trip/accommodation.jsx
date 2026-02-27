@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import clsx from 'clsx';
-import useAccommodations from '../../../hooks/useAccommodations';
-import { useSocketDebounce } from '../../../utils/debounce';
-import { componentStyles } from '../../../utils/style';
+import useAccommodations from '../../hooks/useAccommodations';
+import { useSocketDebounce } from '../../utils/debounce';
+import { componentStyles } from '../../utils/style';
 
 import AccommodationRow from './AccommodationRow';
 

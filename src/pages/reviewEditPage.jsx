@@ -201,7 +201,7 @@ export default function ReviewEditPage() {
                           }}
                         />
                         <button
-                          className="absolute top-1 right-1 p-1 bg-[#EB5E28] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-1 right-1 p-1 bg-[#f5861d] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => handleRemoveExistingImage(imgUrl)}
                           aria-label="이미지 삭제"
                         >
@@ -239,7 +239,7 @@ export default function ReviewEditPage() {
                               className="w-full h-24 object-cover rounded-lg"
                             />
                             <button
-                              className="absolute top-1 right-1 p-1 bg-[#EB5E28] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute top-1 right-1 p-1 bg-[#f5861d] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                               onClick={() => handleRemoveNewPhoto(index)}
                               aria-label="이미지 삭제"
                             >

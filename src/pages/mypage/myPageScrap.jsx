@@ -118,7 +118,7 @@ function MyPageScrap() {
                       whileTap={{ scale: 0.9 }}
                     >
                       <BookmarkIcon
-                        className={`absolute top-3 right-3 w-5 h-5 ${spot.isDeleted ? '' : 'fill-[#EB5E28] stroke-[#EB5E28]'}`}
+                        className={`absolute top-3 right-3 w-5 h-5 ${spot.isDeleted ? '' : 'fill-[#f5861d] stroke-[#f5861d]'}`}
                         onClick={(event) => handleSpotScrap(event, spot.spotId)}
                       />
                     </motion.div>
@@ -202,7 +202,7 @@ function MyPageScrap() {
                         whileTap={{ scale: 0.9 }}
                       >
                         <BookmarkIcon
-                          className={`absolute top-3 right-3 w-5 h-5 ${curation.isDeleted ? '' : 'fill-[#EB5E28] stroke-[#EB5E28]'}`}
+                          className={`absolute top-3 right-3 w-5 h-5 ${curation.isDeleted ? '' : 'fill-[#f5861d] stroke-[#f5861d]'}`}
                           onClick={(event) =>
                             handleCurationScrap(event, curation.curationId)
                           }

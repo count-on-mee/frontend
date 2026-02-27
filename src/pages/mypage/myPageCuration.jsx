@@ -107,7 +107,7 @@ function MyPageCuration() {
               새로운 큐레이션을 작성해보세요!
             </p>
             <button
-              className="bg-gradient-to-r from-[#EB5E28] to-[#D54E23] text-white rounded-3xl px-8 py-4 text-lg font-semibold shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff] hover:shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 hover:scale-105"
+              className="bg-gradient-to-r from-[#f5861d] to-[#D54E23] text-white rounded-3xl px-8 py-4 text-lg font-semibold shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff] hover:shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 hover:scale-105"
               onClick={() => navigate('/curation/create')}
             >
               큐레이션 작성하기
@@ -162,7 +162,7 @@ function MyPageCuration() {
                   {/* 콘텐츠 영역 */}
                   <div className="p-6 space-y-4 flex-1 flex flex-col">
                     <h3
-                      className="text-xl font-bold text-[#252422] group-hover:text-[#EB5E28] transition-colors overflow-hidden"
+                      className="text-xl font-bold text-[#252422] group-hover:text-[#f5861d] transition-colors overflow-hidden"
                       style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 2,

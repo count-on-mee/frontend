@@ -34,7 +34,7 @@ export default function Spot({ handleScrapClick, spot, onClick, varient }) {
             className={`p-2 rounded-full ${neumorphStyles.small} ${neumorphStyles.hover}`}
           >
             <BookmarkIcon
-              className={`w-5 h-5 transition-colors ${isScraped ? 'fill-[#EB5E28] stroke-[#EB5E28]' : 'text-gray-400 hover:text-[#EB5E28]'}`}
+              className={`w-5 h-5 transition-colors ${isScraped ? 'fill-[#f5861d] stroke-[#f5861d]' : 'text-gray-400 hover:text-[#f5861d]'}`}
             />
           </div>
           <span className="text-xs text-gray-600 font-medium">
