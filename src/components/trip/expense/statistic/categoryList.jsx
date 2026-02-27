@@ -1,15 +1,15 @@
 import React from 'react';
 import { neumorphStyles } from '../../../../utils/style';
 
-const CategoryList = ({ categoryData, formatAmount }) => {
+const CategoryList = ({ categoryData, formatAmount, title }) => {
   if (!categoryData.categories || categoryData.categories.length === 0) {
     return null;
   }
 
   return (
-    <div className={`${neumorphStyles.small} rounded-xl p-6 mb-6 bg-[#f0f0f3]`}>
+    <div className={`${neumorphStyles.small} rounded-xl p-6 bg-[#f0f0f3]`}>
       <h3 className="text-lg font-semibold text-gray-700 mb-4">
-        카테고리별 내역
+        카테고리별 내역 ({title})
       </h3>
       <div className="space-y-3">
         {categoryData.categories.map((item) => {

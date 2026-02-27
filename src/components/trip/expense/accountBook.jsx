@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRecoilValue } from 'recoil';
-import { useRecoilState } from 'recoil';
 import tripDatesAtom from '../../../recoil/tripDates';
 import userAtom from '../../../recoil/user';
 import ExpenseModal from './expenseModal.jsx';
 import Settlement from './settlement.jsx';
 import Statistics from './statistic/statistics.jsx';
 import DeleteConfirmModal from '../../common/DeleteConfirmModal.jsx';
-import { neumorphStyles, tabButtonStyles, scrapListStyles } from '../../../utils/style';
+import {
+  neumorphStyles,
+  tabButtonStyles,
+  scrapListStyles,
+} from '../../../utils/style';
 import receiptIcon from '../../../assets/receipt.png';
 import paymentIcon from '../../../assets/payment.png';
 import chartIcon from '../../../assets/chart.png';
@@ -20,6 +23,7 @@ import cruiseIcon from '../../../assets/cruise.png';
 import shoppingIcon from '../../../assets/shopping.png';
 import hotelIcon from '../../../assets/hotel.png';
 import binIcon from '../../../assets/bin.png';
+import editIcon from '../../../assets/edit.png';
 
 const CATEGORY_MAP = {
   TRANSPORTATION: '교통',
@@ -66,12 +70,12 @@ const AccountBook = ({
   const [selectedDate, setSelectedDate] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
+  const [isReadOnlyMode, setIsReadOnlyMode] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingExpense, setDeletingExpense] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const tripDates = useRecoilValue(tripDatesAtom);
   const user = useRecoilValue(userAtom);
-
 
   const dateOptions = React.useMemo(() => {
     const dates = [];
@@ -106,47 +110,95 @@ const AccountBook = ({
 
   const filteredExpenses = React.useMemo(() => {
     let filtered = expenses || [];
-    
+
     if (selectedDate) {
       filtered = filtered.filter((expense) => {
-        const normalizedExpenseDate = 
-          !expense.expenseDate || 
-          expense.expenseDate === '' || 
+        const normalizedExpenseDate =
+          !expense.expenseDate ||
+          expense.expenseDate === '' ||
           expense.expenseDate === null ||
           expense.expenseDate === undefined
-            ? '1970-01-01' 
+            ? '1970-01-01'
             : expense.expenseDate;
-        
-        const normalizedSelectedDate = 
-          !selectedDate || 
-          selectedDate === ''
-            ? '1970-01-01' 
-            : selectedDate;
-        
+
+        const normalizedSelectedDate =
+          !selectedDate || selectedDate === '' ? '1970-01-01' : selectedDate;
+
         return normalizedExpenseDate === normalizedSelectedDate;
       });
     }
-    
+
     const typeFiltered = filtered.filter(
       (expense) => expense.expenseType === expenseType,
     );
-    
+
     return typeFiltered;
   }, [expenses, selectedDate, expenseType]);
+
+  // 공동경비에서 결제한 금액 계산 (payUserId가 null인 경우만)
+  const totalSpentFromBudget = React.useMemo(() => {
+    if (!expenses || expenses.length === 0) return 0;
+
+    return expenses
+      .filter(
+        (expense) =>
+          expense.expenseType === 'SHARED' &&
+          expense.expenseCategory !== 'BUDGET' &&
+          expense.payUserId === null,
+      )
+      .reduce((sum, expense) => sum + (expense.totalAmount || 0), 0);
+  }, [expenses]);
+
+  // 공동경비 잔액 계산
+  const sharedBudgetInfo = React.useMemo(() => {
+    if (!statistics?.shared) return null;
+
+    const totalBudget = statistics.shared.totalBudget || 0;
+    const remainingBudget = totalBudget - totalSpentFromBudget;
+
+    return {
+      totalBudget,
+      totalSpentFromBudget,
+      remainingBudget,
+    };
+  }, [statistics?.shared, totalSpentFromBudget]);
+
+  // 개인경비 정보 계산
+  const personalBudgetInfo = React.useMemo(() => {
+    if (!statistics?.personal) return null;
+
+    const totalBudget = statistics.personal.totalBudget || 0;
+    const totalSpent = statistics.personal.totalSpent || 0;
+    const remainingBudget = totalBudget - totalSpent;
+
+    return {
+      totalBudget,
+      totalSpent,
+      remainingBudget,
+    };
+  }, [statistics?.personal]);
 
   useEffect(() => {
     if (dateOptions.length > 0 && !selectedDate) {
       setSelectedDate(dateOptions[0].value);
     }
-  }, [dateOptions]);
+  }, [dateOptions, selectedDate]);
 
   const handleAddExpense = () => {
     setEditingExpense(null);
+    setIsReadOnlyMode(false);
+    setShowModal(true);
+  };
+
+  const handleViewExpense = (expense) => {
+    setEditingExpense(expense);
+    setIsReadOnlyMode(true);
     setShowModal(true);
   };
 
   const handleEditExpense = (expense) => {
     setEditingExpense(expense);
+    setIsReadOnlyMode(false);
     setShowModal(true);
   };
 
@@ -168,9 +220,9 @@ const AccountBook = ({
     }
 
     setIsDeleting(true);
-    
-    socket.emit('deleteExpense', { 
-      tripDocumentExpenseId: deletingExpense.tripDocumentExpenseId 
+
+    socket.emit('deleteExpense', {
+      tripDocumentExpenseId: deletingExpense.tripDocumentExpenseId,
     });
 
     if (onExpenseUpdate) {
@@ -249,7 +301,7 @@ const AccountBook = ({
             </button>
           </div>
 
-          {expenseType === 'SHARED' && statistics?.shared && (
+          {expenseType === 'SHARED' && sharedBudgetInfo && (
             <div
               className={`${neumorphStyles.small} rounded-xl p-6 mb-6 bg-[#f0f0f3]`}
             >
@@ -257,19 +309,46 @@ const AccountBook = ({
                 공동경비 잔액
               </h3>
               <div className="text-3xl font-bold text-[#252422] mb-4">
-                {formatAmount(statistics.shared.remainingBudget)}원
+                {formatAmount(sharedBudgetInfo.remainingBudget)}원
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500">모인돈</span>
                   <span className="font-medium text-gray-700">
-                    {formatAmount(statistics.shared.totalBudget)}원
+                    {formatAmount(sharedBudgetInfo.totalBudget)}원
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500">총쓴돈</span>
                   <span className="font-medium text-gray-700">
-                    {formatAmount(statistics.shared.totalSpent)}원
+                    {formatAmount(sharedBudgetInfo.totalSpentFromBudget)}원
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {expenseType === 'PERSONAL' && personalBudgetInfo && (
+            <div
+              className={`${neumorphStyles.small} rounded-xl p-6 mb-6 bg-[#f0f0f3]`}
+            >
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                개인경비 잔액
+              </h3>
+              <div className="text-3xl font-bold text-[#252422] mb-4">
+                {formatAmount(personalBudgetInfo.remainingBudget)}원
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">모인돈</span>
+                  <span className="font-medium text-gray-700">
+                    {formatAmount(personalBudgetInfo.totalBudget)}원
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">총쓴돈</span>
+                  <span className="font-medium text-gray-700">
+                    {formatAmount(personalBudgetInfo.totalSpent)}원
                   </span>
                 </div>
               </div>
@@ -324,12 +403,16 @@ const AccountBook = ({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={`${neumorphStyles.smallInset} rounded-xl p-4 mb-3 flex items-center justify-between cursor-pointer overflow-hidden`}
-                  onClick={() => handleEditExpense(expense)}
+                  onClick={() => handleViewExpense(expense)}
                 >
                   <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className={`w-10 h-10 flex items-center justify-center flex-shrink-0 ${neumorphStyles.small} rounded-full`}>
+                    <div
+                      className={`w-10 h-10 flex items-center justify-center flex-shrink-0 ${neumorphStyles.small} rounded-full`}
+                    >
                       <img
-                        src={CATEGORY_ICONS[expense.expenseCategory] || receiptIcon}
+                        src={
+                          CATEGORY_ICONS[expense.expenseCategory] || receiptIcon
+                        }
                         alt={CATEGORY_MAP[expense.expenseCategory] || '기타'}
                         className="w-6 h-6 object-contain"
                       />
@@ -368,8 +451,22 @@ const AccountBook = ({
                       </div>
                     )}
                     <div className="text-lg font-semibold text-gray-800 whitespace-nowrap">
-                      {expense.expenseCategory === 'BUDGET' ? '+' : '-'} {formatAmount(expense.totalAmount)}원
+                      {expense.expenseCategory === 'BUDGET' ? '+' : '-'}{' '}
+                      {formatAmount(expense.totalAmount)}원
                     </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditExpense(expense);
+                      }}
+                      className={`${neumorphStyles.small} w-8 h-8 rounded-full flex items-center justify-center transition-all ${neumorphStyles.hover} flex-shrink-0`}
+                    >
+                      <img
+                        src={editIcon}
+                        alt="수정"
+                        className="w-5 h-5 object-contain"
+                      />
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -423,6 +520,7 @@ const AccountBook = ({
           onClose={() => {
             setShowModal(false);
             setEditingExpense(null);
+            setIsReadOnlyMode(false);
           }}
           socket={socket}
           tripId={tripId}
@@ -432,6 +530,11 @@ const AccountBook = ({
           tripDates={tripDates}
           dateOptions={dateOptions}
           onExpenseUpdate={onExpenseUpdate}
+          expenseType={expenseType}
+          isReadOnly={isReadOnlyMode}
+          onEditModeChange={(readOnly) => {
+            setIsReadOnlyMode(readOnly);
+          }}
         />
       )}
 

@@ -5,7 +5,6 @@ import { neumorphStyles } from '../../../utils/style';
 import PaymentInfoModal from './paymentInfoModal';
 import QRCodeDisplay from '../../common/qrCodeDisplay';
 import { roundPaymentUrlAmount } from '../../../utils/paymentUrl';
-// generateTossPaymentUrl, getTossBankCode import 제거: 백엔드에서 URL 생성 책임을 가짐
 
 export const BANKS = [
   '경남',
@@ -32,13 +31,9 @@ export const BANKS = [
   'NH농협',
 ];
 
-// 유틸 함수들
 const formatAmount = (amount) => {
   return Math.round(amount).toLocaleString('ko-KR');
 };
-
-// generatePaymentUrl 함수 제거: 백엔드에서 URL 생성 책임을 가짐
-// 백엔드 API 응답으로 전달받은 tossUrl과 kakaoPayUrl만 사용
 
 const getAvatarColor = (index) => {
   const colors = [
@@ -52,7 +47,13 @@ const getAvatarColor = (index) => {
   return colors[index % colors.length];
 };
 
-const Avatar = ({ imgUrl, name, index, size = 'w-12 h-12', textSize = 'text-lg' }) => {
+const Avatar = ({
+  imgUrl,
+  name,
+  index,
+  size = 'w-12 h-12',
+  textSize = 'text-lg',
+}) => {
   if (imgUrl) {
     return (
       <img
@@ -71,7 +72,13 @@ const Avatar = ({ imgUrl, name, index, size = 'w-12 h-12', textSize = 'text-lg' 
   );
 };
 
-const Settlement = ({ tripId, expenses, statistics, participants, currentUserId }) => {
+const Settlement = ({
+  tripId,
+  expenses,
+  statistics: _statistics,
+  participants,
+  currentUserId,
+}) => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [settlementData, setSettlementData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -94,22 +101,52 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
         const settlementPersonal = data.settlement.personal;
         const sharedSettlement = data.settlement.shared || {};
 
-        const participantsMapForFetch = new Map(participants.map((p) => [p.userId, p]));
+        const participantsMapForFetch = new Map(
+          participants.map((p) => [p.userId, p]),
+        );
 
         const userSettlementMap = {};
         settlementPersonal.forEach((settlement) => {
           const participant = participantsMapForFetch.get(settlement.userId);
           if (participant) {
+            const addedSharedBudget = settlement.addedSharedBudget || 0;
+            const paidAmount = settlement.paidAmount || 0;
+            const consumedAmount = settlement.consumedAmount || 0;
+            const distributedSharedBudget =
+              settlement.distributedSharedBudget || 0;
+            const netAmount = settlement.netAmount || 0;
+            const calculatedNetAmount =
+              addedSharedBudget +
+              paidAmount -
+              consumedAmount -
+              distributedSharedBudget;
+            const isFormulaCorrect =
+              Math.abs(netAmount - calculatedNetAmount) < 1;
+
+            if (!isFormulaCorrect) {
+              console.warn(
+                `정산 금액 공식 불일치 (userId: ${settlement.userId}):`,
+                {
+                  expected: calculatedNetAmount,
+                  actual: netAmount,
+                  addedSharedBudget,
+                  paidAmount,
+                  consumedAmount,
+                  distributedSharedBudget,
+                },
+              );
+            }
             userSettlementMap[settlement.userId] = {
               userId: settlement.userId,
               name: participant.name || participant.nickname,
               imgUrl: participant.imgUrl,
-              addedSharedBudget: settlement.addedSharedBudget || 0,
-              paidAmount: settlement.paidAmount || 0,
-              consumedAmount: settlement.consumedAmount || 0,
-              distributedSharedBudget: settlement.distributedSharedBudget || 0,
-              netAmount: settlement.netAmount || 0,
+              addedSharedBudget,
+              paidAmount,
+              consumedAmount,
+              distributedSharedBudget,
+              netAmount,
               settlements: settlement.settlements || [],
+              isFormulaCorrect,
             };
           }
         });
@@ -174,7 +211,7 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
 
       return () => clearTimeout(timer);
     }
-  }, [expenses?.length, tripId, loading, fetchSettlementData]);
+  }, [expenses, expenses?.length, tripId, loading, fetchSettlementData]);
 
   const handlePaymentInfoRegistered = useCallback(async () => {
     setShowPaymentModal(false);
@@ -231,7 +268,8 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
             <div className="flex justify-between items-center">
               <span className="text-gray-600">결제한 금액</span>
               <span className="font-semibold text-gray-800">
-                {formatAmount(settlementData.shared.totalSpentFromBudget || 0)}원
+                {formatAmount(settlementData.shared.totalSpentFromBudget || 0)}
+                원
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -241,6 +279,48 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
               </span>
             </div>
           </div>
+          {settlementData.shared.remainingBudget > 0 &&
+            participants &&
+            participants.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="text-xs text-gray-500 bg-blue-50 rounded-lg p-3">
+                  <div className="font-medium text-gray-700 mb-1">
+                    💡 공동경비 잔액 분배 안내
+                  </div>
+                  <div className="text-gray-600">
+                    남은 공동경비는 참가자 {participants.length}명에게 1/N로
+                    분배됩니다.
+                    {(() => {
+                      const roundingAmount =
+                        (settlementData.shared.remainingBudget || 0) %
+                        participants.length;
+                      if (roundingAmount > 0) {
+                        const baseAmount = Math.floor(
+                          (settlementData.shared.remainingBudget || 0) /
+                            participants.length,
+                        );
+                        return (
+                          <>
+                            <br />
+                            <span className="text-orange-600 font-medium">
+                              분배 금액: {baseAmount.toLocaleString()}원 ×{' '}
+                              {participants.length}명 + 나머지 {roundingAmount}
+                              원
+                            </span>
+                            <br />
+                            <span className="text-gray-500">
+                              나머지 {roundingAmount}원은 여행을 만든 사람이
+                              받습니다.
+                            </span>
+                          </>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
         </div>
       )}
 
@@ -279,6 +359,25 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                   {formatAmount(user.consumedAmount || 0)}원
                 </span>
               </div>
+              {user.distributedSharedBudget !== undefined &&
+                user.distributedSharedBudget !== 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">공동경비 잔액 분배액</span>
+                    <span className="font-medium text-gray-700">
+                      {formatAmount(user.distributedSharedBudget || 0)}원
+                    </span>
+                  </div>
+                )}
+              {user.isFormulaCorrect === false && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="text-xs text-red-600 font-medium">
+                    ⚠️ 정산 금액 계산 오류가 감지되었습니다.
+                  </div>
+                  <div className="text-xs text-red-500 mt-1">
+                    관리자에게 문의해주세요.
+                  </div>
+                </div>
+              )}
             </div>
 
             {user.netAmount !== 0 && (
@@ -304,11 +403,13 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                   user.settlements
                     .filter((s) => s.direction === 'SEND')
                     .map((settlement) => {
-                      const counterpart = participantsMap.get(settlement.counterpartUserId);
+                      const counterpart = participantsMap.get(
+                        settlement.counterpartUserId,
+                      );
                       if (!counterpart) return null;
 
                       const isCurrentUser = user.userId === currentUserId;
-                      
+
                       if (!isCurrentUser) {
                         return (
                           <div key={settlement.counterpartUserId}>
@@ -317,12 +418,17 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                                 <Avatar
                                   imgUrl={counterpart.imgUrl}
                                   name={counterpart.name}
-                                  index={participantIndexMap.get(counterpart.userId) ?? 0}
+                                  index={
+                                    participantIndexMap.get(
+                                      counterpart.userId,
+                                    ) ?? 0
+                                  }
                                   size="w-8 h-8"
                                   textSize="text-sm"
                                 />
                                 <span className="text-sm text-gray-600">
-                                  {counterpart.name || '알 수 없음'}에게 보낼 금액
+                                  {counterpart.name || '알 수 없음'}에게 보낼
+                                  금액
                                 </span>
                               </div>
                               <span className="font-medium text-gray-800">
@@ -336,14 +442,23 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                       const qrKey = `${user.userId}-${settlement.counterpartUserId}`;
                       const isQRExpanded = expandedQR === qrKey;
                       const backendTossUrl = settlement.tossUrl
-                        ? roundPaymentUrlAmount(settlement.tossUrl, settlement.amount)
+                        ? roundPaymentUrlAmount(
+                            settlement.tossUrl,
+                            settlement.amount,
+                          )
                         : null;
                       const backendKakaoPayUrl = settlement.kakaoPayUrl
-                        ? roundPaymentUrlAmount(settlement.kakaoPayUrl, settlement.amount)
+                        ? roundPaymentUrlAmount(
+                            settlement.kakaoPayUrl,
+                            settlement.amount,
+                          )
                         : null;
                       const paymentUrl = backendTossUrl || backendKakaoPayUrl;
-                      const canReceivePayment = !!(backendTossUrl || backendKakaoPayUrl);
-                      const canShowQR = isCurrentUser && canReceivePayment && paymentUrl;
+                      const canReceivePayment = !!(
+                        backendTossUrl || backendKakaoPayUrl
+                      );
+                      const canShowQR =
+                        isCurrentUser && canReceivePayment && paymentUrl;
 
                       return (
                         <div key={settlement.counterpartUserId}>
@@ -352,7 +467,10 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                               <Avatar
                                 imgUrl={counterpart.imgUrl}
                                 name={counterpart.name}
-                                index={participantIndexMap.get(counterpart.userId) ?? 0}
+                                index={
+                                  participantIndexMap.get(counterpart.userId) ??
+                                  0
+                                }
                                 size="w-8 h-8"
                                 textSize="text-sm"
                               />
@@ -383,14 +501,11 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                           </div>
                           {canShowQR && isQRExpanded && paymentUrl && (
                             <div className="mt-3 p-4 bg-gray-50 rounded-lg flex flex-col items-center">
-                              {/* 
-                                백엔드에서 받은 토스 URL만 사용
-                                백엔드에서 생성한 URL 형식: supertoss://send?amount=...&bank=...&accountNo=...
-                              */}
                               {backendTossUrl && (
                                 <div className="mb-4 flex flex-col items-center">
                                   <p className="text-sm font-medium text-gray-700 mb-2">
-                                    토스 송금 ({formatAmount(settlement.amount)}원)
+                                    토스 송금 ({formatAmount(settlement.amount)}
+                                    원)
                                   </p>
                                   <div className="mb-2">
                                     <QRCodeDisplay
@@ -399,20 +514,11 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                                     />
                                   </div>
                                   <div className="flex gap-2 mt-2">
-                                    {(backendTossUrl.startsWith('supertoss://') || 
-                                      backendTossUrl.startsWith('toss://')) && (
-                                      <a
-                                        href={backendTossUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-all"
-                                      >
-                                        토스 앱 열기
-                                      </a>
-                                    )}
                                     <button
                                       onClick={() => {
-                                        navigator.clipboard.writeText(backendTossUrl);
+                                        navigator.clipboard.writeText(
+                                          backendTossUrl,
+                                        );
                                         alert('토스 링크가 복사되었습니다.');
                                       }}
                                       className="px-3 py-1.5 bg-gray-500 text-white rounded-lg text-sm hover:bg-gray-600 transition-all"
@@ -422,11 +528,18 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                                   </div>
                                 </div>
                               )}
-                              
+
                               {backendKakaoPayUrl && (
-                                <div className={backendTossUrl ? "mt-4 pt-4 border-t border-gray-300 flex flex-col items-center" : "flex flex-col items-center"}>
+                                <div
+                                  className={
+                                    backendTossUrl
+                                      ? 'mt-4 pt-4 border-t border-gray-300 flex flex-col items-center'
+                                      : 'flex flex-col items-center'
+                                  }
+                                >
                                   <p className="text-sm font-medium text-gray-700 mb-2">
-                                    카카오페이 송금 ({formatAmount(settlement.amount)}원)
+                                    카카오페이 송금 (
+                                    {formatAmount(settlement.amount)}원)
                                   </p>
                                   <div className="mb-2">
                                     <QRCodeDisplay
@@ -435,18 +548,14 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                                     />
                                   </div>
                                   <div className="flex gap-2 mt-2">
-                                    <a
-                                      href={backendKakaoPayUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="px-3 py-1.5 bg-yellow-400 text-gray-800 rounded-lg text-sm hover:bg-yellow-500 transition-all"
-                                    >
-                                      카카오페이 열기
-                                    </a>
                                     <button
                                       onClick={() => {
-                                        navigator.clipboard.writeText(backendKakaoPayUrl);
-                                        alert('카카오페이 링크가 복사되었습니다.');
+                                        navigator.clipboard.writeText(
+                                          backendKakaoPayUrl,
+                                        );
+                                        alert(
+                                          '카카오페이 링크가 복사되었습니다.',
+                                        );
                                       }}
                                       className="px-3 py-1.5 bg-gray-500 text-white rounded-lg text-sm hover:bg-gray-600 transition-all"
                                     >
@@ -457,7 +566,8 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                               )}
                               {!backendTossUrl && !backendKakaoPayUrl && (
                                 <div className="text-sm text-gray-500">
-                                  송금 URL을 받을 수 없습니다. 결제 정보를 확인해주세요.
+                                  송금 URL을 받을 수 없습니다. 결제 정보를
+                                  확인해주세요.
                                 </div>
                               )}
                             </div>
@@ -470,7 +580,9 @@ const Settlement = ({ tripId, expenses, statistics, participants, currentUserId 
                   user.settlements
                     .filter((s) => s.direction === 'RECEIVE')
                     .map((settlement) => {
-                      const counterpart = participantsMap.get(settlement.counterpartUserId);
+                      const counterpart = participantsMap.get(
+                        settlement.counterpartUserId,
+                      );
                       if (!counterpart) return null;
 
                       return (
