@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../../../utils/axiosInstance';
 import { neumorphStyles, scrapListStyles } from '../../../utils/style';
-import { BANKS } from './settlement.jsx';
+import { BANKS } from './constants.js';
 
 const AccountRegistration = ({ onBack, onComplete }) => {
   const [depositorName, setDepositorName] = useState('');
@@ -49,7 +49,6 @@ const AccountRegistration = ({ onBack, onComplete }) => {
 
   return (
     <div className="h-full flex flex-col">
-      {/* 헤더 */}
       <div className="sticky top-0 px-6 py-4 flex items-center relative rounded-t-2xl bg-[#f0f0f3]">
         <button
           onClick={onBack}
@@ -75,7 +74,6 @@ const AccountRegistration = ({ onBack, onComplete }) => {
       </div>
 
       <div className="p-6 space-y-6">
-        {/* 예금주명 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             예금주명
@@ -89,7 +87,6 @@ const AccountRegistration = ({ onBack, onComplete }) => {
           />
         </div>
 
-        {/* 주 사용 은행 */}
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             주 사용 은행
@@ -145,7 +142,6 @@ const AccountRegistration = ({ onBack, onComplete }) => {
           </div>
         </div>
 
-        {/* 계좌번호 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             계좌번호
@@ -162,7 +158,6 @@ const AccountRegistration = ({ onBack, onComplete }) => {
           />
         </div>
 
-        {/* 버튼 */}
         <div className="flex gap-3 pt-4">
           <button
             type="button"

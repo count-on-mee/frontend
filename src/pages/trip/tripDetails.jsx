@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
 import useTripDetails from '../../hooks/useTripDetails';
 import AccountBook from '../../components/trip/expense/accountBook';
 import Accommodation from '../../components/trip/accommodation';
 import TodoList from '../../components/trip/todolist';
 import AllInOneView from '../../components/trip/allInOneView';
 import { neumorphStyles } from '../../utils/style';
+import userAtom from '../../recoil/user';
 import expenseIcon from '../../assets/expense.png';
 import hotelIcon from '../../assets/hotel.png';
 import todolistIcon from '../../assets/todolist.png';
@@ -15,6 +17,7 @@ const TripDetails = () => {
   const { tripId } = useParams();
   const { socket, tripData } = useOutletContext();
   const [selectedTab, setSelectedTab] = useState('expenses');
+  const user = useRecoilValue(userAtom);
 
   const {
     expenses,
@@ -23,23 +26,17 @@ const TripDetails = () => {
     tasks,
     loading,
     error,
-    setExpenses,
     setAccommodations,
     setTasks,
-    participantCount,
-    setParticipantCount,
     refetch,
   } = useTripDetails(tripId);
 
-  const tabs = useMemo(
-    () => [
-      { id: 'expenses', title: '비용', icon: expenseIcon },
-      { id: 'accommodation', title: '숙소', icon: hotelIcon },
-      { id: 'todo', title: '할 일', icon: todolistIcon },
-      { id: 'all', title: '한눈에 보기', icon: documentIcon },
-    ],
-    [],
-  );
+  const tabs = [
+    { id: 'expenses', title: '비용', icon: expenseIcon },
+    { id: 'accommodation', title: '숙소', icon: hotelIcon },
+    { id: 'todo', title: '할 일', icon: todolistIcon },
+    { id: 'all', title: '한눈에 보기', icon: documentIcon },
+  ];
 
   const renderContent = useMemo(() => {
     switch (selectedTab) {
@@ -78,13 +75,13 @@ const TripDetails = () => {
             socket={socket}
             tripId={tripId}
             expenses={expenses}
+            participants={tripData?.participants || []}
+            currentUserId={user?.userId}
             accommodations={accommodations}
             tasks={tasks}
-            setExpenses={setExpenses}
             setAccommodations={setAccommodations}
             setTasks={setTasks}
-            participantCount={participantCount}
-            setParticipantCount={setParticipantCount}
+            statistics={statistics}
           />
         );
       default:
@@ -99,12 +96,10 @@ const TripDetails = () => {
     accommodations,
     tasks,
     tripData?.participants,
-    participantCount,
     refetch,
     setAccommodations,
     setTasks,
-    setExpenses,
-    setParticipantCount,
+    user?.userId,
   ]);
 
   if (loading) {

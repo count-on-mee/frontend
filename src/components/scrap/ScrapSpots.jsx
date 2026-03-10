@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { scrapListStyles } from '../../utils/style';
 import defaultImage from '../../assets/logo.png';
+import Searchbar from '../ui/Searchbar';
 
 const SpotCard = ({ spot, isSelected, onToggleSelection }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -67,6 +68,8 @@ export default function ScrapSpots({
   error,
   selectedSpots,
   onToggleSelection,
+  searchTerm,
+  onSearchChange,
 }) {
   const [isSectionHovered, setIsSectionHovered] = useState(false);
   const [sectionHoverTimeout, setSectionHoverTimeout] = useState(null);
@@ -86,6 +89,14 @@ export default function ScrapSpots({
     setIsSectionHovered(false);
   };
 
+  const handleSectionClick = () => {
+    if (sectionHoverTimeout) {
+      clearTimeout(sectionHoverTimeout);
+      setSectionHoverTimeout(null);
+    }
+    setIsSectionHovered(true);
+  };
+
   return (
     <div className="mt-8">
       <SectionHeader title="스크랩한 장소" />
@@ -97,8 +108,19 @@ export default function ScrapSpots({
         }
         onMouseEnter={handleSectionMouseEnter}
         onMouseLeave={handleSectionMouseLeave}
+        onClick={handleSectionClick}
       >
         <div className="opacity-100 transition-opacity duration-1000 ease-out">
+          {isSectionHovered && (
+            <div className="w-full max-w-2xl mx-auto mb-6">
+              <Searchbar
+                value={searchTerm || ''}
+                onChange={onSearchChange}
+                placeholder="스크랩한 장소 검색"
+                size="lg"
+              />
+            </div>
+          )}
           {loading ? (
             <div className="text-center py-4">로딩 중...</div>
           ) : error ? (
@@ -109,7 +131,7 @@ export default function ScrapSpots({
             </div>
           ) : (
             <div className={scrapListStyles.grid}>
-              {spots.map((spot) => (
+              {(isSectionHovered ? spots : spots.slice(0, 6)).map((spot) => (
                 <SpotCard
                   key={spot.spotId}
                   spot={spot}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import useSocket from './useSocket';
 import axiosInstance from '../utils/axiosInstance';
 
@@ -29,7 +29,7 @@ const useTripDetails = (tripId) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchTripData = async () => {
+  const fetchTripData = useCallback(async () => {
     if (!tripId) {
       return;
     }
@@ -39,12 +39,7 @@ const useTripDetails = (tripId) => {
 
     try {
       const response = await axiosInstance.get(`/trips/${tripId}/documents`);
-      
-      const tripStartDate = response.data.document?.startDate;
-      const tripStartDateStr = tripStartDate 
-        ? new Date(tripStartDate).toISOString().slice(0, 10)
-        : null;
-      
+
       const newExpenses = (response.data.expenses || []).map((expense) => {
         // 빈 값이나 null일 때는 1970-01-01로 설정 (준비 날짜)
         if (!expense.expenseDate || expense.expenseDate === '') {
@@ -53,16 +48,7 @@ const useTripDetails = (tripId) => {
             expenseDate: '1970-01-01',
           };
         }
-        
-        if (tripStartDateStr && expense.expenseDate === tripStartDateStr) {
-          if (expense.expenseCategory === 'BUDGET') {
-            return {
-              ...expense,
-              expenseDate: '1970-01-01',
-            };
-          }
-        }
-        
+
         return expense;
       });
       const newStatistics = response.data.statistics || {
@@ -77,7 +63,7 @@ const useTripDetails = (tripId) => {
           remainingBudget: 0,
         },
       };
-      
+
       setExpenses(newExpenses);
       setStatistics(newStatistics);
       setAccommodations(response.data.accommodations || []);
@@ -97,22 +83,24 @@ const useTripDetails = (tripId) => {
         setLoading(false);
       }
     }
-  };
+  }, [tripId]);
 
   useEffect(() => {
     fetchTripData();
-  }, [tripId]);
+  }, [fetchTripData]);
 
   useEffect(() => {
     if (isConnected && !loading) {
       fetchTripData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected]);
 
   useEffect(() => {
     if (socket && isConnected) {
       fetchTripData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, isConnected]);
 
   useEffect(() => {
@@ -124,16 +112,16 @@ const useTripDetails = (tripId) => {
       const expenseType = data.expenseType;
       const isPersonal = expenseType === 'PERSONAL';
       const isBudget = data.expenseCategory === 'BUDGET';
-      
+
       if (isPersonal && !isBudget) {
         return;
       }
 
-      const normalizedExpenseDate = 
+      const normalizedExpenseDate =
         !data.expenseDate || data.expenseDate === ''
-          ? '1970-01-01' 
+          ? '1970-01-01'
           : data.expenseDate;
-      
+
       const newExpense = {
         tripDocumentExpenseId: data.tripDocumentExpenseId,
         payUserId: data.payUserId !== undefined ? data.payUserId : null,
@@ -145,21 +133,23 @@ const useTripDetails = (tripId) => {
         expenseType: expenseType,
         participants: Array.isArray(data.participants) ? data.participants : [],
       };
-      
+
       setExpenses((prev) => {
         const exists = prev.some(
-          (exp) => exp.tripDocumentExpenseId === data.tripDocumentExpenseId
+          (exp) => exp.tripDocumentExpenseId === data.tripDocumentExpenseId,
         );
         if (exists) {
           return prev;
         }
         return [...prev, newExpense];
       });
-      
+
       if (isBudget && expenseType === 'SHARED') {
         setStatistics((prev) => {
-          const newTotalBudget = (prev.shared?.totalBudget || 0) + data.totalAmount;
-          const newRemainingBudget = newTotalBudget - (prev.shared?.totalSpent || 0);
+          const newTotalBudget =
+            (prev.shared?.totalBudget || 0) + data.totalAmount;
+          const newRemainingBudget =
+            newTotalBudget - (prev.shared?.totalSpent || 0);
           return {
             ...prev,
             shared: {
@@ -170,62 +160,73 @@ const useTripDetails = (tripId) => {
           };
         });
       }
-      
-      setTimeout(() => {
-        fetchTripData();
-      }, isBudget ? 800 : 300);
+
+      setTimeout(
+        () => {
+          fetchTripData();
+        },
+        isBudget ? 800 : 300,
+      );
     };
 
     const handleExpenseUpdated = (data) => {
       const expenseType = data.expenseFields?.expenseType || 'SHARED';
       const isPersonal = expenseType === 'PERSONAL';
       const isBudget = data.expenseFields?.expenseCategory === 'BUDGET';
-      
+
       if (isPersonal && !isBudget) {
         return;
       }
 
       const expenseFields = data.expenseFields || {};
-      
+
       const updatedFields = {};
-      if (expenseFields.expenseCategory !== undefined) updatedFields.expenseCategory = expenseFields.expenseCategory;
-      if (expenseFields.totalAmount !== undefined) updatedFields.totalAmount = expenseFields.totalAmount;
-      if (expenseFields.description !== undefined) updatedFields.description = expenseFields.description;
-      if (expenseFields.paymentMethod !== undefined) updatedFields.paymentMethod = expenseFields.paymentMethod;
+      if (expenseFields.expenseCategory !== undefined)
+        updatedFields.expenseCategory = expenseFields.expenseCategory;
+      if (expenseFields.totalAmount !== undefined)
+        updatedFields.totalAmount = expenseFields.totalAmount;
+      if (expenseFields.description !== undefined)
+        updatedFields.description = expenseFields.description;
+      if (expenseFields.paymentMethod !== undefined)
+        updatedFields.paymentMethod = expenseFields.paymentMethod;
       if (expenseFields.expenseDate !== undefined) {
         // 빈 값일 때는 1970-01-01로 설정 (준비 날짜)
-        updatedFields.expenseDate = 
+        updatedFields.expenseDate =
           !expenseFields.expenseDate || expenseFields.expenseDate === ''
-            ? '1970-01-01' 
+            ? '1970-01-01'
             : expenseFields.expenseDate;
       }
-      if (expenseFields.expenseType !== undefined) updatedFields.expenseType = expenseFields.expenseType;
-      if (expenseFields.payUserId !== undefined) updatedFields.payUserId = expenseFields.payUserId;
-      if (expenseFields.participants !== undefined) updatedFields.participants = expenseFields.participants;
+      if (expenseFields.expenseType !== undefined)
+        updatedFields.expenseType = expenseFields.expenseType;
+      if (expenseFields.payUserId !== undefined)
+        updatedFields.payUserId = expenseFields.payUserId;
+      if (expenseFields.participants !== undefined)
+        updatedFields.participants = expenseFields.participants;
 
       setExpenses((prev) => {
         const existingExpense = prev.find(
-          (exp) => exp.tripDocumentExpenseId === data.tripDocumentExpenseId
+          (exp) => exp.tripDocumentExpenseId === data.tripDocumentExpenseId,
         );
-        
+
         if (!existingExpense) {
           return prev;
         }
-        
+
         const updatedExpense = {
           ...existingExpense,
           ...updatedFields,
         };
-        
+
         if (isBudget && expenseType === 'SHARED') {
           const oldAmount = existingExpense.totalAmount || 0;
           const newAmount = updatedExpense.totalAmount || oldAmount;
           const diff = newAmount - oldAmount;
-          
+
           if (diff !== 0) {
             setStatistics((statPrev) => {
               const newTotalBudget = (statPrev.shared?.totalBudget || 0) + diff;
-              const newRemainingBudget = newTotalBudget - (statPrev.shared?.totalSpent || 0);
+              const newRemainingBudget =
+                newTotalBudget - (statPrev.shared?.totalSpent || 0);
               return {
                 ...statPrev,
                 shared: {
@@ -237,7 +238,7 @@ const useTripDetails = (tripId) => {
             });
           }
         }
-        
+
         const updated = prev.map((expense) =>
           expense.tripDocumentExpenseId === data.tripDocumentExpenseId
             ? updatedExpense
@@ -245,10 +246,13 @@ const useTripDetails = (tripId) => {
         );
         return updated;
       });
-      
-      setTimeout(() => {
-        fetchTripData();
-      }, isBudget ? 800 : 300);
+
+      setTimeout(
+        () => {
+          fetchTripData();
+        },
+        isBudget ? 800 : 300,
+      );
     };
 
     const handleExpenseDeleted = (data) => {
@@ -258,7 +262,7 @@ const useTripDetails = (tripId) => {
             expense.tripDocumentExpenseId !== data.tripDocumentExpenseId,
         ),
       );
-      
+
       setTimeout(() => {
         fetchTripData();
       }, 300);
@@ -350,9 +354,10 @@ const useTripDetails = (tripId) => {
       socket.off('taskDeleted', handleTaskDeleted);
 
       socket.off('participantCountUpdated', handleParticipantCountUpdated);
-      
+
       socket.off('error', handleError);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   return {

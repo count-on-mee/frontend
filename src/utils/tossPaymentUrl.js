@@ -1,11 +1,13 @@
+import { BANK_CODE_MAP } from '../components/trip/expense/constants.js';
+
 /**
  * 토스 송금 URL 생성
- * @param {Object} params - 송금 파라미터
- * @param {string} params.accountNumber - 계좌번호
- * @param {string} params.bankCode - 은행 코드
- * @param {string} params.amount - 송금 금액
- * @param {string} params.message - 송금 메시지 (선택)
- * @returns {string} 토스 송금 URL
+ * @param {Object} params
+ * @param {string} params.accountNumber
+ * @param {string} params.bankCode
+ * @param {string} params.amount
+ * @param {string} params.message
+ * @returns {string}
  */
 export const generateTossPaymentUrl = ({
   accountNumber,
@@ -39,30 +41,5 @@ export const generateTossPaymentUrl = ({
  * @returns {string} 토스 은행 코드
  */
 export const getTossBankCode = (bankName) => {
-  const bankCodeMap = {
-    경남: 'KYONGNAMBANK',
-    광주: 'GWANGJUBANK',
-    IBK기업: 'IBK',
-    KB국민: 'KB',
-    'iM뱅크(대구)': 'DAEGUBANK',
-    부산: 'BUSANBANK',
-    KDB산림: 'KDB',
-    새마을: 'SAEMAUL',
-    SC제일: 'SC',
-    신한: 'SHINHAN',
-    신협: 'SHINHYUP',
-    수협: 'SUHYUP',
-    케이뱅크: 'KAKAOBANK',
-    우리: 'WOORI',
-    우체국: 'POST',
-    저축은행: 'SAVINGBANK',
-    전북: 'JEONBUKBANK',
-    제주: 'JEJUBANK',
-    카카오뱅크: 'KAKAOBANK',
-    토스뱅크: 'TOSSBANK',
-    하나: 'HANA',
-    'NH농협': 'NONGHYUP',
-  };
-
-  return bankCodeMap[bankName] || '';
+  return BANK_CODE_MAP[bankName] || '';
 };
