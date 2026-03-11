@@ -1,8 +1,8 @@
 import React from 'react';
-import Expenses from './expense/expenses';
+import SettlementSummary from './settlementSummary';
 import Accommodation from './accommodation';
 import TodoList from './todolist';
-import expenseIcon from '../../assets/expense.png';
+import paymentIcon from '../../assets/payment.png';
 import hotelIcon from '../../assets/hotel.png';
 import todolistIcon from '../../assets/todolist.png';
 
@@ -10,28 +10,25 @@ const AllInOneView = ({
   socket,
   tripId,
   expenses,
+  participants,
+  currentUserId,
   accommodations,
   tasks,
-  setExpenses,
   setAccommodations,
   setTasks,
-  participantCount,
-  setParticipantCount,
+  statistics,
 }) => {
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-3 text-[#252422] flex items-center">
-          <img src={expenseIcon} alt="비용" className="w-8 h-8 mr-2" />
-          비용
+          <img src={paymentIcon} alt="정산 요약" className="w-8 h-8 mr-2" />
+          정산 요약
         </h2>
-        <Expenses
-          socket={socket}
-          tripId={tripId}
-          initialExpenses={expenses}
-          setExpenses={setExpenses}
-          participantCount={participantCount}
-          setParticipantCount={setParticipantCount}
+        <SettlementSummary
+          expenses={expenses}
+          statistics={statistics}
+          participants={participants}
         />
       </div>
 

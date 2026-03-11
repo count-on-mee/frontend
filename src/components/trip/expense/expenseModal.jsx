@@ -1,52 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import trainIcon from '../../../assets/train.png';
-import foodIcon from '../../../assets/food.png';
-import tourIcon from '../../../assets/tour.png';
-import cruiseIcon from '../../../assets/cruise.png';
-import shoppingIcon from '../../../assets/shopping.png';
-import hotelIcon from '../../../assets/hotel.png';
+// eslint-disable-next-line no-unused-vars
+import { AnimatePresence, motion } from 'framer-motion';
 import { neumorphStyles, scrapListStyles } from '../../../utils/style';
+import CurrencyAmountInput from './currencyAmountInput';
+import CategorySelector from './categorySelector';
+import PayerSelector from './payerSelector';
+import ConsumerSelector from './consumerSelector';
+import { createExpenseData } from './expenseUtils';
 
 const expenseModalOrangeButton = scrapListStyles.expenseModalOrangeButton;
-
-const CATEGORY_MAP = {
-  TRANSPORTATION: '교통',
-  MEAL: '식비',
-  ACCOMMODATION: '숙박',
-  TOUR: '관광',
-  ACTIVITY: '액티비티',
-  SHOPPING: '쇼핑',
-};
-
-const CATEGORY_ICONS = {
-  TRANSPORTATION: trainIcon,
-  MEAL: foodIcon,
-  ACCOMMODATION: hotelIcon,
-  TOUR: tourIcon,
-  ACTIVITY: cruiseIcon,
-  SHOPPING: shoppingIcon,
-};
-
-const CURRENCY_OPTIONS = [
-  { code: 'KRW', name: '대한민국 원', symbol: '원' },
-  { code: 'JPY', name: '일본 엔', symbol: '¥' },
-  { code: 'USD', name: '미국 달러', symbol: '$' },
-];
 
 const ExpenseModal = ({
   isOpen,
   onClose,
   socket,
-  tripId,
   expense,
   participants,
   currentUserId,
-  tripDates,
   dateOptions,
   onExpenseUpdate,
+  expenseType: expenseTypeProp,
+  isReadOnly = false,
+  onEditModeChange,
 }) => {
   const isEditMode = !!expense;
+
+  // 수정 모드: expense.expenseType 사용, 추가 모드: expenseType prop 사용
+  const expenseType = isEditMode
+    ? expense?.expenseType || 'SHARED'
+    : expenseTypeProp || 'SHARED';
 
   const [expenseMode, setExpenseMode] = useState('spend');
   const [paymentMethod, setPaymentMethod] = useState('CASH');
@@ -58,9 +40,12 @@ const ExpenseModal = ({
   const [settlementMethod, setSettlementMethod] = useState('SHARED');
   const [payerId, setPayerId] = useState(null);
   const [consumers, setConsumers] = useState([]);
+  const [roundingPayer, setRoundingPayer] = useState(null);
+  const [customAmounts, setCustomAmounts] = useState({});
+  const [showAutoCalculateMessage, setShowAutoCalculateMessage] =
+    useState(false);
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('KRW');
-  const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
 
   useEffect(() => {
     if (isEditMode && expense) {
@@ -73,13 +58,49 @@ const ExpenseModal = ({
       setCategory(expense.expenseCategory);
       setDescription(expense.description || '');
       setExpenseDate(expense.expenseDate || '1970-01-01');
-      setSettlementMethod(expense.expenseType || 'SHARED');
+      if (expenseType === 'SHARED') {
+        if (expense.participants && expense.participants.length > 0) {
+          const sharedAmounts = expense.participants.map((p) => p.sharedAmount);
+          const isDirect = new Set(sharedAmounts).size > 1;
+          setSettlementMethod(isDirect ? 'DIRECT' : 'SHARED');
+
+          // 직접정산 모드일 때 customAmounts 초기화
+          if (isDirect) {
+            const customAmountsMap = {};
+            expense.participants.forEach((p) => {
+              customAmountsMap[p.participantUserId] =
+                p.sharedAmount?.toString() || '';
+            });
+            setCustomAmounts(customAmountsMap);
+          } else {
+            setCustomAmounts({});
+          }
+        } else {
+          setSettlementMethod('SHARED');
+          setCustomAmounts({});
+        }
+      }
       setPayerId(expense.payUserId || null);
       setAmount(expense.totalAmount?.toString() || '');
       if (expense.participants && expense.participants.length > 0) {
-        setConsumers(expense.participants.map((p) => p.participantUserId));
+        const participantUserIds = expense.participants.map(
+          (p) => p.participantUserId,
+        );
+        setConsumers(participantUserIds);
+        const sharedAmounts = expense.participants.map((p) => p.sharedAmount);
+        const baseAmount = Math.min(...sharedAmounts);
+        const remainderPayer = expense.participants.find(
+          (p) => p.sharedAmount > baseAmount,
+        );
+        if (remainderPayer) {
+          setRoundingPayer(remainderPayer.participantUserId);
+        } else if (participantUserIds.length > 0) {
+          setRoundingPayer(participantUserIds[0]);
+        }
       } else {
         setConsumers([]);
+        setRoundingPayer(null);
+        setCustomAmounts({});
       }
     } else {
       setExpenseMode('spend');
@@ -90,41 +111,79 @@ const ExpenseModal = ({
       setSettlementMethod('SHARED');
       setPayerId(null);
       setConsumers([]);
+      setRoundingPayer(null);
+      setCustomAmounts({});
+      setShowAutoCalculateMessage(false);
       setAmount('');
       setCurrency('KRW');
     }
-  }, [isEditMode, expense, dateOptions]);
+  }, [isEditMode, expense, dateOptions, expenseTypeProp, expenseType]);
+
+  useEffect(() => {
+    if (expenseType === 'PERSONAL') {
+      setSettlementMethod('SHARED');
+      setPayerId(null);
+      setConsumers([]);
+      setRoundingPayer(null);
+      setCustomAmounts({});
+    }
+  }, [expenseType]);
 
   useEffect(() => {
     if (
-      settlementMethod === 'PERSONAL' &&
-      consumers.length === participants?.length &&
-      participants?.length > 0
+      expenseType === 'SHARED' &&
+      settlementMethod === 'DIRECT' &&
+      consumers.length > 0
     ) {
-      setSettlementMethod('SHARED');
-    }
-  }, [consumers, participants, settlementMethod]);
+      const total = consumers.reduce((sum, userId) => {
+        const customAmount = customAmounts[userId] || 0;
+        return (
+          sum + parseInt(customAmount.toString().replace(/[^0-9]/g, '') || '0')
+        );
+      }, 0);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isCurrencyOpen && !event.target.closest('.currency-dropdown')) {
-        setIsCurrencyOpen(false);
+      const currentAmount = parseInt(amount.replace(/[^0-9]/g, '') || '0');
+
+      if (total > 0 && total !== currentAmount) {
+        setAmount(total.toString());
+        setShowAutoCalculateMessage(true);
+
+        const timer = setTimeout(() => {
+          setShowAutoCalculateMessage(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      } else if (total === 0) {
+        setShowAutoCalculateMessage(false);
       }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isCurrencyOpen]);
+    } else {
+      setShowAutoCalculateMessage(false);
+    }
+  }, [customAmounts, consumers, settlementMethod, expenseType, amount]);
 
   const handleConsumerToggle = (userId) => {
     setConsumers((prev) => {
       if (prev.includes(userId)) {
-        return prev.filter((id) => id !== userId);
+        const newConsumers = prev.filter((id) => id !== userId);
+        if (roundingPayer === userId && newConsumers.length > 0) {
+          setRoundingPayer(newConsumers[0]);
+        } else if (newConsumers.length === 0) {
+          setRoundingPayer(null);
+        }
+        return newConsumers;
       } else {
-        return [...prev, userId];
+        const newConsumers = [...prev, userId];
+        if (prev.length === 0) {
+          setRoundingPayer(userId);
+        }
+        return newConsumers;
       }
     });
+  };
+
+  const handlePayerChange = (newPayerId) => {
+    // 결제자 변경 시 정산 방법을 자동으로 변경하지 않음
+    // 기존에 선택한 정산 방법이 우선
+    setPayerId(newPayerId);
   };
 
   const handleSubmit = () => {
@@ -148,108 +207,84 @@ const ExpenseModal = ({
       return;
     }
 
-    if (settlementMethod === 'SHARED') {
-      if (!payerId && expenseMode === 'spend') {
-        alert('결제자를 선택해주세요.');
-        return;
+    if (expenseType === 'SHARED') {
+      if (settlementMethod === 'SHARED') {
+        if (!payerId && expenseMode === 'spend') {
+          alert('결제자를 선택해주세요.');
+          return;
+        }
+        if (consumers.length === 0) {
+          alert(
+            expenseMode === 'collect'
+              ? '돈 낼 사람을 선택해주세요.'
+              : '소비자를 선택해주세요.',
+          );
+          return;
+        }
+        const totalAmount = parseInt(amount.replace(/[^0-9]/g, ''));
+        const roundingAmount = totalAmount % consumers.length;
+        if (roundingAmount > 0 && !roundingPayer) {
+          alert('나머지 금액을 부담할 사람을 선택해주세요.');
+          return;
+        }
+      } else if (settlementMethod === 'DIRECT') {
+        if (!payerId && expenseMode === 'spend') {
+          alert('결제자를 선택해주세요.');
+          return;
+        }
+        if (consumers.length === 0) {
+          alert(
+            expenseMode === 'collect'
+              ? '돈 낼 사람을 선택해주세요.'
+              : '소비자를 선택해주세요.',
+          );
+          return;
+        }
       }
-      if (consumers.length === 0) {
-        alert(expenseMode === 'collect' ? '돈 낼 사람을 선택해주세요.' : '소비자를 선택해주세요.');
-        return;
-      }
-    } else {
+    } else if (expenseType === 'PERSONAL') {
       if (!currentUserId) {
         alert('로그인이 필요합니다.');
         return;
       }
-      setPayerId(currentUserId);
-      setConsumers([]);
     }
 
     const totalAmount = parseInt(amount.replace(/[^0-9]/g, ''));
 
-    const serverExpenseDate = expenseDate;
+    const expenseDataResult = createExpenseData({
+      expenseMode,
+      expenseType,
+      settlementMethod,
+      totalAmount,
+      consumers,
+      roundingPayer,
+      customAmounts,
+      category,
+      description,
+      paymentMethod,
+      expenseDate,
+      payerId,
+      currentUserId,
+    });
 
-    let expenseData;
-
-    if (expenseMode === 'collect') {
-      if (settlementMethod === 'SHARED') {
-        const sharedAmount = Math.floor(totalAmount / consumers.length);
-        const remainder = totalAmount % consumers.length;
-        const participants = consumers.map((userId, index) => ({
-          participantUserId: userId,
-          sharedAmount:
-            index === 0 ? sharedAmount + remainder : sharedAmount,
-        }));
-
-        expenseData = {
-          expenseCategory: 'BUDGET',
-          description: description || '공동경비 추가',
-          totalAmount,
-          paymentMethod: paymentMethod,
-          expenseDate: serverExpenseDate,
-          expenseType: 'SHARED',
-          payUserId: null,
-          participants,
-        };
-      } else {
-        expenseData = {
-          expenseCategory: 'BUDGET',
-          description: description || '예산',
-          totalAmount,
-          paymentMethod: paymentMethod,
-          expenseDate: serverExpenseDate,
-          expenseType: 'PERSONAL',
-          payUserId: currentUserId,
-          participants: [],
-        };
-      }
-    } else {
-      if (settlementMethod === 'SHARED') {
-        const sharedAmount = Math.floor(totalAmount / consumers.length);
-        const remainder = totalAmount % consumers.length;
-        const participants = consumers.map((userId, index) => ({
-          participantUserId: userId,
-          sharedAmount:
-            index === 0 ? sharedAmount + remainder : sharedAmount,
-        }));
-
-        expenseData = {
-          expenseCategory: category,
-          description,
-          totalAmount,
-          paymentMethod: paymentMethod,
-          expenseDate: serverExpenseDate,
-          expenseType: 'SHARED',
-          payUserId: payerId === 'COMMON' ? null : payerId,
-          participants,
-        };
-      } else {
-        expenseData = {
-          expenseCategory: category,
-          description,
-          totalAmount,
-          paymentMethod: paymentMethod,
-          expenseDate: serverExpenseDate,
-          expenseType: 'PERSONAL',
-          payUserId: currentUserId,
-          participants: [],
-        };
-      }
+    if (expenseDataResult.error) {
+      alert('금액 계산 오류가 발생했습니다. 다시 시도해주세요.');
+      return;
     }
+
+    const expenseData = expenseDataResult.data;
 
     if (!socket || !socket.connected) {
       alert('서버에 연결되지 않았습니다. 네트워크 연결을 확인해주세요.');
       return;
     }
 
-
     let hasError = false;
     const errorHandler = (error) => {
-      if (hasError) return; 
+      if (hasError) return;
       hasError = true;
       console.error('지출 저장 중 오류 발생:', error);
-      const errorMessage = error?.message || error?.toString() || '알 수 없는 오류';
+      const errorMessage =
+        error?.message || error?.toString() || '알 수 없는 오류';
       alert(`지출 저장 중 오류가 발생했습니다: ${errorMessage}`);
     };
 
@@ -270,13 +305,13 @@ const ExpenseModal = ({
       if (onExpenseUpdate) {
         const isBudget = expenseData.expenseCategory === 'BUDGET';
         const delay = isBudget ? 1500 : 800;
-        
+
         setTimeout(() => {
           if (!hasError) {
             onExpenseUpdate();
           }
         }, delay);
-        
+
         if (isBudget) {
           setTimeout(() => {
             if (!hasError) {
@@ -317,350 +352,273 @@ const ExpenseModal = ({
             className="bg-[#f0f0f3] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto m-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-        {/* 헤더 */}
-        <div className="sticky top-0 px-6 py-4 flex items-center relative rounded-t-2xl">
-          <button
-            onClick={onClose}
-            className={`${neumorphStyles.small} w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 text-2xl transition-all ${neumorphStyles.hover}`}
-          >
-            ×
-          </button>
-
-          <h2 className="absolute left-1/2 -translate-x-1/2 text-xl font-base text-gray-800">
-            내역 추가
-          </h2>
-        </div>
-
-
-        <div className="p-6 space-y-6">
-          {/* 지출 추가 / 공동경비 추가 선택 */}
-          <div className={` rounded-xl p-2 flex gap-2`}>
-            <button
-              onClick={() => setExpenseMode('spend')}
-              className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-                expenseMode === 'spend'
-                  ? `${neumorphStyles.smallInset} text-black`
-                  : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
-              }`}
-            >
-              돈 쓰기
-            </button>
-            <button
-              onClick={() => setExpenseMode('collect')}
-              className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-                expenseMode === 'collect'
-                  ? `${neumorphStyles.smallInset} text-black`
-                  : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
-              }`}
-            >
-              돈 모으기
-            </button>
-          </div>
-
-          {/* 금액 입력 */}
-          <div className={`${neumorphStyles.medium} rounded-xl p-4 relative currency-dropdown`}>
-            <div className="text-sm text-gray-500 mb-2 flex items-center justify-between">
-              <span>
-                {CURRENCY_OPTIONS.find((c) => c.code === currency)?.code || 'KRW'}{' '}
-                ({CURRENCY_OPTIONS.find((c) => c.code === currency)?.name || '대한민국 원'})
-              </span>
+            {/* 헤더 */}
+            <div className="sticky top-0 px-6 py-4 flex items-center relative rounded-t-2xl">
               <button
-                onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
-                className={`text-gray-400 hover:text-gray-600 transition-all ${
-                  isCurrencyOpen ? 'rotate-180' : ''
-                }`}
+                onClick={onClose}
+                className={`${neumorphStyles.small} w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 text-2xl transition-all ${neumorphStyles.hover}`}
               >
-                ▼
+                ×
               </button>
-            </div>
-            {isCurrencyOpen && (
-              <div className={`absolute top-12 right-4 z-10 ${neumorphStyles.medium} rounded-lg min-w-[200px] overflow-hidden`}>
-                {CURRENCY_OPTIONS.map((curr) => (
-                  <button
-                    key={curr.code}
-                    onClick={() => {
-                      setCurrency(curr.code);
-                      setIsCurrencyOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 transition-all ${
-                      currency === curr.code
-                        ? expenseModalOrangeButton
-                        : 'text-gray-700 hover:bg-gray-200/50'
-                    }`}
-                  >
-                    {curr.code} ({curr.name})
-                  </button>
-                ))}
-              </div>
-            )}
-            <input
-              type="text"
-              value={amount}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, '');
-                setAmount(value);
-              }}
-              placeholder="0"
-              className="text-3xl font-bold bg-transparent border-none outline-none w-full"
-            />
-            <div className="text-sm text-gray-400 mt-2">
-              = {parseInt(amount || 0).toLocaleString()}
-              {CURRENCY_OPTIONS.find((c) => c.code === currency)?.symbol || '원'}
-            </div>
-          </div>
 
-          {/* 지출 형태 */}
-          <div className={` rounded-xl p-4`}>
-            <div className="flex items-center gap-10">
-              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                지출형태<span className="text-red-500">*</span>
-              </label>
-              <div className="flex gap-2 flex-1">
-                <button
-                  onClick={() => setPaymentMethod('CASH')}
-                  className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                    paymentMethod === 'CASH'
-                      ? expenseModalOrangeButton
-                      : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
-                  }`}
-                >
-                  현금
-                </button>
-                <button
-                  onClick={() => setPaymentMethod('CARD')}
-                  className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                    paymentMethod === 'CARD'
-                      ? expenseModalOrangeButton
-                      : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
-                  }`}
-                >
-                  카드
-                </button>
-              </div>
+              <h2 className="absolute left-1/2 -translate-x-1/2 text-xl font-base text-gray-800">
+                {isReadOnly
+                  ? '지출 내역'
+                  : isEditMode
+                    ? '내역 수정'
+                    : '내역 추가'}
+              </h2>
             </div>
-          </div>
 
-          {/* 카테고리 (돈 쓰기일 때만) */}
-          {expenseMode === 'spend' && (
-            <div className={` rounded-xl p-4`}>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                카테고리<span className="text-red-500">*</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {Object.entries(CATEGORY_MAP).map(([key, label]) => (
+            <div className="p-6 space-y-6">
+              {/* 돈 쓰기/돈 모으기 선택 */}
+              {!isReadOnly && (
+                <div className={` rounded-xl p-2 flex gap-2`}>
                   <button
-                    key={key}
-                    onClick={() => setCategory(key)}
-                    className={`py-3 rounded-lg font-medium transition-all ${
-                      category === key
-                        ? expenseModalOrangeButton
+                    onClick={() => setExpenseMode('spend')}
+                    className={`flex-1 py-3 rounded-lg font-medium transition-all ${
+                      expenseMode === 'spend'
+                        ? `${neumorphStyles.smallInset} text-black`
                         : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
                     }`}
                   >
-                    <div className="flex items-center justify-center mb-1">
-                      <img
-                        src={CATEGORY_ICONS[key]}
-                        alt={label}
-                        className="w-8 h-8 object-contain"
-                      />
-                    </div>
-                    <div className="text-xs">{label}</div>
+                    돈 쓰기
                   </button>
-                ))}
-              </div>
-            </div>
-          )}
+                  <button
+                    onClick={() => setExpenseMode('collect')}
+                    className={`flex-1 py-3 rounded-lg font-medium transition-all ${
+                      expenseMode === 'collect'
+                        ? `${neumorphStyles.smallInset} text-black`
+                        : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
+                    }`}
+                  >
+                    돈 모으기
+                  </button>
+                </div>
+              )}
 
-          {/* 지출 내용 */}
-          <div className={`rounded-xl p-4`}>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              지출내용<span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="내용을 입력해주세요"
-              className={`w-full px-4 py-2 ${neumorphStyles.smallInset} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C4B]`}
-            />
-          </div>
+              <CurrencyAmountInput
+                amount={amount}
+                currency={currency}
+                onAmountChange={setAmount}
+                onCurrencyChange={setCurrency}
+                disabled={isReadOnly}
+              />
 
-          {/* 지출 날짜 */}
-          <div className={`rounded-xl p-4`}>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              지출날짜<span className="text-red-500">*</span>
-            </label>
-            <div className="space-y-2">
-              {dateOptions.map((dateOption) => (
-                <button
-                  key={dateOption.value}
-                  onClick={() => setExpenseDate(dateOption.value)}
-                  className={`w-full py-2 px-4 rounded-lg font-medium transition-all text-left flex items-center justify-between ${
-                    expenseDate === dateOption.value
-                      ? dateOption.isPrep
-                        ? 'bg-[#6EAB5B] text-white'
-                        : scrapListStyles.selectedOrangeButton
-                      : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
-                  }`}
-                >
-                  <span>
-                    {dateOption.isPrep && '✈️ '}
-                    {dateOption.label}
-                  </span>
-                  {expenseDate === dateOption.value && (
-                    <span className="text-lg">✓</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 정산 방법 */}
-          <div className={`rounded-xl p-4`}>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              정산방법<span className="text-red-500">*</span>
-            </label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setSettlementMethod('SHARED')}
-                className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                  settlementMethod === 'SHARED'
-                    ? expenseModalOrangeButton
-                    : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
-                }`}
-              >
-                공동경비로 1/N
-              </button>
-              <button
-                onClick={() => setSettlementMethod('PERSONAL')}
-                className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                  settlementMethod === 'PERSONAL'
-                    ? expenseModalOrangeButton
-                    : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
-                }`}
-              >
-                개인지출
-              </button>
-            </div>
-          </div>
-
-          {/* 결제자 (공동경비이고 돈 쓰기일 때만) */}
-          {settlementMethod === 'SHARED' &&
-            expenseMode === 'spend' &&
-            participants &&
-            participants.length > 0 && (
+              {/* 지출 형태 */}
               <div className={` rounded-xl p-4`}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  결제자<span className="text-red-500">*</span>
-                </label>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setPayerId('COMMON')}
-                    className={`w-full py-2 px-4 rounded-lg font-medium transition-all text-left flex items-center justify-between ${
-                      payerId === 'COMMON'
-                        ? expenseModalOrangeButton
-                        : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
-                    }`}
-                  >
-                    <span>공동경비로 결제</span>
-                    {payerId === 'COMMON' && (
-                      <span className="text-lg">✓</span>
-                    )}
-                  </button>
-                  {participants.map((participant) => (
+                <div className="flex items-center gap-10">
+                  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    지출형태<span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-2 flex-1">
                     <button
-                      key={participant.userId}
-                      onClick={() => setPayerId(participant.userId)}
-                      className={`w-full py-2 px-4 rounded-lg font-medium transition-all text-left flex items-center justify-between ${
-                        payerId === participant.userId
+                      onClick={() => !isReadOnly && setPaymentMethod('CASH')}
+                      disabled={isReadOnly}
+                      className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                        paymentMethod === 'CASH'
                           ? expenseModalOrangeButton
-                          : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
+                          : `${neumorphStyles.small} text-gray-700 ${!isReadOnly ? neumorphStyles.hover : 'opacity-50 cursor-not-allowed'}`
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        {participant.imgUrl ? (
-                          <img
-                            src={participant.imgUrl}
-                            alt={participant.name}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                            <span className="text-sm text-gray-600">
-                              {participant.name?.[0] || '?'}
-                            </span>
-                          </div>
-                        )}
-                        <span>{participant.name || participant.nickname}</span>
-                      </div>
-                      {payerId === participant.userId && (
+                      현금
+                    </button>
+                    <button
+                      onClick={() => !isReadOnly && setPaymentMethod('CARD')}
+                      disabled={isReadOnly}
+                      className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                        paymentMethod === 'CARD'
+                          ? expenseModalOrangeButton
+                          : `${neumorphStyles.small} text-gray-700 ${!isReadOnly ? neumorphStyles.hover : 'opacity-50 cursor-not-allowed'}`
+                      }`}
+                    >
+                      카드
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 카테고리 */}
+              {expenseMode === 'spend' && (
+                <CategorySelector
+                  category={category}
+                  onCategoryChange={setCategory}
+                  disabled={isReadOnly}
+                />
+              )}
+
+              {/* 지출 내용 */}
+              <div className={`rounded-xl p-4`}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  지출내용<span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) =>
+                    !isReadOnly && setDescription(e.target.value)
+                  }
+                  placeholder="내용을 입력해주세요"
+                  disabled={isReadOnly}
+                  className={`w-full px-4 py-2 ${neumorphStyles.smallInset} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C4B] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                />
+              </div>
+
+              {/* 지출 날짜 */}
+              <div className={`rounded-xl p-4`}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  지출날짜<span className="text-red-500">*</span>
+                </label>
+                <div className="space-y-2">
+                  {dateOptions.map((dateOption) => (
+                    <button
+                      key={dateOption.value}
+                      onClick={() =>
+                        !isReadOnly && setExpenseDate(dateOption.value)
+                      }
+                      disabled={isReadOnly}
+                      className={`w-full py-2 px-4 rounded-lg font-medium transition-all text-left flex items-center justify-between ${
+                        expenseDate === dateOption.value
+                          ? dateOption.isPrep
+                            ? 'bg-[#6EAB5B] text-white'
+                            : scrapListStyles.selectedOrangeButton
+                          : `${neumorphStyles.small} text-gray-700 ${!isReadOnly ? neumorphStyles.hover : 'opacity-50 cursor-not-allowed'}`
+                      }`}
+                    >
+                      <span>
+                        {dateOption.isPrep && '✈️ '}
+                        {dateOption.label}
+                      </span>
+                      {expenseDate === dateOption.value && (
                         <span className="text-lg">✓</span>
                       )}
                     </button>
                   ))}
                 </div>
               </div>
-            )}
 
-          {/* 소비자 (1/N 분할) - 공동경비일 때만 */}
-          {settlementMethod === 'SHARED' && participants && (
-            <div className={`rounded-xl p-4`}>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {expenseMode === 'collect' ? '돈 낼 사람' : '소비자'} (1/N 분할)<span className="text-red-500">*</span>
-              </label>
-              <div className="space-y-2">
-                {participants.map((participant) => (
-                  <button
-                    key={participant.userId}
-                    onClick={() => handleConsumerToggle(participant.userId)}
-                    className={`w-full py-2 px-4 rounded-lg font-medium transition-all text-left flex items-center justify-between ${
-                      consumers.includes(participant.userId)
-                        ? 'bg-[#6EAB5B] text-white'
-                        : `${neumorphStyles.small} text-gray-700 ${neumorphStyles.hover}`
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {participant.imgUrl ? (
-                        <img
-                          src={participant.imgUrl}
-                          alt={participant.name}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                          <span className="text-sm text-gray-600">
-                            {participant.name?.[0] || '?'}
-                          </span>
-                        </div>
-                      )}
-                      <span>{participant.name || participant.nickname}</span>
-                    </div>
-                    {consumers.includes(participant.userId) && (
-                      <span className="text-lg">✓</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-              {consumers.length > 0 && (
-                <div className="text-sm text-gray-500 mt-2">
-                  선택된 {consumers.length}명에게 1/N 분할됩니다
+              {/* 정산 방법 (공동 모드일 때만) */}
+              {expenseType === 'SHARED' && (
+                <div className={`rounded-xl p-4`}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    정산방법<span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        !isReadOnly && setSettlementMethod('SHARED')
+                      }
+                      disabled={isReadOnly}
+                      className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                        settlementMethod === 'SHARED'
+                          ? expenseModalOrangeButton
+                          : `${neumorphStyles.small} text-gray-700 ${!isReadOnly ? neumorphStyles.hover : 'opacity-50 cursor-not-allowed'}`
+                      }`}
+                    >
+                      공동경비로 1/N
+                    </button>
+                    <button
+                      onClick={() =>
+                        !isReadOnly && setSettlementMethod('DIRECT')
+                      }
+                      disabled={isReadOnly}
+                      className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                        settlementMethod === 'DIRECT'
+                          ? expenseModalOrangeButton
+                          : `${neumorphStyles.small} text-gray-700 ${!isReadOnly ? neumorphStyles.hover : 'opacity-50 cursor-not-allowed'}`
+                      }`}
+                    >
+                      직접정산
+                    </button>
+                  </div>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* 추가하기 버튼 */}
-          <button
-            onClick={handleSubmit}
-            className={`w-full py-4 rounded-lg font-medium transition-all ${
-              neumorphStyles.medium
-            } text-gray-700 hover:bg-[#f5861d] hover:text-white hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]`}
-          >
-            {isEditMode ? '수정하기' : '추가하기'}
-          </button>
-        </div>
+              {/* 결제자 (공동 모드이고 돈 쓰기일 때만) */}
+              {expenseType === 'SHARED' &&
+                (settlementMethod === 'SHARED' ||
+                  settlementMethod === 'DIRECT') &&
+                expenseMode === 'spend' &&
+                participants &&
+                participants.length > 0 && (
+                  <PayerSelector
+                    payerId={payerId}
+                    participants={participants}
+                    onPayerChange={handlePayerChange}
+                    disabled={isReadOnly}
+                  />
+                )}
+
+              {/* 소비자 (1/N 분할) - 공동 모드일 때만 */}
+              {expenseType === 'SHARED' &&
+                settlementMethod === 'SHARED' &&
+                participants &&
+                participants.length > 0 && (
+                  <ConsumerSelector
+                    consumers={consumers}
+                    participants={participants}
+                    amount={amount}
+                    roundingPayer={roundingPayer}
+                    expenseMode={expenseMode}
+                    settlementMethod={settlementMethod}
+                    onConsumerToggle={handleConsumerToggle}
+                    onRoundingPayerChange={setRoundingPayer}
+                    disabled={isReadOnly}
+                  />
+                )}
+
+              {/* 소비자 (직접정산) - 공동 모드일 때만 */}
+              {expenseType === 'SHARED' &&
+                settlementMethod === 'DIRECT' &&
+                participants &&
+                participants.length > 0 && (
+                  <>
+                    {showAutoCalculateMessage && (
+                      <div className="text-xs text-gray-500 mb-2 px-2 animate-fade-in bg-blue-50 border border-blue-200 rounded-lg p-2">
+                        💡 입력하신 금액의 합계로 총 금액이 변경됩니다.
+                      </div>
+                    )}
+                    <ConsumerSelector
+                      consumers={consumers}
+                      participants={participants}
+                      amount={amount}
+                      roundingPayer={roundingPayer}
+                      expenseMode={expenseMode}
+                      settlementMethod={settlementMethod}
+                      customAmounts={customAmounts}
+                      onConsumerToggle={handleConsumerToggle}
+                      onRoundingPayerChange={setRoundingPayer}
+                      onCustomAmountChange={setCustomAmounts}
+                      disabled={isReadOnly}
+                    />
+                  </>
+                )}
+
+              {/* 수정하기/추가하기 버튼 */}
+              {isReadOnly ? (
+                <button
+                  onClick={() => {
+                    if (onEditModeChange) {
+                      onEditModeChange(false);
+                    }
+                  }}
+                  className={`w-full py-4 rounded-lg font-medium transition-all ${scrapListStyles.selectedOrangeButton} text-white`}
+                >
+                  수정하기
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  className={`w-full py-4 rounded-lg font-medium transition-all ${
+                    neumorphStyles.medium
+                  } text-gray-700 hover:bg-[#f5861d] hover:text-white hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]`}
+                >
+                  {isEditMode ? '수정하기' : '추가하기'}
+                </button>
+              )}
+            </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
       )}
     </AnimatePresence>
   );
