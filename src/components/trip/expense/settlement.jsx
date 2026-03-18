@@ -6,31 +6,6 @@ import PaymentInfoModal from './paymentInfoModal';
 import QRCodeDisplay from '../../common/qrCodeDisplay';
 import { roundPaymentUrlAmount } from '../../../utils/paymentUrl';
 
-export const BANKS = [
-  '경남',
-  '광주',
-  'IBK기업',
-  'KB국민',
-  'iM뱅크(대구)',
-  '부산',
-  'KDB산림',
-  '새마을',
-  'SC제일',
-  '신한',
-  '신협',
-  '수협',
-  '케이뱅크',
-  '우리',
-  '우체국',
-  '저축은행',
-  '전북',
-  '제주',
-  '카카오뱅크',
-  '토스뱅크',
-  '하나',
-  'NH농협',
-];
-
 const formatAmount = (amount) => {
   return Math.round(amount).toLocaleString('ko-KR');
 };
@@ -72,13 +47,7 @@ const Avatar = ({
   );
 };
 
-const Settlement = ({
-  tripId,
-  expenses,
-  statistics: _statistics,
-  participants,
-  currentUserId,
-}) => {
+const Settlement = ({ tripId, expenses, participants, currentUserId }) => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [settlementData, setSettlementData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -291,6 +260,8 @@ const Settlement = ({
                     남은 공동경비는 참가자 {participants.length}명에게 1/N로
                     분배됩니다.
                     {(() => {
+                      const extraDistribution =
+                        settlementData.shared.extraDistribution;
                       const roundingAmount =
                         (settlementData.shared.remainingBudget || 0) %
                         participants.length;
@@ -299,6 +270,12 @@ const Settlement = ({
                           (settlementData.shared.remainingBudget || 0) /
                             participants.length,
                         );
+                        const extraRecipient = extraDistribution?.userId
+                          ? participantsMap.get(extraDistribution.userId)
+                          : null;
+                        const extraRecipientName = extraRecipient
+                          ? extraRecipient.name || extraRecipient.nickname
+                          : '여행을 만든 사람';
                         return (
                           <>
                             <br />
@@ -309,8 +286,8 @@ const Settlement = ({
                             </span>
                             <br />
                             <span className="text-gray-500">
-                              나머지 {roundingAmount}원은 여행을 만든 사람이
-                              받습니다.
+                              나머지 {roundingAmount}원은 {extraRecipientName}
+                              이(가) 받습니다.
                             </span>
                           </>
                         );

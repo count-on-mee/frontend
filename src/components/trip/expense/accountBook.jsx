@@ -134,34 +134,19 @@ const AccountBook = ({
 
     return typeFiltered;
   }, [expenses, selectedDate, expenseType]);
-
-  // 공동경비에서 결제한 금액 계산 (payUserId가 null인 경우만)
-  const totalSpentFromBudget = React.useMemo(() => {
-    if (!expenses || expenses.length === 0) return 0;
-
-    return expenses
-      .filter(
-        (expense) =>
-          expense.expenseType === 'SHARED' &&
-          expense.expenseCategory !== 'BUDGET' &&
-          expense.payUserId === null,
-      )
-      .reduce((sum, expense) => sum + (expense.totalAmount || 0), 0);
-  }, [expenses]);
-
-  // 공동경비 잔액 계산
   const sharedBudgetInfo = React.useMemo(() => {
     if (!statistics?.shared) return null;
 
     const totalBudget = statistics.shared.totalBudget || 0;
-    const remainingBudget = totalBudget - totalSpentFromBudget;
+    const totalSpent = statistics.shared.totalSpent || 0;
+    const remainingBudget = statistics.shared.remainingBudget || 0;
 
     return {
       totalBudget,
-      totalSpentFromBudget,
+      totalSpentFromBudget: totalSpent,
       remainingBudget,
     };
-  }, [statistics?.shared, totalSpentFromBudget]);
+  }, [statistics?.shared]);
 
   // 개인경비 정보 계산
   const personalBudgetInfo = React.useMemo(() => {

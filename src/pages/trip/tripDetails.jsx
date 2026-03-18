@@ -26,23 +26,17 @@ const TripDetails = () => {
     tasks,
     loading,
     error,
-    setExpenses,
     setAccommodations,
     setTasks,
-    participantCount,
-    setParticipantCount,
     refetch,
   } = useTripDetails(tripId);
 
-  const tabs = useMemo(
-    () => [
-      { id: 'expenses', title: '비용', icon: expenseIcon },
-      { id: 'accommodation', title: '숙소', icon: hotelIcon },
-      { id: 'todo', title: '할 일', icon: todolistIcon },
-      { id: 'all', title: '한눈에 보기', icon: documentIcon },
-    ],
-    [],
-  );
+  const tabs = [
+    { id: 'expenses', title: '비용', icon: expenseIcon },
+    { id: 'accommodation', title: '숙소', icon: hotelIcon },
+    { id: 'todo', title: '할 일', icon: todolistIcon },
+    { id: 'all', title: '한눈에 보기', icon: documentIcon },
+  ];
 
   const renderContent = useMemo(() => {
     switch (selectedTab) {
@@ -81,16 +75,13 @@ const TripDetails = () => {
             socket={socket}
             tripId={tripId}
             expenses={expenses}
-            accommodations={accommodations}
-            tasks={tasks}
-            setExpenses={setExpenses}
-            setAccommodations={setAccommodations}
-            setTasks={setTasks}
-            participantCount={participantCount}
-            setParticipantCount={setParticipantCount}
-            statistics={statistics}
             participants={tripData?.participants || []}
             currentUserId={user?.userId}
+            accommodations={accommodations}
+            tasks={tasks}
+            setAccommodations={setAccommodations}
+            setTasks={setTasks}
+            statistics={statistics}
           />
         );
       default:
@@ -105,12 +96,9 @@ const TripDetails = () => {
     accommodations,
     tasks,
     tripData?.participants,
-    participantCount,
     refetch,
     setAccommodations,
     setTasks,
-    setExpenses,
-    setParticipantCount,
     user?.userId,
   ]);
 

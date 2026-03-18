@@ -575,7 +575,7 @@ const ExpenseModal = ({
                   <>
                     {showAutoCalculateMessage && (
                       <div className="text-xs text-gray-500 mb-2 px-2 animate-fade-in bg-blue-50 border border-blue-200 rounded-lg p-2">
-                        💡 소비자별 금액을 입력하면 총 금액에 변경됩니다.
+                        💡 입력하신 금액의 합계로 총 금액이 변경됩니다.
                       </div>
                     )}
                     <ConsumerSelector

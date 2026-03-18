@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import authAtom from '../recoil/auth';
@@ -23,6 +23,8 @@ import Searchbar from '../components/ui/Searchbar';
 import ScrapSpots from '../components/scrap/ScrapSpots';
 import ScrapCurations from '../components/scrap/ScrapCurations';
 import Map from '../components/map/Map';
+import api from '../utils/axiosInstance';
+import { formatSpotData, formatSpotsData } from '../utils/spotUtils';
 
 export default function MyScrapListPage() {
   const navigate = useNavigate();
@@ -34,6 +36,12 @@ export default function MyScrapListPage() {
   const [tripDates, setTripDates] = useRecoilState(tripDatesAtom);
   const [selectedCurationId, setSelectedCurationId] = useState(null);
   const [showCurationModal, setShowCurationModal] = useState(false);
+  const [spotSearchTerm, setSpotSearchTerm] = useState('');
+  const [spotSearchResults, setSpotSearchResults] = useState([]);
+  const [spotSearchLoading, setSpotSearchLoading] = useState(false);
+  const [spotSearchError, setSpotSearchError] = useState(null);
+  const abortControllerRef = useRef(null);
+  const searchRequestIdRef = useRef(0);
 
   const {
     scrapedSpots,
@@ -47,9 +55,9 @@ export default function MyScrapListPage() {
   } = useScrapedCurations();
   const { createTrip, loading: tripLoading } = useTrip();
   const {
-    searchTerm,
+    searchTerm: scrapedSearchTerm,
     filteredItems: filteredSpots,
-    handleSearch,
+    handleSearch: handleScrapedSearch,
   } = useListSearch(scrapedSpots);
   const mapRef = useRef(null);
   const markers = selectedSpots.map((spot) => ({
@@ -100,6 +108,85 @@ export default function MyScrapListPage() {
     setShowCurationModal(false);
     setSelectedCurationId(null);
   };
+
+  const handleSearchSpots = async (searchValue) => {
+    if (!searchValue || searchValue.trim() === '') {
+      setSpotSearchResults([]);
+      return;
+    }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    searchRequestIdRef.current += 1;
+    const currentRequestId = searchRequestIdRef.current;
+
+    setSpotSearchLoading(true);
+    setSpotSearchError(null);
+
+    try {
+      const response = await api.get('/spots/search', {
+        params: { name: searchValue.trim() },
+        signal: abortController.signal,
+      });
+
+      if (
+        abortController.signal.aborted ||
+        currentRequestId !== searchRequestIdRef.current
+      )
+        return;
+
+      const formattedSpots = formatSpotsData(response.data || []);
+      setSpotSearchResults(formattedSpots);
+    } catch (error) {
+      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') return;
+      if (currentRequestId !== searchRequestIdRef.current) return;
+
+      console.error('Failed to search spots:', error);
+      setSpotSearchError('검색 중 오류가 발생했습니다.');
+      setSpotSearchResults([]);
+    } finally {
+      if (currentRequestId === searchRequestIdRef.current) {
+        setSpotSearchLoading(false);
+      }
+    }
+  };
+
+  const handleSpotSearchChange = (value) => {
+    setSpotSearchTerm(value);
+    if (value.trim() === '') {
+      setSpotSearchResults([]);
+    }
+  };
+
+  const handleSelectSpot = async (spotId) => {
+    try {
+      const response = await api.get(`/spots/${spotId}`);
+      const formattedSpot = formatSpotData(response.data);
+
+      // 이미 선택된 spot인지 확인
+      const isAlreadySelected = selectedSpots.some(
+        (spot) => spot.spotId === formattedSpot.spotId,
+      );
+
+      if (!isAlreadySelected) {
+        toggleSelection(formattedSpot);
+      }
+    } catch (error) {
+      console.error('Failed to fetch spot:', error);
+      alert('장소 정보를 불러오는데 실패했습니다.');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   const handleStartTrip = async () => {
     if (selectedSpots.length === 0) {
@@ -265,13 +352,73 @@ export default function MyScrapListPage() {
 
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
             <div className="w-full md:w-1/2 overflow-y-auto px-8 py-8">
-              <div className="w-full mb-8">
-                <Searchbar
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  placeholder="장소 검색"
-                  size="lg"
-                />
+              {/* Spot 검색 섹션 */}
+              <div className="mb-8">
+                <div className="w-full mb-4">
+                  <Searchbar
+                    value={spotSearchTerm}
+                    onChange={handleSpotSearchChange}
+                    onSubmit={handleSearchSpots}
+                    placeholder="장소를 검색해보세요"
+                    size="lg"
+                  />
+                </div>
+                {spotSearchLoading && (
+                  <div className="text-center py-4 text-gray-500">
+                    검색 중...
+                  </div>
+                )}
+                {spotSearchError && (
+                  <div className="text-center py-4 text-red-500">
+                    {spotSearchError}
+                  </div>
+                )}
+                {spotSearchResults.length > 0 && (
+                  <div className="mt-4">
+                    <h3
+                      className={scrapListStyles.sectionHeaderTitle + ' mb-4'}
+                    >
+                      검색 결과
+                    </h3>
+                    <div className={scrapListStyles.grid}>
+                      {spotSearchResults.map((spot) => {
+                        const isSelected = selectedSpots.some(
+                          (s) => s.spotId === spot.spotId,
+                        );
+                        return (
+                          <div
+                            key={spot.spotId}
+                            className={scrapListStyles.spotCard}
+                          >
+                            <div className={scrapListStyles.imageContainer}>
+                              <img
+                                src={spot.imgUrls?.[0] || defaultImage}
+                                alt={spot.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className={scrapListStyles.infoContainer}>
+                              <h3 className={scrapListStyles.name}>
+                                {spot.name}
+                              </h3>
+                              <p className={scrapListStyles.address}>
+                                {spot.address}
+                              </p>
+                              <button
+                                onClick={() => handleSelectSpot(spot.spotId)}
+                                className={scrapListStyles.selectionButton(
+                                  isSelected,
+                                )}
+                              >
+                                {isSelected ? '선택' : '선택'}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <ScrapSpots
@@ -280,6 +427,8 @@ export default function MyScrapListPage() {
                 error={spotsError}
                 selectedSpots={selectedSpots}
                 onToggleSelection={toggleSelection}
+                searchTerm={scrapedSearchTerm}
+                onSearchChange={handleScrapedSearch}
               />
 
               <ScrapCurations
