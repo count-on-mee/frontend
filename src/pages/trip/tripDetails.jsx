@@ -56,7 +56,7 @@ const TripDetails = () => {
           <Accommodation
             socket={socket}
             tripId={tripId}
-            initialAccommodations={accommodations}
+            accommodations={accommodations}
             setAccommodations={setAccommodations}
           />
         );

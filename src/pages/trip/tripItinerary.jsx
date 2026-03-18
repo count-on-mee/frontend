@@ -6,6 +6,7 @@ import React, {
   useRef,
 } from 'react';
 import { useParams } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { useRecoilState } from 'recoil';
 import useTrip from '../../hooks/useTrip';
@@ -16,7 +17,6 @@ import RecoilDateRangePicker from '../../components/datePickers/recoilDateRangeP
 import LoadingSpinner from '../../components/loadingSpinner';
 import tripDatesAtom from '../../recoil/tripDates/atom';
 import defaultImage from '../../assets/logo.png';
-import koreaMap from '../../assets/Korea.png';
 import {
   neumorphStyles,
   componentStyles,
@@ -29,16 +29,13 @@ const DayButton = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
     className={`px-4 py-2 rounded-full text-base font-medium ${
-      active
-        ? 'bg-[#f5861d] text-white'
-        : 'bg-[#f0f0f3] text-gray-600'
+      active ? 'bg-[#f5861d] text-white' : 'bg-[#f0f0f3] text-gray-600'
     } ${neumorphStyles.small} ${neumorphStyles.hover}`}
   >
     {children}
   </button>
 );
 
-// 날짜 포맷 함수
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -89,7 +86,6 @@ const TripItinerary = () => {
     }
   }, [meta, setTripDates]);
 
-  // Day별 spot 리스트로 변환
   const dayMap = useMemo(() => {
     const map = {};
     itinerary?.forEach((item) => {
@@ -99,22 +95,23 @@ const TripItinerary = () => {
     return map;
   }, [itinerary]);
 
-  const days = useMemo(
-    () =>
-      Object.keys(dayMap)
-        .map(Number)
-        .sort((a, b) => a - b),
-    [dayMap],
-  );
+  const allDays = useMemo(() => {
+    if (!meta?.startDate || !meta?.endDate) {
+      const maxDay = Math.max(...Object.keys(dayMap).map(Number), 1);
+      return Array.from({ length: maxDay }, (_, i) => i + 1);
+    }
+    const start = new Date(meta.startDate);
+    const end = new Date(meta.endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return Array.from({ length: diffDays }, (_, i) => i + 1);
+  }, [meta, dayMap]);
 
   const handleSaveItinerary = async () => {
     setShowModal(false);
     await refetchItinerary();
   };
 
-  // ItineraryModal에 전달할 데이터 생성
-  const maxDay = Math.max(...days, 1);
-  const allDays = Array.from({ length: maxDay }, (_, i) => i + 1);
   const modalSpots = allDays.map((day) => ({
     day,
     list: (dayMap[day] || []).map((item) => ({
@@ -128,7 +125,7 @@ const TripItinerary = () => {
     dayItem.list.map((item) => ({
       ...item.spot,
       day: dayItem.day,
-      position: new naver.maps.LatLng(
+      position: new window.naver.maps.LatLng(
         item.spot.location.lat,
         item.spot.location.lng,
       ),
@@ -237,7 +234,7 @@ const TripItinerary = () => {
           <div
             className={`${layoutStyles.flex.gap} ${layoutStyles.spacing.section}`}
           >
-            {days.map((day) => (
+            {allDays.map((day) => (
               <DayButton
                 key={day}
                 active={activeDay === day}
@@ -304,7 +301,6 @@ const TripItinerary = () => {
                         </div>
                       </div>
                     </motion.div>
-                    {/* 마지막 spot이 아니면 다음 spot으로의 이동 정보만 출력 */}
                     {idx < spots.length - 1 && item.transportation?.next && (
                       <TransportationInfo
                         duration={item.transportation.next.durationMinute}
@@ -350,6 +346,7 @@ const TripItinerary = () => {
         days={allDays}
         spots={modalSpots}
         onSave={handleSaveItinerary}
+        onRefetch={refetchItinerary}
       />
     </>
   );

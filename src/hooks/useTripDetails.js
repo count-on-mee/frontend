@@ -40,13 +40,26 @@ const useTripDetails = (tripId) => {
     try {
       const response = await axiosInstance.get(`/trips/${tripId}/documents`);
 
+      const tripStartDate = response.data.document?.startDate;
+      const tripStartDateStr = tripStartDate
+        ? new Date(tripStartDate).toISOString().slice(0, 10)
+        : null;
+
       const newExpenses = (response.data.expenses || []).map((expense) => {
-        // 빈 값이나 null일 때는 1970-01-01로 설정 (준비 날짜)
         if (!expense.expenseDate || expense.expenseDate === '') {
           return {
             ...expense,
             expenseDate: '1970-01-01',
           };
+        }
+
+        if (tripStartDateStr && expense.expenseDate === tripStartDateStr) {
+          if (expense.expenseCategory === 'BUDGET') {
+            return {
+              ...expense,
+              expenseDate: '1970-01-01',
+            };
+          }
         }
 
         return expense;
@@ -66,7 +79,38 @@ const useTripDetails = (tripId) => {
 
       setExpenses(newExpenses);
       setStatistics(newStatistics);
-      setAccommodations(response.data.accommodations || []);
+
+      setAccommodations((prev) => {
+        const newAccommodations = response.data.accommodations || [];
+        if (prev.length === 0) {
+          return newAccommodations;
+        }
+
+        const existingIds = new Set(
+          prev
+            .map((item) => item.tripDocumentAccommodationId)
+            .filter((id) => id !== null && id !== undefined),
+        );
+
+        const toAdd = newAccommodations.filter(
+          (item) => !existingIds.has(item.tripDocumentAccommodationId),
+        );
+
+        const updated = prev.map((item) => {
+          if (!item.tripDocumentAccommodationId) {
+            return item;
+          }
+          const serverItem = newAccommodations.find(
+            (newItem) =>
+              newItem.tripDocumentAccommodationId ===
+              item.tripDocumentAccommodationId,
+          );
+          return serverItem || item;
+        });
+
+        return [...updated, ...toAdd];
+      });
+
       setTasks(response.data.tasks || []);
       setParticipantCount(
         (response.data.document && response.data.document.participantCount) ||
@@ -75,33 +119,20 @@ const useTripDetails = (tripId) => {
       setLoading(false);
       setError(null);
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError(err);
-        setLoading(false);
-      } else {
-        setError(err);
-        setLoading(false);
-      }
+      setError(err);
+      setLoading(false);
     }
   }, [tripId]);
 
   useEffect(() => {
     fetchTripData();
-  }, [fetchTripData]);
+  }, [tripId, fetchTripData]);
 
   useEffect(() => {
-    if (isConnected && !loading) {
+    if (socket && isConnected && accommodations.length === 0) {
       fetchTripData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected]);
-
-  useEffect(() => {
-    if (socket && isConnected) {
-      fetchTripData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket, isConnected]);
+  }, [socket, isConnected, accommodations.length, fetchTripData]);
 
   useEffect(() => {
     if (!socket) {
@@ -190,7 +221,6 @@ const useTripDetails = (tripId) => {
       if (expenseFields.paymentMethod !== undefined)
         updatedFields.paymentMethod = expenseFields.paymentMethod;
       if (expenseFields.expenseDate !== undefined) {
-        // 빈 값일 때는 1970-01-01로 설정 (준비 날짜)
         updatedFields.expenseDate =
           !expenseFields.expenseDate || expenseFields.expenseDate === ''
             ? '1970-01-01'
@@ -268,34 +298,6 @@ const useTripDetails = (tripId) => {
       }, 300);
     };
 
-    const handleAccommodationAdded = (newAccommodation) => {
-      setAccommodations((prev) => [...prev, newAccommodation]);
-    };
-
-    const handleAccommodationUpdated = ({
-      tripDocumentAccommodationId,
-      accommodationFields,
-    }) => {
-      setAccommodations((prev) =>
-        prev.map((accommodation) =>
-          accommodation.tripDocumentAccommodationId ===
-          tripDocumentAccommodationId
-            ? { ...accommodation, ...accommodationFields }
-            : accommodation,
-        ),
-      );
-    };
-
-    const handleAccommodationDeleted = ({ tripDocumentAccommodationId }) => {
-      setAccommodations((prev) =>
-        prev.filter(
-          (accommodation) =>
-            accommodation.tripDocumentAccommodationId !==
-            tripDocumentAccommodationId,
-        ),
-      );
-    };
-
     const handleTaskAdded = (newTask) => {
       setTasks((prev) => [...prev, newTask]);
     };
@@ -320,19 +322,82 @@ const useTripDetails = (tripId) => {
       setParticipantCount(participantFields.count);
     };
 
+    const handleAccommodationAdded = (newAccommodation) => {
+      if (!newAccommodation) return;
+
+      setAccommodations((prev) => {
+        const exists = prev.some(
+          (acc) =>
+            acc.tripDocumentAccommodationId ===
+            newAccommodation.tripDocumentAccommodationId,
+        );
+        if (exists) {
+          return prev;
+        }
+        return [...prev, newAccommodation];
+      });
+    };
+
+    const handleAccommodationUpdated = ({
+      tripDocumentAccommodationId,
+      accommodationFields,
+    }) => {
+      if (!tripDocumentAccommodationId || !accommodationFields) return;
+
+      setAccommodations((prev) => {
+        const existingIndex = prev.findIndex(
+          (accommodation) =>
+            accommodation.tripDocumentAccommodationId ===
+            tripDocumentAccommodationId,
+        );
+
+        if (existingIndex === -1) {
+          return prev;
+        }
+
+        const existing = prev[existingIndex];
+        const hasChanges = Object.keys(accommodationFields).some(
+          (key) => existing[key] !== accommodationFields[key],
+        );
+
+        if (!hasChanges) {
+          return prev;
+        }
+
+        return prev.map((accommodation) =>
+          accommodation.tripDocumentAccommodationId ===
+          tripDocumentAccommodationId
+            ? { ...accommodation, ...accommodationFields }
+            : accommodation,
+        );
+      });
+    };
+
+    const handleAccommodationDeleted = ({ tripDocumentAccommodationId }) => {
+      if (!tripDocumentAccommodationId) return;
+
+      setAccommodations((prev) =>
+        prev.filter(
+          (accommodation) =>
+            accommodation.tripDocumentAccommodationId !==
+            tripDocumentAccommodationId,
+        ),
+      );
+    };
+
     socket.on('expenseAdded', handleExpenseAdded);
     socket.on('expenseUpdated', handleExpenseUpdated);
     socket.on('expenseDeleted', handleExpenseDeleted);
-
-    socket.on('accommodationAdded', handleAccommodationAdded);
-    socket.on('accommodationUpdated', handleAccommodationUpdated);
-    socket.on('accommodationDeleted', handleAccommodationDeleted);
 
     socket.on('taskAdded', handleTaskAdded);
     socket.on('taskUpdated', handleTaskUpdated);
     socket.on('taskDeleted', handleTaskDeleted);
 
     socket.on('participantCountUpdated', handleParticipantCountUpdated);
+
+    socket.on('accommodationAdded', handleAccommodationAdded);
+    socket.on('accommodationUpdated', handleAccommodationUpdated);
+    socket.on('accommodationDeleted', handleAccommodationDeleted);
 
     const handleError = ({ message }) => {
       alert(`지출 작업 중 오류가 발생했습니다: ${message}`);
@@ -345,20 +410,19 @@ const useTripDetails = (tripId) => {
       socket.off('expenseUpdated', handleExpenseUpdated);
       socket.off('expenseDeleted', handleExpenseDeleted);
 
-      socket.off('accommodationAdded', handleAccommodationAdded);
-      socket.off('accommodationUpdated', handleAccommodationUpdated);
-      socket.off('accommodationDeleted', handleAccommodationDeleted);
-
       socket.off('taskAdded', handleTaskAdded);
       socket.off('taskUpdated', handleTaskUpdated);
       socket.off('taskDeleted', handleTaskDeleted);
 
       socket.off('participantCountUpdated', handleParticipantCountUpdated);
 
+      socket.off('accommodationAdded', handleAccommodationAdded);
+      socket.off('accommodationUpdated', handleAccommodationUpdated);
+      socket.off('accommodationDeleted', handleAccommodationDeleted);
+
       socket.off('error', handleError);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket]);
+  }, [socket, fetchTripData]);
 
   return {
     expenses,

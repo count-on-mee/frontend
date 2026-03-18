@@ -99,7 +99,7 @@ export const componentStyles = {
  * 동적으로 조건부 함수들
  */
 export const styleUtils = {
-  // 버튼 스타일 생성 
+  // 버튼 스타일 생성
   buttonStyle: (isConfirm = false, isDisabled = false, size = 'md') => {
     const sizeStyles = {
       sm: 'py-2 px-4 text-sm',
@@ -339,7 +339,8 @@ export const searchStyles = {
 export const neumorphStyles = {
   base: 'bg-[#f0f0f3] shadow-[2px_2px_4px_#b5b5b5,-2px_-2px_4px_#ffffff]',
   small: 'bg-[#f0f0f3] shadow-[1px_1px_2px_#d1d1d1,-1px_-1px_2px_#ffffff]',
-  medium: 'bg-[#f0f0f3] shadow-[1.5px_1.5px_3px_#d1d1d1,-1.5px_-1.5px_3px_#ffffff]',
+  medium:
+    'bg-[#f0f0f3] shadow-[1.5px_1.5px_3px_#d1d1d1,-1.5px_-1.5px_3px_#ffffff]',
   large: 'bg-[#f0f0f3] shadow-[2px_2px_4px_#b5b5b5,-2px_-2px_4px_#ffffff]',
   smallInset:
     'bg-[#f0f0f3] shadow-[inset_1px_1px_2px_#d1d1d1,inset_-1px_-1px_2px_#ffffff]',
@@ -359,9 +360,7 @@ export const tabButtonStyles = {
   active: clsx(
     'shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]',
   ),
-  inactive: clsx(
-    'hover:shadow-[4px_4px_8px_#d1d1d1,-4px_-4px_8px_#ffffff]',
-  ),
+  inactive: clsx('hover:shadow-[4px_4px_8px_#d1d1d1,-4px_-4px_8px_#ffffff]'),
   inactiveWithNeumorph: clsx(
     'shadow-[2px_2px_4px_#d1d1d1,-2px_-2px_4px_#ffffff]',
     'hover:shadow-[2px_2px_4px_#d1d1d1,-2px_-2px_4px_#ffffff]',
@@ -376,7 +375,11 @@ export const tabButtonStyles = {
           : tabButtonStyles.inactive,
     ),
     style: {
-      backgroundColor: isActive ? '#f0f0f3' : withNeumorph ? '#f0f0f3' : 'transparent',
+      backgroundColor: isActive
+        ? '#f0f0f3'
+        : withNeumorph
+          ? '#f0f0f3'
+          : 'transparent',
     },
   }),
 };
@@ -668,10 +671,9 @@ export const itineraryModalStyles = {
   // 모달 컨텐츠
   modalContent: clsx(
     'min-w-[700px] max-w-[90vw] max-h-[90vh] overflow-auto',
-    'bg-[#f8f8fa] rounded-[24px] relative p-10',
-    'shadow-[0_8px_32px_rgba(0,0,0,0.18)]',
+    'rounded-2xl relative p-10',
+    neumorphStyles.base,
     'flex flex-col items-center',
-    'border border-white/20',
   ),
 
   // 날짜 컨테이너
@@ -679,11 +681,10 @@ export const itineraryModalStyles = {
 
   // 날짜 박스
   dateBox: clsx(
-    'px-6 py-3 rounded-[16px] bg-[#f0f0f3]',
+    'px-6 py-3 rounded-full',
+    neumorphStyles.base,
+    neumorphStyles.hover,
     'font-semibold text-lg text-[#252422]',
-    'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]',
-    'hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
-    'transition-all duration-200',
   ),
 
   // 일정 컨테이너
@@ -695,11 +696,10 @@ export const itineraryModalStyles = {
 
   // 일정 카드
   itineraryCard: clsx(
-    'min-w-[220px] flex-shrink-0 bg-[#f8f8fa]',
-    'rounded-xl p-4 flex flex-col items-center',
-    'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]',
-    'hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
-    'transition-all duration-200',
+    'min-w-[220px] flex-shrink-0',
+    'rounded-2xl p-4 flex flex-col items-center',
+    neumorphStyles.base,
+    neumorphStyles.hover,
   ),
 
   // 일정 제목
@@ -709,26 +709,26 @@ export const itineraryModalStyles = {
   ),
 
   // 일정 날짜
-  itineraryDate: clsx('text-[#FF8C4B] font-medium text-base'),
+  itineraryDate: clsx('text-[#f5861d] font-medium text-base'),
 
   // 일정 리스트
   itineraryList: clsx('min-h-[40px] w-full space-y-2'),
 
   // 일정 아이템
   itineraryItem: clsx(
-    'bg-white rounded-lg p-3',
+    'rounded-full p-3',
+    neumorphStyles.small,
+    neumorphStyles.hover,
     'text-base flex items-center justify-between',
-    'transition-all duration-200',
-    'shadow-[2px_2px_4px_#b8b8b8,-2px_-2px_4px_#ffffff]',
-    'hover:shadow-[inset_2px_2px_4px_#b8b8b8,inset_-2px_-2px_4px_#ffffff]',
-    'hover:bg-[#f8f8fa]',
     'group',
   ),
 
   // 삭제 버튼
   deleteButton: clsx(
-    'ml-2 text-[#FF8C4B] bg-none border-none',
-    'font-semibold cursor-pointer',
+    'ml-2 px-3 py-1 rounded-full',
+    neumorphStyles.small,
+    neumorphStyles.hover,
+    'text-[#f5861d] font-semibold cursor-pointer',
     'opacity-0 group-hover:opacity-100',
     'transition-all duration-200',
     'hover:text-[#D54E23]',
@@ -736,10 +736,9 @@ export const itineraryModalStyles = {
 
   // 드래그 오버레이
   dragOverlay: clsx(
-    'p-3 bg-white rounded-lg',
+    'p-3 rounded-full',
+    neumorphStyles.medium,
     'text-base opacity-90',
-    'shadow-[4px_4px_8px_#b8b8b8,-4px_-4px_8px_#ffffff]',
-    'border border-[#FF8C4B]/20',
   ),
 
   // 버튼 컨테이너
@@ -747,7 +746,7 @@ export const itineraryModalStyles = {
 
   // 완료 버튼
   completeButton: clsx(
-    'min-w-[180px] text-xl py-3.5 rounded-xl',
+    'min-w-[180px] text-xl py-3.5 rounded-full',
     'bg-[#f5861d] text-white font-bold',
     'shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b]',
     'hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
@@ -758,13 +757,11 @@ export const itineraryModalStyles = {
 
   // 취소 버튼
   cancelButton: clsx(
-    'min-w-[100px] text-base rounded-lg',
-    'bg-[#f0f0f3] text-[#666] font-medium',
-    'shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff]',
-    'hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff]',
-    'hover:text-[#252422]',
-    'transition-all duration-200',
-    'border-none py-2.5 cursor-pointer',
+    'min-w-[100px] text-base rounded-full',
+    neumorphStyles.base,
+    neumorphStyles.hover,
+    'text-gray-600 font-medium',
+    'py-2.5 cursor-pointer',
   ),
 };
 
