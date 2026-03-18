@@ -33,41 +33,26 @@ function useTripItinerary(tripId) {
     fetchItinerary();
   }, [fetchItinerary]);
 
-  const addItinerary = async ({ spotId, day, order }) => {
-    await axiosInstance.post(`/trips/${tripId}/itineraries`, {
-      spotId,
-      day,
-      order,
-    });
-  };
-
   const moveItineraries = async (moves) => {
     const payload = Array.isArray(moves) ? { moves } : moves;
-    try {
-      const { data } = await axiosInstance.patch(
-        `/trips/${tripId}/itineraries`,
-        payload,
-      );
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const updateItinerary = async (itineraryId, { day, order }) => {
-    try {
-      const { data } = await axiosInstance.patch(
-        `/trips/${tripId}/itineraries/${itineraryId}`,
-        { day, order },
-      );
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const { data } = await axiosInstance.patch(
+      `/trips/${tripId}/itineraries`,
+      payload,
+    );
+    return data;
   };
 
   const deleteItinerary = async (itineraryId) => {
     await axiosInstance.delete(`/trips/${tripId}/itineraries/${itineraryId}`);
+  };
+
+  const addItinerary = async ({ spotId, day, order }) => {
+    const { data } = await axiosInstance.post(`/trips/${tripId}/itineraries`, {
+      spotId,
+      day,
+      order,
+    });
+    return data;
   };
 
   const updateTripDates = async ({ startDate, endDate }) => {
@@ -97,10 +82,9 @@ function useTripItinerary(tripId) {
     itinerary,
     loading,
     error,
-    addItinerary,
     moveItineraries,
-    updateItinerary,
     deleteItinerary,
+    addItinerary,
     updateTripDates,
     refetch: fetchItinerary,
   };

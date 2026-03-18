@@ -43,7 +43,7 @@ const AllInOneView = ({
         <Accommodation
           socket={socket}
           tripId={tripId}
-          initialAccommodations={accommodations}
+          accommodations={accommodations}
           setAccommodations={setAccommodations}
         />
       </div>

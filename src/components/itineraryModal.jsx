@@ -4,7 +4,7 @@ import tripDatesAtom from '../recoil/tripDates/atom';
 import useTripItinerary from '../hooks/useTripItinerary';
 import LoadingSpinner from './loadingSpinner';
 import { itineraryModalStyles } from '../utils/style';
-import DeleteConfirmModal from './common/DeleteConfirmModal';
+import AddSpotSection from './itinerary/addSpotSection';
 import {
   DndContext,
   closestCenter,
@@ -13,6 +13,7 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -27,6 +28,24 @@ import clsx from 'clsx';
 
 const getSpotId = (spot) => {
   return spot.tripItineraryId || spot.itineraryId || spot.id;
+};
+
+const DroppableDayCard = ({ day, children }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `day-${day}-drop`,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={clsx(
+        itineraryModalStyles.itineraryCard,
+        isOver && 'ring-2 ring-[#f5861d] ring-opacity-50',
+      )}
+    >
+      {children}
+    </div>
+  );
 };
 
 const SortableItem = ({ id, spot, onDeleteClick, loading }) => {
@@ -44,7 +63,6 @@ const SortableItem = ({ id, spot, onDeleteClick, loading }) => {
     transition,
     ...(isDragging && {
       opacity: 0.8,
-      background: '#f0f0f0',
       cursor: 'grabbing',
     }),
   };
@@ -61,10 +79,21 @@ const SortableItem = ({ id, spot, onDeleteClick, loading }) => {
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onDeleteClick(getSpotId(spot), spot.spot?.name || spot.name);
+          e.preventDefault();
+          onDeleteClick(getSpotId(spot));
+        }}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation();
         }}
         disabled={loading}
         className={itineraryModalStyles.deleteButton}
+        aria-label={`${spot.spot?.name || spot.name} 삭제`}
       >
         삭제
       </button>
@@ -72,21 +101,23 @@ const SortableItem = ({ id, spot, onDeleteClick, loading }) => {
   );
 };
 
-const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
-  const { moveItineraries, deleteItinerary } = useTripItinerary(tripId);
+const ItineraryModal = ({
+  open,
+  onClose,
+  tripId,
+  days,
+  spots,
+  onSave,
+  onRefetch,
+}) => {
+  const { moveItineraries, deleteItinerary, addItinerary, refetch } =
+    useTripItinerary(tripId);
   const [tripDates] = useRecoilState(tripDatesAtom);
   const [itinerary, setItinerary] = useState(spots);
   const [loading, setLoading] = useState(false);
   const [pendingMoves, setPendingMoves] = useState([]);
   const [activeId, setActiveId] = useState(null);
-  const [deleteModal, setDeleteModal] = useState({
-    isOpen: false,
-    itineraryId: null,
-    spotName: '',
-  });
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  // DnD Kit 센서 설정
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -95,8 +126,10 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
   );
 
   useEffect(() => {
-    setItinerary(spots);
-  }, [spots, days]);
+    if (open) {
+      setItinerary(spots);
+    }
+  }, [spots, days, open]);
 
   const safeItinerary = useMemo(() => {
     const safeDays = days.map((day) => Number(day));
@@ -108,7 +141,6 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
     return result;
   }, [days, itinerary]);
 
-  // @dnd-kit 드래그 핸들러
   const handleDragStart = useCallback((event) => {
     setActiveId(event.active.id);
   }, []);
@@ -123,12 +155,20 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
         return;
       }
 
-      // ID에서 day와 spot 정보 추출
       const activeId = String(active.id);
       const overId = String(over.id);
 
       const [, activeDay, , activeSpotId] = activeId.split('-');
-      const [, overDay, , overSpotId] = overId.split('-');
+
+      const isOverDayCard = overId.includes('-drop');
+      let overDay, overSpotId;
+
+      if (isOverDayCard) {
+        [, overDay] = overId.split('-');
+        overSpotId = null;
+      } else {
+        [, overDay, , overSpotId] = overId.split('-');
+      }
 
       const sourceDayIdx = safeItinerary.findIndex(
         (d) => Number(d.day) === Number(activeDay),
@@ -148,16 +188,104 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
       const activeIndex = sourceList.findIndex(
         (item) => String(getSpotId(item)) === activeSpotId,
       );
+
+      if (activeIndex === -1) return;
+
+      if (isOverDayCard) {
+        const overIndex = destList.length;
+        if (activeDay === overDay) return;
+
+        const newItinerary = [...safeItinerary];
+        const [removed] = sourceList.splice(activeIndex, 1);
+
+        const removedId = getSpotId(removed);
+
+        if (
+          !removedId ||
+          Number(removedId) === 0 ||
+          !Number.isInteger(Number(removedId))
+        ) {
+          return;
+        }
+
+        destList.splice(overIndex, 0, removed);
+
+        const newSourceList = sourceList.map((item, idx) => ({
+          ...item,
+          order: idx + 1,
+        }));
+        const newDestList = destList.map((item, idx) => ({
+          ...item,
+          order: idx + 1,
+        }));
+
+        newItinerary[sourceDayIdx] = {
+          ...newItinerary[sourceDayIdx],
+          list: newSourceList,
+        };
+        newItinerary[destDayIdx] = {
+          ...newItinerary[destDayIdx],
+          list: newDestList,
+        };
+
+        setPendingMoves((prev) => {
+          const filtered = prev.filter(
+            (m) =>
+              Number(m.day) !== Number(activeDay) &&
+              Number(m.day) !== Number(overDay),
+          );
+          const newMoves = newSourceList
+            .map((item) => {
+              const spotId = getSpotId(item);
+              const itineraryId = Number(spotId);
+              const day = Number(activeDay);
+              const order = Number(item.order);
+              if (!Number.isInteger(itineraryId) || itineraryId === 0) {
+                return null;
+              }
+              return { itineraryId, day, order };
+            })
+            .filter(
+              (move) =>
+                move &&
+                Number.isInteger(move.itineraryId) &&
+                Number.isInteger(move.day) &&
+                Number.isInteger(move.order),
+            );
+          const newMovesDest = newDestList
+            .map((item) => {
+              const spotId = getSpotId(item);
+              const itineraryId = Number(spotId);
+              const day = Number(overDay);
+              const order = Number(item.order);
+              if (!Number.isInteger(itineraryId) || itineraryId === 0) {
+                return null;
+              }
+              return { itineraryId, day, order };
+            })
+            .filter(
+              (move) =>
+                move &&
+                Number.isInteger(move.itineraryId) &&
+                Number.isInteger(move.day) &&
+                Number.isInteger(move.order),
+            );
+          return [...filtered, ...newMoves, ...newMovesDest];
+        });
+
+        setItinerary(newItinerary);
+        return;
+      }
+
       const overIndex = destList.findIndex(
         (item) => String(getSpotId(item)) === overSpotId,
       );
 
-      if (activeIndex === -1 || overIndex === -1) return;
+      if (overIndex === -1) return;
 
       const newItinerary = [...safeItinerary];
 
       if (activeDay === overDay) {
-        // 같은 날짜 내 이동
         const reorderedList = arrayMove(sourceList, activeIndex, overIndex);
         const newList = reorderedList.map((item, idx) => ({
           ...item,
@@ -193,7 +321,6 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
           return [...filtered, ...newMoves];
         });
       } else {
-        // 다른 날짜 간 이동
         const [removed] = sourceList.splice(activeIndex, 1);
         destList.splice(overIndex, 0, removed);
 
@@ -264,23 +391,33 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
     [loading, safeItinerary],
   );
 
-  const openDeleteModal = (itineraryId, spotName) => {
-    setDeleteModal({ isOpen: true, itineraryId, spotName });
-  };
+  const handleDeleteSpot = async (itineraryId) => {
+    if (!itineraryId) return;
 
-  const closeDeleteModal = () => {
-    setDeleteModal({ isOpen: false, itineraryId: null, spotName: '' });
-  };
-
-  const handleDeleteSpot = async () => {
-    if (!deleteModal.itineraryId) return;
-
-    setIsDeleting(true);
     try {
-      await deleteItinerary(deleteModal.itineraryId);
-      closeDeleteModal();
-    } finally {
-      setIsDeleting(false);
+      await deleteItinerary(itineraryId);
+
+      setItinerary((prev) => {
+        return prev.map((dayItem) => ({
+          ...dayItem,
+          list: dayItem.list.filter((spot) => getSpotId(spot) !== itineraryId),
+        }));
+      });
+
+      setPendingMoves((prev) =>
+        prev.filter((move) => move.itineraryId !== itineraryId),
+      );
+
+      if (onRefetch) {
+        await onRefetch();
+      } else {
+        await refetch();
+      }
+    } catch (error) {
+      console.error('일정 삭제 실패:', error);
+      alert(
+        `일정 삭제에 실패했습니다: ${error.response?.data?.message || error.message || '알 수 없는 오류'}`,
+      );
     }
   };
 
@@ -288,19 +425,29 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
     setLoading(true);
     try {
       if (pendingMoves.length > 0) {
-        // 원본 데이터와 비교하여 실제로 변경된 스팟만 필터링
-        const originalSpots = spots.reduce((acc, day) => {
+        const originalSpotsFromProps = spots.reduce((acc, day) => {
           day.list.forEach((spot) => {
             const spotId = getSpotId(spot);
-            acc[spotId] = {
-              day: Number(day.day),
-              order: Number(spot.order),
-            };
+            const numericId = Number(spotId);
+            if (Number.isInteger(numericId) && numericId > 0) {
+              acc[numericId] = {
+                day: Number(day.day),
+                order: Number(spot.order),
+              };
+            }
           });
           return acc;
         }, {});
 
-        // 실제로 변경된 스팟만 필터링
+        const finalSpots = { ...originalSpotsFromProps };
+        pendingMoves.forEach((move) => {
+          const moveId = Number(move.itineraryId);
+          finalSpots[moveId] = {
+            day: Number(move.day),
+            order: Number(move.order),
+          };
+        });
+
         const changedMoves = pendingMoves
           .map((move) => ({
             itineraryId: Number(move.itineraryId),
@@ -308,12 +455,18 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
             order: Number(move.order),
           }))
           .filter((move) => {
-            const originalSpot = originalSpots[move.itineraryId];
-            return (
-              !originalSpot ||
-              originalSpot.day !== move.day ||
-              originalSpot.order !== move.order
-            );
+            const originalSpot = originalSpotsFromProps[move.itineraryId];
+            const finalSpot = finalSpots[move.itineraryId];
+
+            if (!originalSpot) {
+              return false;
+            }
+
+            const isChanged =
+              originalSpot.day !== finalSpot.day ||
+              originalSpot.order !== finalSpot.order;
+
+            return isChanged;
           });
 
         if (changedMoves.length > 0) {
@@ -323,13 +476,17 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
       onSave?.();
       onClose();
     } catch (e) {
-      alert('저장에 실패했습니다.');
+      console.error('저장 실패:', e);
+      console.error('에러 응답:', e.response?.data);
+      console.error('요청 페이로드:', e.config?.data);
+      alert(
+        `저장에 실패했습니다: ${e.response?.data?.message || e.message || '알 수 없는 오류'}`,
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Day별 날짜 계산 함수
   const getDateByDay = (day, date) => {
     if (date) return formatKoreanDate(date);
     if (!tripDates.startDate) return '';
@@ -337,11 +494,30 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
     return formatKoreanDate(format(d, 'yyyy-MM-dd'));
   };
 
-  // 날짜 포맷 함수 (YYYY년 MM월 DD일)
   const formatKoreanDate = (dateStr) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, '0')}월 ${String(d.getDate()).padStart(2, '0')}일`;
+  };
+
+  const handleAddSpotToDay = async (spot, day, order) => {
+    try {
+      await addItinerary({
+        spotId: spot.spotId,
+        day: Number(day),
+        order,
+      });
+
+      if (onRefetch) {
+        await onRefetch();
+      } else {
+        await refetch();
+      }
+    } catch (error) {
+      console.error('스팟 추가 실패:', error);
+      console.error('에러 응답:', error.response?.data);
+      throw error;
+    }
   };
 
   if (!open) return null;
@@ -367,6 +543,12 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
           </div>
         </div>
 
+        <AddSpotSection
+          days={days}
+          onAddSpot={handleAddSpotToDay}
+          safeItinerary={safeItinerary}
+        />
+
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -386,10 +568,7 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
               });
 
               return (
-                <div
-                  key={`day-${dayItem.day}`}
-                  className={itineraryModalStyles.itineraryCard}
-                >
+                <DroppableDayCard key={`day-${dayItem.day}`} day={dayItem.day}>
                   <h4 className={itineraryModalStyles.itineraryTitle}>
                     Day{dayItem.day}
                     <span className={itineraryModalStyles.itineraryDate}>
@@ -409,14 +588,14 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
                             key={id}
                             id={id}
                             spot={spot}
-                            onDeleteClick={openDeleteModal}
+                            onDeleteClick={handleDeleteSpot}
                             loading={loading}
                           />
                         );
                       })}
                     </ul>
                   </SortableContext>
-                </div>
+                </DroppableDayCard>
               );
             })}
           </div>
@@ -429,7 +608,6 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
           </DragOverlay>
         </DndContext>
 
-        {/* 완료/취소 버튼 */}
         <div className={itineraryModalStyles.buttonContainer}>
           <button
             onClick={handleSave}
@@ -452,17 +630,6 @@ const ItineraryModal = ({ open, onClose, tripId, days, spots, onSave }) => {
 
         {loading && <LoadingSpinner message="최적 경로 재생성 중이에요!" />}
       </div>
-
-      <DeleteConfirmModal
-        isOpen={deleteModal.isOpen}
-        onClose={closeDeleteModal}
-        onConfirm={handleDeleteSpot}
-        title="일정 삭제"
-        message={`"${deleteModal.spotName}" 일정을 삭제하시겠습니까?`}
-        confirmText="삭제"
-        cancelText="취소"
-        isLoading={isDeleting}
-      />
     </div>
   );
 };
