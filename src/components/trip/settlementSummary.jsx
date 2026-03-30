@@ -36,6 +36,7 @@ const formatAmount = (amount) => {
 };
 
 const SettlementSummary = ({ expenses, statistics, participants }) => {
+  const MotionDiv = motion.div;
   const categoryExpenses = useMemo(() => {
     if (!expenses || expenses.length === 0) {
       return [];
@@ -96,10 +97,9 @@ const SettlementSummary = ({ expenses, statistics, participants }) => {
   }, [participants]);
 
   const totalSharedExpenses = useMemo(() => {
-    return categoryExpenses.reduce(
-      (sum, category) => sum + category.totalAmount,
-      0,
-    );
+    return categoryExpenses
+      .filter((category) => category.category !== 'BUDGET')
+      .reduce((sum, category) => sum + category.totalAmount, 0);
   }, [categoryExpenses]);
 
   return (
@@ -107,7 +107,7 @@ const SettlementSummary = ({ expenses, statistics, participants }) => {
       <div className="space-y-4 mb-6">
         {categoryExpenses.length > 0 ? (
           categoryExpenses.map((categoryData, index) => (
-            <motion.div
+            <MotionDiv
               key={categoryData.category}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -147,7 +147,7 @@ const SettlementSummary = ({ expenses, statistics, participants }) => {
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </MotionDiv>
           ))
         ) : (
           <div className="text-center text-gray-400 py-8">
@@ -157,7 +157,7 @@ const SettlementSummary = ({ expenses, statistics, participants }) => {
       </div>
 
       {sharedBudgetInfo && (
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: categoryExpenses.length * 0.1 + 0.1 }}
@@ -246,7 +246,7 @@ const SettlementSummary = ({ expenses, statistics, participants }) => {
                 </div>
               </div>
             )}
-        </motion.div>
+        </MotionDiv>
       )}
 
       {categoryExpenses.length === 0 && !sharedBudgetInfo && (
