@@ -1,5 +1,5 @@
 import api from '../../utils/axiosInstance';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   XMarkIcon,
@@ -9,8 +9,11 @@ import {
 } from '@heroicons/react/24/outline';
 import TripProfile from '../../components/user/tripProfile';
 import useTrip from '../../hooks/useTrip';
-import { componentStyles, styleUtils, neumorphStyles } from '../../utils/style';
+import { styleUtils, neumorphStyles } from '../../utils/style';
 import DeleteConfirmModal from '../../components/common/DeleteConfirmModal';
+import editIcon from '../../assets/edit.png';
+import selectIcon from '../../assets/selectIcon.png';
+import cancelIcon from '../../assets/cancelIcon.png';
 
 function MyPageTripList() {
   const [tripList, setTripList] = useState([]);
@@ -23,10 +26,13 @@ function MyPageTripList() {
     tripTitle: '',
   });
   const [isDeleting, setIsDeleting] = useState(false);
+  const [editingTripId, setEditingTripId] = useState(null);
+  const [titleInput, setTitleInput] = useState('');
+  const [savingTripId, setSavingTripId] = useState(null);
   const navigate = useNavigate();
-  const { getTrip } = useTrip();
+  const { getTrip, updateTrip } = useTrip();
 
-  const fetchTripList = async () => {
+  const fetchTripList = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get('/trips');
@@ -60,7 +66,7 @@ function MyPageTripList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getTrip, navigate]);
 
   const openDeleteModal = (event, tripId, tripTitle) => {
     event.stopPropagation();
@@ -98,7 +104,7 @@ function MyPageTripList() {
 
   useEffect(() => {
     fetchTripList();
-  }, []);
+  }, [fetchTripList]);
 
   if (loading) {
     return (
@@ -157,9 +163,97 @@ function MyPageTripList() {
                               {index + 1}
                             </div>
                             <div>
-                              <h3 className="text-2xl font-bold text-[#252422] mb-1">
-                                {trip.title}
-                              </h3>
+                              <div className="flex items-center mb-1">
+                                {editingTripId === trip.tripId ? (
+                                  <>
+                                    <input
+                                      className="px-3 py-2 rounded-lg bg-[#f0f0f3] text-[#252422] shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] outline-none"
+                                      value={titleInput}
+                                      onChange={(e) =>
+                                        setTitleInput(e.target.value)
+                                      }
+                                      onClick={(e) => e.stopPropagation()}
+                                      maxLength={50}
+                                    />
+                                    <button
+                                      className="p-0 bg-transparent shadow-none hover:shadow-none transition disabled:opacity-50"
+                                      onClick={async (e) => {
+                                        e.stopPropagation();
+                                        if (!titleInput?.trim() || savingTripId)
+                                          return;
+                                        try {
+                                          setSavingTripId(trip.tripId);
+                                          await updateTrip(trip.tripId, {
+                                            title: titleInput.trim(),
+                                          });
+                                          setTripList((prev) =>
+                                            prev.map((t) =>
+                                              t.tripId === trip.tripId
+                                                ? {
+                                                    ...t,
+                                                    title: titleInput.trim(),
+                                                  }
+                                                : t,
+                                            ),
+                                          );
+                                          setEditingTripId(null);
+                                        } catch {
+                                          alert(
+                                            '여행 이름 수정에 실패했습니다.',
+                                          );
+                                        } finally {
+                                          setSavingTripId(null);
+                                        }
+                                      }}
+                                      disabled={
+                                        savingTripId === trip.tripId ||
+                                        !titleInput?.trim()
+                                      }
+                                    >
+                                      <img
+                                        src={selectIcon}
+                                        alt="확인"
+                                        className="w-10 h-10"
+                                      />
+                                    </button>
+                                    <button
+                                      className="p-0 bg-transparent shadow-none hover:shadow-none transition"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingTripId(null);
+                                        setTitleInput('');
+                                      }}
+                                    >
+                                      <img
+                                        src={cancelIcon}
+                                        alt="취소"
+                                        className="w-10 h-10"
+                                      />
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <h3 className="text-2xl font-bold text-[#252422]">
+                                      {trip.title}
+                                    </h3>
+                                    <button
+                                      className="p-0 bg-transparent shadow-none hover:shadow-none transition opacity-0 group-hover:opacity-100"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingTripId(trip.tripId);
+                                        setTitleInput(trip.title || '');
+                                      }}
+                                      aria-label="여행 이름 수정"
+                                    >
+                                      <img
+                                        src={editIcon}
+                                        alt="수정"
+                                        className="w-6 h-6"
+                                      />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
                               <div className="flex items-center gap-6 text-gray-600">
                                 <div className="flex items-center gap-2">
                                   <CalendarIcon className="w-5 h-5" />
