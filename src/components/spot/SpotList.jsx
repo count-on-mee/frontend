@@ -4,6 +4,7 @@ import Spot from './Spot';
 import { withCenter } from '../../recoil/selectedSpot';
 import { useState, useEffect } from 'react';
 import { neumorphStyles } from '../../utils/style';
+import { useIsDesktop } from '../../hooks/useMediaQuery';
 
 export default function SpotList({
   handleSpotScrap,
@@ -14,6 +15,7 @@ export default function SpotList({
   onSearchSubmit,
 }) {
   const setSelectedSpotWithCenter = useSetRecoilState(withCenter);
+  const isDesktop = useIsDesktop();
   const [currentPage, setCurrentPage] = useState(1);
   const spotsPerPage = 15;
   const indexOfLastSpot = currentPage * spotsPerPage;
@@ -52,7 +54,7 @@ export default function SpotList({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="mb-6">
+      <div className="mb-3 lg:mb-6">
         <Searchbar
           value={searchTerm}
           onChange={onSearchChange}
@@ -64,11 +66,11 @@ export default function SpotList({
       <div className="flex-1 overflow-y-auto">
         {spots.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-500 text-lg">
+            <p className="text-charcoal/40 text-sm">
               스팟을 검색하거나 지도를 움직여 주세요.
             </p>
           </div>
-        ) : (
+        ) : isDesktop ? (
           <div className="space-y-4">
             {currentItems.map((spot) => (
               <Spot
@@ -82,16 +84,31 @@ export default function SpotList({
               />
             ))}
           </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-0.5">
+            {currentItems.map((spot) => (
+              <Spot
+                key={spot.spotId}
+                spot={spot}
+                handleScrapClick={handleSpotScrap}
+                varient="grid"
+                onClick={() => {
+                  setSelectedSpotWithCenter(spot);
+                  onSpotClick(spot);
+                }}
+              />
+            ))}
+          </div>
         )}
       </div>
 
       {spots.length > 0 && (
-        <div className="mt-6 pt-4">
-          <div className="flex justify-center items-center space-x-2">
+        <div className="mt-3 lg:mt-6 pt-2 lg:pt-4">
+          <div className="flex justify-center items-center space-x-1 lg:space-x-2">
             <button
               onClick={handlePrevGroup}
               disabled={currentPageGroup === 1}
-              className={`px-3 py-2 rounded-lg text-[#252422] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${neumorphStyles.small} ${neumorphStyles.hover}`}
+              className={`px-2 py-1.5 lg:px-3 lg:py-2 rounded-lg text-[#252422] text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${neumorphStyles.small} ${neumorphStyles.hover}`}
             >
               &lt;
             </button>
@@ -103,7 +120,7 @@ export default function SpotList({
                   <button
                     key={pageNumber}
                     onClick={() => paginate(pageNumber)}
-                    className={`px-3 py-2 rounded-lg transition-colors ${
+                    className={`px-2 py-1.5 lg:px-3 lg:py-2 rounded-lg text-sm transition-colors ${
                       currentPage === pageNumber
                         ? 'bg-[#f5861d] text-white shadow-[inset_3px_3px_6px_#c44e1f,inset_-3px_-3px_6px_#ff6c31]'
                         : `${neumorphStyles.small} ${neumorphStyles.hover} text-[#252422]`
@@ -117,7 +134,7 @@ export default function SpotList({
             <button
               onClick={handleNextGroup}
               disabled={currentPageGroup === totalGroups}
-              className={`px-3 py-2 rounded-lg text-[#252422] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${neumorphStyles.small} ${neumorphStyles.hover}`}
+              className={`px-2 py-1.5 lg:px-3 lg:py-2 rounded-lg text-[#252422] text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${neumorphStyles.small} ${neumorphStyles.hover}`}
             >
               &gt;
             </button>

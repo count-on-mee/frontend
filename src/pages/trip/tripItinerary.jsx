@@ -184,13 +184,29 @@ const TripItinerary = () => {
       {isUpdatingDates && (
         <LoadingSpinner message="최적 경로 재생성 중이에요!" />
       )}
-      <div className="flex w-full">
-        <div className="w-1/2 p-8">
-          <div className="flex items-center gap-4">
+      <div className="flex flex-col desktop:flex-row w-full">
+        <div className="order-1 desktop:order-2 w-full desktop:w-1/2 h-[200px] desktop:h-[500px] flex flex-col overflow-hidden desktop:sticky desktop:top-30">
+          <Map
+            mapRef={mapRef}
+            markers={markersToSend}
+            showAllDays={showAllDays}
+            markerType="itinerary"
+          />
+          <div className="flex justify-end p-1 desktop:p-2">
+            <button
+              onClick={() => setShowAllDays((prev) => !prev)}
+              className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} text-xs desktop:text-sm ${showAllDays ? 'text-[var(--color-primary)]' : 'text-gray-600'}`}
+            >
+              {showAllDays ? 'Day 보기' : '전체 보기'}
+            </button>
+          </div>
+        </div>
+        <div className="order-2 desktop:order-1 w-full desktop:w-1/2 p-3 desktop:p-8">
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="relative">
               <button
                 onClick={() => setShowStartDatePicker(!showStartDatePicker)}
-                className={`${componentStyles.button.secondary} ${neumorphStyles.small} text-[var(--color-primary)] ${neumorphStyles.hover}`}
+                className={`${componentStyles.button.secondary} ${neumorphStyles.small} text-[var(--color-primary)] ${neumorphStyles.hover} text-xs desktop:text-sm`}
               >
                 {formatDate(meta.startDate)} - {formatDate(meta.endDate)}
               </button>
@@ -213,27 +229,21 @@ const TripItinerary = () => {
                 </div>
               )}
             </div>
-          </div>
-          {meta.destinations?.length > 0 && (
-            <span
-              className={`ml-4 text-base text-gray-600 ${neumorphStyles.small} ${neumorphStyles.hover}`}
-            >
-              {meta.destinations.join(', ')}
-            </span>
-          )}
-          <div
-            className={`${layoutStyles.flex.between} ${layoutStyles.spacing.section} mt-8 `}
-          >
+            {meta.destinations?.length > 0 && (
+              <span
+                className={`text-xs desktop:text-base text-gray-600 ${neumorphStyles.small} ${neumorphStyles.hover}`}
+              >
+                {meta.destinations.join(', ')}
+              </span>
+            )}
             <button
               onClick={() => setShowModal(true)}
-              className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} text-[var(--color-primary)]`}
+              className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} text-[var(--color-primary)] text-xs desktop:text-sm ml-auto`}
             >
               수정
             </button>
           </div>
-          <div
-            className={`${layoutStyles.flex.gap} ${layoutStyles.spacing.section}`}
-          >
+          <div className="flex gap-2 mt-3 mb-3 overflow-x-auto pb-1 scrollbar-none">
             {allDays.map((day) => (
               <DayButton
                 key={day}
@@ -250,13 +260,13 @@ const TripItinerary = () => {
           <div>
             {itineraryLoading ? (
               <div
-                className={`text-center py-12 ${componentStyles.text.loading} ${neumorphStyles.base}`}
+                className={`text-center py-8 ${componentStyles.text.loading} ${neumorphStyles.base}`}
               >
                 <p>일정을 불러오는 중...</p>
               </div>
             ) : itineraryError ? (
               <div
-                className={`text-center py-12 ${componentStyles.text.error} ${neumorphStyles.base}`}
+                className={`text-center py-8 ${componentStyles.text.error} ${neumorphStyles.base}`}
               >
                 <p>일정을 불러오는데 실패했습니다: {itineraryError.message}</p>
               </div>
@@ -273,29 +283,29 @@ const TripItinerary = () => {
                         ...animationStyles.fadeIn.transition,
                         delay: idx * 0.1,
                       }}
-                      className={layoutStyles.spacing.item}
+                      className="mb-2"
                     >
                       <div
-                        className={`${layoutStyles.flex.gap} p-6 ${neumorphStyles.base} ${neumorphStyles.hover}`}
+                        className={`flex items-center gap-3 p-3 desktop:p-4 ${neumorphStyles.base} ${neumorphStyles.hover} cursor-pointer`}
                         onClick={() => handleSpotClick(item)}
                       >
                         <motion.div
                           key={item.order}
                           {...animationStyles.scaleIn}
-                          className={`w-8 h-8 rounded-full bg-[#f5861d] text-white flex items-center justify-center font-bold ${neumorphStyles.tinyInset} ${neumorphStyles.hover}`}
+                          className={`w-7 h-7 desktop:w-8 desktop:h-8 rounded-full bg-[#f5861d] text-white flex items-center justify-center font-bold text-sm flex-shrink-0 ${neumorphStyles.tinyInset}`}
                         >
                           {item.order}
                         </motion.div>
                         <img
                           src={item.spot?.imgUrls?.[0] || defaultImage}
                           alt={item.spot?.name}
-                          className={`w-20 h-20 rounded-xl object-cover ${neumorphStyles.small} ${neumorphStyles.hover}`}
+                          className={`w-12 h-12 desktop:w-16 desktop:h-16 rounded-xl object-cover flex-shrink-0 ${neumorphStyles.small}`}
                         />
-                        <div className="flex-grow">
-                          <div className={componentStyles.text.title}>
+                        <div className="flex-grow min-w-0">
+                          <div className="text-sm desktop:text-base font-semibold text-[#252422] truncate">
                             {item.spot?.name}
                           </div>
-                          <div className={componentStyles.text.subtitle}>
+                          <div className="text-xs text-gray-500 truncate mt-0.5">
                             {item.spot?.address}
                           </div>
                         </div>
@@ -311,31 +321,15 @@ const TripItinerary = () => {
                 ));
               })()
             ) : (
-              <div className={`text-center py-12 ${neumorphStyles.base}`}>
+              <div className={`text-center py-8 ${neumorphStyles.base}`}>
                 <p className={componentStyles.text.loading}>
                   Day {activeDay}에 등록된 일정이 없습니다.
                 </p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-xs text-gray-500 mt-2">
                   수정 버튼을 눌러 일정을 추가해보세요.
                 </p>
               </div>
             )}
-          </div>
-        </div>
-        <div className="w-1/2 h-[500px] flex flex-col overflow-hidden sticky top-30">
-          <Map
-            mapRef={mapRef}
-            markers={markersToSend}
-            showAllDays={showAllDays}
-            markerType="itinerary"
-          />
-          <div className="flex justify-end p-2">
-            <button
-              onClick={() => setShowAllDays((prev) => !prev)}
-              className={`${componentStyles.button.secondary} ${neumorphStyles.small} ${neumorphStyles.hover} ${showAllDays ? 'text-[var(--color-primary)]' : 'text-gray-600'}`}
-            >
-              {showAllDays ? 'Day 보기' : '전체 보기'}
-            </button>
           </div>
         </div>
       </div>

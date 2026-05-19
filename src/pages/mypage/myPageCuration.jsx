@@ -93,103 +93,59 @@ function MyPageCuration() {
   }, []);
 
   return (
-    <div className="px-6 py-8">
+    <div className="w-full">
+      <h2 className="text-[13px] font-semibold text-charcoal/50 uppercase tracking-wider mb-3 px-1">
+        Curation
+      </h2>
+
       <div className="w-full">
         {curations.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-[#f0f0f3] to-[#e0e0e3] rounded-full flex items-center justify-center shadow-[inset_8px_8px_16px_#d1d1d1,inset_-8px_-8px_16px_#ffffff]">
-              <PencilIcon className="w-16 h-16 text-[#666]" />
+          <div className="text-center py-10">
+            <div className="w-14 h-14 mx-auto mb-4 bg-[#f0f0f3] rounded-full flex items-center justify-center shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]">
+              <PencilIcon className="w-7 h-7 text-charcoal/30" />
             </div>
-            <h3 className="text-2xl font-bold text-[#252422] mb-3">
-              아직 작성한 큐레이션이 없습니다
-            </h3>
-            <p className="text-[#666] mb-8 text-lg">
-              새로운 큐레이션을 작성해보세요!
-            </p>
+            <p className="text-sm text-charcoal/40 mb-4">아직 작성한 큐레이션이 없습니다</p>
             <button
-              className="bg-gradient-to-r from-[#f5861d] to-[#D54E23] text-white rounded-3xl px-8 py-4 text-lg font-semibold shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff] hover:shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 hover:scale-105"
+              className="text-[13px] text-charcoal/60 py-2 px-4 border border-charcoal/15 rounded-xl hover:bg-charcoal/5 transition-colors"
               onClick={() => navigate('/curation/create')}
             >
               큐레이션 작성하기
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
             {curations.map((curation) => (
-              <div key={curation.curationId} className="group h-full">
-                <div
-                  className="relative h-full cursor-pointer bg-[#f0f0f3] rounded-3xl overflow-hidden shadow-[8px_8px_16px_#d1d1d1,-8px_-8px_16px_#ffffff] hover:shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff] transition-all duration-300 hover:scale-[1.02] flex flex-col"
-                  onClick={() => handleCurationClick(curation.curationId)}
-                >
-                  {/* 이미지 컨테이너 */}
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={curation.imgUrl || defaultImage}
-                      alt={curation.name}
-                      className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-                      onError={(e) => {
-                        e.target.src = defaultImage;
-                      }}
-                    />
-                    {/* 그라데이션 오버레이 */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+              <div
+                key={curation.curationId}
+                className="relative aspect-[3/4] cursor-pointer rounded-lg overflow-hidden group"
+                onClick={() => handleCurationClick(curation.curationId)}
+              >
+                <img
+                  src={curation.imgUrl || defaultImage}
+                  alt={curation.name}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => { e.target.src = defaultImage; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                    {/* 액션 버튼들 */}
-                    <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <button
-                        className="p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-blue-50 transition-all duration-300"
-                        onClick={(event) =>
-                          handleEditCuration(event, curation.curationId)
-                        }
-                      >
-                        <PencilIcon className="w-5 h-5 text-[#666] group-hover:text-blue-600" />
-                      </button>
-                      <button
-                        className="p-3 bg-[#f0f0f3] backdrop-blur-sm rounded-full shadow-lg hover:bg-orange-50 transition-all duration-300"
-                        onClick={(event) =>
-                          openDeleteModal(
-                            event,
-                            curation.curationId,
-                            curation.name,
-                          )
-                        }
-                      >
-                        <XMarkIcon className="w-5 h-5 text-[#FF8C4B] group-hover:text-[#D54E23]" />
-                      </button>
-                    </div>
-                  </div>
+                <div className="absolute top-1.5 right-1.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <button
+                    className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow"
+                    onClick={(e) => handleEditCuration(e, curation.curationId)}
+                  >
+                    <PencilIcon className="w-3 h-3 text-charcoal/70" />
+                  </button>
+                  <button
+                    className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow"
+                    onClick={(e) => openDeleteModal(e, curation.curationId, curation.name)}
+                  >
+                    <XMarkIcon className="w-3 h-3 text-[#FF8C4B]" />
+                  </button>
+                </div>
 
-                  {/* 콘텐츠 영역 */}
-                  <div className="p-6 space-y-4 flex-1 flex flex-col">
-                    <h3
-                      className="text-xl font-bold text-[#252422] group-hover:text-[#f5861d] transition-colors overflow-hidden"
-                      style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {curation.name}
-                    </h3>
-
-                    <p
-                      className="text-[#666] text-base overflow-hidden flex-1"
-                      style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {curation.description || ''}
-                    </p>
-
-                    <div className="flex items-center justify-between pt-3">
-                      {/* 작성자 정보 */}
-                      <div className="text-sm text-[#999] font-medium">
-                        {curation.author?.nickname || '익명'}
-                      </div>
-                    </div>
-                  </div>
+                <div className="absolute bottom-2 left-2 right-2">
+                  <p className="text-[11px] text-white font-semibold truncate">{curation.name}</p>
+                  <p className="text-[10px] text-white/70 truncate">{curation.author?.nickname || '익명'}</p>
                 </div>
               </div>
             ))}

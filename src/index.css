@@ -10,6 +10,7 @@
   --color-background-gray: #f0f0f3;
   --color-primary: #f5861d;
   --color-charcoal: #403d39;
+  --breakpoint-desktop: 75rem;
 }
 
 @layer utilities {

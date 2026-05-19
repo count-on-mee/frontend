@@ -302,27 +302,26 @@ export default function MyScrapListPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-40 overflow-hidden" style={{ top: '80px' }}>
-      <div className="flex items-center justify-center h-full p-2 sm:p-4 md:p-6">
+    <div className="fixed inset-0 z-40 overflow-hidden top-14 bottom-16 desktop:top-[80px] desktop:bottom-0">
+      <div className="flex items-center justify-center h-full p-1 sm:p-4 md:p-6">
         <div
-          className="fixed inset-0 transition-opacity"
+          className="fixed inset-0 top-14 desktop:top-[80px] transition-opacity"
           aria-hidden="true"
-          style={{ top: '80px' }}
         >
           <div className="absolute inset-0 bg-background opacity-70 backdrop-filter backdrop-blur-xl"></div>
         </div>
 
         <div
-          className={`${neumorphStyles.base} ${neumorphStyles.hover} rounded-2xl p-6 w-full max-w-7xl h-[calc(100vh-8rem)] relative z-10 flex flex-col`}
+          className={`${neumorphStyles.base} ${neumorphStyles.hover} rounded-2xl p-3 sm:p-6 w-full max-w-7xl h-full relative z-10 flex flex-col`}
         >
-          <div className="relative pt-16 pb-8 px-8">
+          <div className="relative flex items-center justify-between py-2 px-1 sm:pt-8 sm:pb-4 sm:px-8">
             <button
               onClick={goBack}
               className={clsx(
                 baseStyles.button,
                 baseStyles.shadow,
                 baseStyles.hoverShadow,
-                'p-2 sm:p-3 absolute left-8 top-8',
+                'p-1.5 sm:p-3',
               )}
             >
               <svg
@@ -331,7 +330,7 @@ export default function MyScrapListPage() {
                 viewBox="0 0 24 24"
                 strokeWidth={2}
                 stroke="currentColor"
-                className="w-5 h-5 sm:w-6 sm:h-6"
+                className="w-4 h-4 sm:w-6 sm:h-6"
               >
                 <path
                   strokeLinecap="round"
@@ -340,21 +339,17 @@ export default function MyScrapListPage() {
                 />
               </svg>
             </button>
-            <h2
-              className={clsx(
-                componentStyles.header,
-                'absolute left-1/2 top-8 -translate-x-1/2',
-              )}
-            >
+            <h2 className="text-sm sm:text-xl font-semibold text-[#252422]">
               나의 스크랩 리스트
             </h2>
+            <div className="w-7 sm:w-12" />
           </div>
 
-          <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-            <div className="w-full md:w-1/2 overflow-y-auto px-8 py-8">
+          <div className="flex-1 flex flex-col md:flex-row overflow-hidden gap-2 sm:gap-0">
+            <div className="w-full md:w-1/2 overflow-y-auto px-1 sm:px-8 py-1 sm:py-4">
               {/* Spot 검색 섹션 */}
-              <div className="mb-8">
-                <div className="w-full mb-4">
+              <div className="mb-3 sm:mb-6">
+                <div className="w-full mb-2 sm:mb-4">
                   <Searchbar
                     value={spotSearchTerm}
                     onChange={handleSpotSearchChange}
@@ -439,14 +434,14 @@ export default function MyScrapListPage() {
               />
             </div>
 
-            <div className="w-full md:w-1/2 relative px-8 py-8">
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+            <div className="w-full md:w-1/2 relative px-1 sm:px-8 py-1 sm:py-8 h-[180px] md:h-auto flex-shrink-0">
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-xl overflow-hidden">
                 <Map markers={markers} mapRef={mapRef} markerType="scrapList" />
               </div>
             </div>
           </div>
 
-          <div className="p-6 flex justify-center">
+          <div className="py-2 sm:p-6 flex justify-center">
             <button
               onClick={handleStartTrip}
               className={scrapListStyles.startTripButton}

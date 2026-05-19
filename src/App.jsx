@@ -1,13 +1,14 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
+import { useRecoilValue } from 'recoil';
+import authAtom from './recoil/auth';
 import PlanLayout from './layouts/PlanLayout';
 import TripLayout from './layouts/TripLayout';
 import SupportLayout from './layouts/supportLayout';
+import AppLayout from './layouts/appLayout';
 import Calendar from './components/plan/Calendar';
 import Destination from './components/plan/Destination';
-import Header from './components/Header';
-import Footer from './components/footer';
 import SpotPage from './pages/SpotPage';
 import CurationPage from './pages/CurationPage';
 import CurationEditPage from './pages/curationEditPage';
@@ -35,59 +36,77 @@ function App() {
     <React.StrictMode>
       <RecoilRoot>
         <InitializeUserWrapper />
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow">
-            <Routes>
-              <Route path="/" element={<SpotPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/auth-callback" element={<OAuthCallbackPage />} />
-              <Route path="/me" element={<MyPage />} />
-              <Route path="/mypage" element={<MyPageLayout />}>
-                <Route index element={<Navigate to="scrap" replace />} />
-                <Route path="scrap" element={<MyPageScrap />} />
-                <Route path="triplist" element={<MyPageTripList />} />
-                <Route path="curation" element={<MyPageCuration />} />
-                <Route path="review" element={<MyPageReview />} />
-              </Route>
-              <Route
-                path="/review/edit/:reviewId"
-                element={<ReviewEditPage />}
-              />
-              <Route path="/spot" element={<SpotPage />} />
-              <Route path="/spot/:spotId" element={<SpotPage />} />
-              <Route path="/scrap-spots" element={<ScrapSpotPage />} />
-              <Route path="/scrap-spots/:spotId" element={<ScrapSpotPage />} />
-              <Route path="/curation" element={<CurationPage />} />
-              <Route path="/curation/:curationId" element={<CurationPage />} />
-              <Route
-                path="/curation/edit/:curationId"
-                element={<CurationEditPage />}
-              />
-              <Route path="/login-notice" element={<LoginNoticePage />} />
-              <Route path="/com" element={<PlanLayout />}>
-                <Route path="calendar" element={<Calendar />} />
-                <Route path="destination" element={<Destination />} />
-                <Route path="my-scrap-list" element={<MyScrapListPage />} />
-              </Route>
-              <Route path="/trip/:tripId" element={<TripLayout />}>
-                <Route index element={<Navigate to="itinerary" replace />} />
-                <Route path="itinerary" element={<TripItinerary />} />
-                <Route path="details" element={<TripDetails />} />
-              </Route>
-              <Route path="/support" element={<SupportLayout />}>
-                <Route index element={<Navigate to="faq" replace />} />
-                <Route path="faq" element={<FaqPage />} />
-                <Route path="notice" element={<NoticePage />} />
-                <Route path="inquiry" element={<InquiryPage />} />
-              </Route>
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+        <AppLayout>
+          <Routes>
+            <Route path="/" element={<SpotPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth-callback" element={<OAuthCallbackPage />} />
+            <Route
+              path="/me"
+              element={
+                <ProtectedRoute>
+                  <MyPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mypage"
+              element={
+                <ProtectedRoute>
+                  <MyPageLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="scrap" replace />} />
+              <Route path="scrap" element={<MyPageScrap />} />
+              <Route path="triplist" element={<MyPageTripList />} />
+              <Route path="curation" element={<MyPageCuration />} />
+              <Route path="review" element={<MyPageReview />} />
+            </Route>
+            <Route path="/review/edit/:reviewId" element={<ReviewEditPage />} />
+            <Route path="/spot" element={<SpotPage />} />
+            <Route path="/spot/:spotId" element={<SpotPage />} />
+            <Route path="/scrap-spots" element={<ScrapSpotPage />} />
+            <Route path="/scrap-spots/:spotId" element={<ScrapSpotPage />} />
+            <Route path="/curation" element={<CurationPage />} />
+            <Route path="/curation/:curationId" element={<CurationPage />} />
+            <Route
+              path="/curation/edit/:curationId"
+              element={<CurationEditPage />}
+            />
+            <Route path="/login-notice" element={<LoginNoticePage />} />
+            <Route path="/com" element={<PlanLayout />}>
+              <Route path="calendar" element={<Calendar />} />
+              <Route path="destination" element={<Destination />} />
+              <Route path="my-scrap-list" element={<MyScrapListPage />} />
+            </Route>
+            <Route path="/trip/:tripId" element={<TripLayout />}>
+              <Route index element={<Navigate to="itinerary" replace />} />
+              <Route path="itinerary" element={<TripItinerary />} />
+              <Route path="details" element={<TripDetails />} />
+            </Route>
+            <Route path="/support" element={<SupportLayout />}>
+              <Route index element={<Navigate to="faq" replace />} />
+              <Route path="faq" element={<FaqPage />} />
+              <Route path="notice" element={<NoticePage />} />
+              <Route path="inquiry" element={<InquiryPage />} />
+            </Route>
+          </Routes>
+        </AppLayout>
       </RecoilRoot>
     </React.StrictMode>
   );
+}
+
+function ProtectedRoute({ children }) {
+  const auth = useRecoilValue(authAtom);
+  const wasLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+  if (!wasLoggedIn && !auth.accessToken) {
+    return <Navigate to="/login-notice" replace />;
+  }
+
+  return children;
 }
 
 function InitializeUserWrapper() {

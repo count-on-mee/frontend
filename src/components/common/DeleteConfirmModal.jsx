@@ -50,16 +50,15 @@ const DeleteConfirmModal = ({
     onConfirm();
   };
 
-  const modalShadow = variant === 'trip' ? neumorphStyles.small : neumorphStyles.large;
+  const modalShadow =
+    variant === 'trip' ? neumorphStyles.small : neumorphStyles.large;
 
   return (
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div
-        className={`${modalShadow} rounded-3xl p-8 w-full max-w-md`}
-      >
+      <div className={`${modalShadow} rounded-3xl p-8 w-full max-w-md`}>
         {/* 헤더 */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">

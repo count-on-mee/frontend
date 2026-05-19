@@ -158,26 +158,25 @@ export default function CurationPage() {
       {!selectedCuration ? (
         <div className="w-full">
           {/* 헤더 영역 */}
-          <div className="w-full bg-[#f0f0f3] pt-12 sm:pt-16 lg:pt-20">
-            <div className="w-full px-8 sm:px-12 lg:px-16 py-6 lg:py-3">
+          <div className="w-full bg-[#f0f0f3] pt-4 sm:pt-10 lg:pt-16">
+            <div className="w-full px-3 sm:px-12 lg:px-16 py-3 lg:py-3">
               <div className="text-center">
                 {/* 검색 영역 */}
-                <div className="max-w-3xl mx-auto mb-6">
+                <div className="max-w-3xl mx-auto mb-3 sm:mb-6">
                   <Searchbar
                     value={searchTerm}
                     onChange={handleSearch}
                     size="lg"
                   />
                 </div>
-                <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-4xl mx-auto">
+                <p className="hidden sm:block text-base sm:text-lg lg:text-xl text-gray-600 max-w-4xl mx-auto">
                   다양한 큐레이션을 둘러보고 나만의 큐레이션을 추천해주세요!
                 </p>
               </div>
             </div>
           </div>
 
-
-          <div className="w-full px-8 sm:px-12 lg:px-16 pb-20">
+          <div className="w-full px-3 sm:px-12 lg:px-16 pb-20">
             <div className="max-w-8xl mx-auto">
               <CurationList
                 handleScrapClick={handleScrapClick}
@@ -188,8 +187,7 @@ export default function CurationPage() {
             </div>
           </div>
 
-          {/* 업로드 버튼 */}
-          <div className="fixed bottom-6 right-6">
+          <div className="fixed bottom-[88px] desktop:bottom-6 right-6">
             <motion.button
               className="group relative flex items-center gap-3 z-50 px-6 py-4 bg-[#f0f0f3] text-[#252422] rounded-2xl font-semibold text-lg shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.5)] hover:shadow-[inset_8px_8px_16px_rgba(163,177,198,0.4),inset_-8px_-8px_16px_rgba(255,255,255,0.7)] active:shadow-[inset_4px_4px_8px_rgba(163,177,198,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] transition-all duration-300 ease-out hover:scale-105 active:scale-95 border-2 border-transparent hover:border-[#f5861d] hover:border-opacity-60"
               onClick={handleOpenUploader}
@@ -226,21 +224,28 @@ export default function CurationPage() {
         // 큐레이션 상세 레이아웃
         <div className="w-full">
           {/* 헤더 */}
-          <div className="w-full bg-[#f0f0f3]  pt-12 sm:pt-16 lg:pt-20">
-            <div className="w-full px-8 sm:px-12 lg:px-16 py-6 lg:py-3">
-              <div className="text-center">
-                <h1 className="text-3xl sm:text-2xl lg:text-4xl font-bold mb-2 text-[#252422]">
-                  {selectedCuration.name}
-                </h1>
-              </div>
+          <div className="w-full bg-[#f0f0f3] pt-3 sm:pt-10 lg:pt-16">
+            <div className="w-full px-3 sm:px-12 lg:px-16 py-2 lg:py-3">
+              <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold text-[#252422] text-center sm:text-center">
+                {selectedCuration.name}
+              </h1>
             </div>
           </div>
 
-          {/* 메인 콘텐츠 */}
-          <div className="w-full px-8 sm:px-12 lg:px-16 pb-8">
+          <div className="w-full px-3 sm:px-12 lg:px-16 pb-6">
             <div className="max-w-8xl mx-auto">
-              <div className="w-full flex h-[calc(100vh-200px)] gap-6">
-                <div className="w-1/4 overflow-y-auto h-full bg-white shadow-lg">
+              <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-200px)] gap-3 lg:gap-6">
+                <div
+                  className={`order-1 lg:order-3 w-full ${selectedCurationSpot ? 'lg:w-1/2' : 'lg:w-3/4'} h-[180px] lg:h-full bg-[#f0f0f3] rounded-2xl shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.5)] overflow-hidden flex-shrink-0`}
+                >
+                  <Map
+                    mapRef={mapRef}
+                    markers={curationMarkers}
+                    markerType="curation"
+                  />
+                </div>
+
+                <div className="order-2 lg:order-1 w-full lg:w-1/4 overflow-y-auto lg:h-full bg-[#f0f0f3] rounded-2xl shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.5)]">
                   <CurationDetail
                     selectedCuration={selectedCuration}
                     setSelectedCuration={setSelectedCuration}
@@ -249,7 +254,7 @@ export default function CurationPage() {
                   />
                 </div>
                 {selectedCurationSpot && (
-                  <div className="w-1/4 overflow-y-auto h-full bg-white shadow-lg">
+                  <div className="order-3 lg:order-2 w-full lg:w-1/4 overflow-y-auto lg:h-full bg-[#f0f0f3] rounded-2xl shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.5)]">
                     <SpotDetail
                       selectedSpot={selectedCurationSpot}
                       setSelectedSpot={setSelectedCurationSpot}
@@ -257,15 +262,6 @@ export default function CurationPage() {
                     />
                   </div>
                 )}
-                <div
-                  className={`${selectedCurationSpot ? 'w-1/2' : 'w-3/4'} bg-white shadow-lg overflow-hidden`}
-                >
-                  <Map
-                    mapRef={mapRef}
-                    markers={curationMarkers}
-                    markerType="curation"
-                  />
-                </div>
               </div>
             </div>
           </div>

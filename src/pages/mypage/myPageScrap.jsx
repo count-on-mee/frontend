@@ -1,36 +1,32 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 import api from '../../utils/axiosInstance';
 import defaultImage from '../../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
-import { animationStyles } from '../../utils/style';
 
 function MyPageScrap() {
   const [scrapedSpots, setScrapedSpots] = useState([]);
   const [scrapedCurations, setScrapedCurations] = useState([]);
-  const [visibleSpotCount, setVisibleSpotCount] = useState(3);
-  const [visibleCurationCount, setVisibleCurationCount] = useState(5);
-
+  const [visibleSpotCount, setVisibleSpotCount] = useState(9);
+  const [visibleCurationCount, setVisibleCurationCount] = useState(6);
   const navigate = useNavigate();
 
   const fetchScrapedSpots = async () => {
     try {
-      const response = await api.get('/scraps/spots');
-      const data = await response.data;
-      setScrapedSpots(data);
-    } catch (error) {
-      console.error('Failed to fetch scraped spots:', error);
+      const res = await api.get('/scraps/spots');
+      setScrapedSpots(res.data);
+    } catch (e) {
+      console.error(e);
     }
   };
 
   const fetchScrapedCurations = async () => {
     try {
-      const response = await api.get('/scraps/curations');
-      const data = await response.data;
-      setScrapedCurations(data);
-    } catch (error) {
-      console.error('Failed to fetch scraped curations:', error);
+      const res = await api.get('/scraps/curations');
+      setScrapedCurations(res.data);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -39,200 +35,149 @@ function MyPageScrap() {
     fetchScrapedCurations();
   }, []);
 
-  const handleSpotScrap = async (event, spotId) => {
-    event.stopPropagation();
+  const handleSpotScrap = async (e, spotId) => {
+    e.stopPropagation();
     try {
-      const response = await api.delete(`/scraps/spots/${spotId}`);
+      await api.delete(`/scraps/spots/${spotId}`);
       fetchScrapedSpots();
-    } catch (error) {
-      console.error('스크랩 취소 에러:', error);
+    } catch (e) {
+      console.error(e);
     }
   };
 
-  const handleCurationScrap = async (event, curationId) => {
-    event.stopPropagation();
+  const handleCurationScrap = async (e, curationId) => {
+    e.stopPropagation();
     try {
-      const response = await api.delete(`/scraps/curations/${curationId}`);
+      await api.delete(`/scraps/curations/${curationId}`);
       fetchScrapedCurations();
-    } catch (error) {
-      console.error('스크랩 취소 에러:', error);
+    } catch (e) {
+      console.error(e);
     }
-  };
-
-  const handleShowMoreSpot = () => {
-    setVisibleSpotCount((prev) => prev + 3);
-  };
-
-  const handleShowMoreCuration = () => {
-    setVisibleCurationCount((prev) => prev + 5);
   };
 
   return (
-    <>
-      <motion.div
-        className="w-full px-6 py-8"
-        initial="hidden"
-        animate="visible"
-        variants={animationStyles.listContainer}
-      >
-        <motion.div
-          className="px-4 py-6 mx-auto font-mixed text-3xl text-center text-[#252422] font-bold"
-          variants={animationStyles.title}
-        >
-          SPOT
-        </motion.div>
-        {scrapedSpots.length > 0 && (
-          <motion.div
-            className="grid grid-cols-3 gap-5"
-            variants={animationStyles.listContainer}
-          >
-            <AnimatePresence mode="popLayout">
-              {scrapedSpots.slice(0, visibleSpotCount).map((spot) => (
-                <motion.div
-                  key={spot.spotScrapId}
-                  variants={animationStyles.listItem}
-                  layout
-                  exit={{
-                    opacity: 0,
-                    scale: 0.8,
-                    transition: { duration: 0.2 },
-                  }}
-                >
+    <div className="w-full">
+      <section className="mb-6">
+        <h2 className="text-[13px] font-semibold text-charcoal/50 uppercase tracking-wider mb-3 px-1">
+          Spot
+        </h2>
+
+        {scrapedSpots.length === 0 ? (
+          <p className="text-sm text-charcoal/40 text-center py-6">
+            스크랩한 Spot이 없습니다
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-0.5">
+              <AnimatePresence mode="popLayout">
+                {scrapedSpots.slice(0, visibleSpotCount).map((spot) => (
                   <motion.div
-                    className="relative mx-3 cursor-pointer"
+                    key={spot.spotScrapId}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="relative aspect-square cursor-pointer group"
                     onClick={() => navigate(`/spot/${spot.spotId}?from=scrap`)}
-                    whileHover={animationStyles.hover}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                   >
                     <img
                       src={spot.imgUrls || defaultImage}
-                      alt={spot.title}
-                      className="relative object-cover flex mt-2 rounded-md w-full aspect-16/9"
+                      alt={spot.name}
+                      className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = defaultImage;
                       }}
                     />
-                    <motion.div
-                      whileHover={{ scale: 1.2, rotate: 5 }}
-                      whileTap={{ scale: 0.9 }}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <button
+                      className="absolute top-1.5 right-1.5 z-10"
+                      onClick={(e) => handleSpotScrap(e, spot.spotId)}
                     >
-                      <BookmarkIcon
-                        className={`absolute top-3 right-3 w-5 h-5 ${spot.isDeleted ? '' : 'fill-[#f5861d] stroke-[#f5861d]'}`}
-                        onClick={(event) => handleSpotScrap(event, spot.spotId)}
-                      />
-                    </motion.div>
+                      <BookmarkIcon className="w-4 h-4 fill-primary stroke-primary drop-shadow" />
+                    </button>
+                    <p className="absolute bottom-1 left-1.5 right-1.5 text-[10px] text-white font-medium truncate drop-shadow">
+                      {spot.name}
+                    </p>
                   </motion.div>
-                  <div
-                    className="w-56 font-light truncate font-mixed text-md cursor-pointer"
-                    onClick={() => navigate(`/spot/${spot.spotId}?from=scrap`)}
-                  >
-                    {spot.name}
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            <div></div>
+                ))}
+              </AnimatePresence>
+            </div>
+
             {visibleSpotCount < scrapedSpots.length && (
-              <motion.button
-                onClick={handleShowMoreSpot}
-                className="w-30 text-bold mx-auto bg-background-gray box-shadow py-2 rounded-2xl"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                onClick={() => setVisibleSpotCount((p) => p + 9)}
+                className="mt-3 w-full text-[13px] text-charcoal/60 py-2 border border-charcoal/15 rounded-xl hover:bg-charcoal/5 transition-colors"
               >
-                더보기
-              </motion.button>
+                더 보기
+              </button>
             )}
-          </motion.div>
+          </>
         )}
-      </motion.div>
-      <motion.div
-        className="w-full px-6 py-8"
-        initial="hidden"
-        animate="visible"
-        variants={animationStyles.listContainer}
-      >
-        <motion.div
-          className="px-4 py-6 mx-auto font-mixed text-3xl text-center text-[#252422] font-bold"
-          variants={animationStyles.title}
-        >
-          CURATION
-        </motion.div>
-        {scrapedCurations.length > 0 && (
-          <motion.div
-            className="grid grid-cols-5 gap-2 w-full"
-            variants={animationStyles.listContainer}
-          >
-            <AnimatePresence mode="popLayout">
-              {scrapedCurations
-                .slice(0, visibleCurationCount)
-                .map((curation) => (
-                  <motion.div
-                    key={curation.curationScrapId}
-                    variants={animationStyles.listItem}
-                    layout
-                    exit={{
-                      opacity: 0,
-                      scale: 0.8,
-                      transition: { duration: 0.2 },
-                    }}
-                  >
+      </section>
+      <section>
+        <h2 className="text-[13px] font-semibold text-charcoal/50 uppercase tracking-wider mb-3 px-1">
+          Curation
+        </h2>
+
+        {scrapedCurations.length === 0 ? (
+          <p className="text-sm text-charcoal/40 text-center py-6">
+            스크랩한 Curation이 없습니다
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <AnimatePresence mode="popLayout">
+                {scrapedCurations
+                  .slice(0, visibleCurationCount)
+                  .map((curation) => (
                     <motion.div
-                      className="relative cursor-pointer"
+                      key={curation.curationScrapId}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="relative aspect-[3/4] cursor-pointer rounded-lg overflow-hidden group"
                       onClick={() =>
                         navigate(`/curation/${curation.curationId}`)
                       }
-                      whileHover={animationStyles.hover}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 17,
-                      }}
                     >
                       <img
-                        src={curation.imgUrl}
+                        src={curation.imgUrl || defaultImage}
                         alt={curation.name}
-                        className="relative object-cover flex mt-2 rounded-md w-full aspect-3/4"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = defaultImage;
+                        }}
                       />
-                      <motion.div
-                        whileHover={{ scale: 1.2, rotate: 5 }}
-                        whileTap={{ scale: 0.9 }}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      <button
+                        className="absolute top-2 right-2 z-10"
+                        onClick={(e) =>
+                          handleCurationScrap(e, curation.curationId)
+                        }
                       >
-                        <BookmarkIcon
-                          className={`absolute top-3 right-3 w-5 h-5 ${curation.isDeleted ? '' : 'fill-[#f5861d] stroke-[#f5861d]'}`}
-                          onClick={(event) =>
-                            handleCurationScrap(event, curation.curationId)
-                          }
-                        />
-                      </motion.div>
-                      <div className="absolute font-bold text-white truncate font-mixed left-2 bottom-1 text-md text-shadow">
+                        <BookmarkIcon className="w-4 h-4 fill-primary stroke-primary drop-shadow" />
+                      </button>
+                      <p className="absolute bottom-2 left-2 right-2 text-[11px] text-white font-semibold truncate">
                         {curation.name}
-                      </div>
+                      </p>
                     </motion.div>
-                  </motion.div>
-                ))}
-            </AnimatePresence>
-            <div></div>
-            <div></div>
+                  ))}
+              </AnimatePresence>
+            </div>
+
             {visibleCurationCount < scrapedCurations.length && (
-              <motion.button
-                onClick={handleShowMoreCuration}
-                className="w-30 mx-auto text-bold bg-background-gray box-shadow py-2 rounded-2xl"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                onClick={() => setVisibleCurationCount((p) => p + 6)}
+                className="mt-3 w-full text-[13px] text-charcoal/60 py-2 border border-charcoal/15 rounded-xl hover:bg-charcoal/5 transition-colors"
               >
-                더보기
-              </motion.button>
+                더 보기
+              </button>
             )}
-          </motion.div>
+          </>
         )}
-      </motion.div>
-    </>
+      </section>
+    </div>
   );
 }
 

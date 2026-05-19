@@ -98,7 +98,7 @@ export default function ScrapSpots({
   };
 
   return (
-    <div className="mt-8">
+    <div className="mt-3 sm:mt-6">
       <SectionHeader title="스크랩한 장소" />
       <div
         className={

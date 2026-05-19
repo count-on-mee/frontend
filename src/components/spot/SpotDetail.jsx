@@ -50,21 +50,21 @@ export default function SpotDetail({
   };
   return (
     <div className="h-full flex flex-col">
-      <div className="sticky top-0 z-10 flex justify-between items-center border-b border-gray-200 px-6 py-4">
+      <div className="sticky top-0 z-10 flex justify-between items-center bg-[#f0f0f3] px-4 py-3 shadow-[0_2px_8px_rgba(163,177,198,0.4)]">
         <button
           onClick={handleClose}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-2 rounded-full shadow-[3px_3px_6px_rgba(163,177,198,0.6),-3px_-3px_6px_rgba(255,255,255,0.8)] hover:shadow-[inset_3px_3px_6px_rgba(163,177,198,0.4),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] transition-all duration-200"
         >
-          <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
+          <ChevronLeftIcon className="w-5 h-5 text-charcoal" />
         </button>
-        <h2 className="font-semibold text-lg text-[#252422] truncate flex-1 text-center px-4">
+        <h2 className="font-semibold text-base text-[#252422] truncate flex-1 text-center px-3">
           {selectedSpot.name}
         </h2>
         <button
           onClick={handleClose}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-2 rounded-full shadow-[3px_3px_6px_rgba(163,177,198,0.6),-3px_-3px_6px_rgba(255,255,255,0.8)] hover:shadow-[inset_3px_3px_6px_rgba(163,177,198,0.4),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] transition-all duration-200"
         >
-          <XMarkIcon className="w-6 h-6 text-gray-600" />
+          <XMarkIcon className="w-5 h-5 text-charcoal" />
         </button>
       </div>
 

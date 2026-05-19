@@ -13,6 +13,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import api from '../utils/axiosInstance';
 import { neumorphStyles } from '../utils/style';
 import { formatSpotData, formatSpotsData } from '../utils/spotUtils';
+import { useIsDesktop } from '../hooks/useMediaQuery';
 
 export default function SpotPage() {
   const { spotId } = useParams();
@@ -23,6 +24,8 @@ export default function SpotPage() {
   const isFromScrap =
     new URLSearchParams(location.search).get('from') === 'scrap';
   const mapRef = useRef(null);
+  const spotDetailRef = useRef(null);
+  const isDesktop = useIsDesktop();
   const [spotMarkers, setSpotMarkers] = useRecoilState(spotMarkersAtom);
   const user = useRecoilValue(userAtom);
   const [activeCategories, setActiveCategories] = useState([]);
@@ -62,7 +65,11 @@ export default function SpotPage() {
         signal: abortController.signal,
       });
 
-      if (abortController.signal.aborted || currentRequestId !== searchRequestIdRef.current) return;
+      if (
+        abortController.signal.aborted ||
+        currentRequestId !== searchRequestIdRef.current
+      )
+        return;
 
       const formattedSpots = formatSpotsData(response.data || []);
       setSpotMarkers(formattedSpots);
@@ -163,18 +170,36 @@ export default function SpotPage() {
 
   useEffect(() => () => abortControllerRef.current?.abort(), []);
 
+  useEffect(() => {
+    if (!isDesktop && selectedSpot && spotDetailRef.current) {
+      spotDetailRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [selectedSpot, isDesktop]);
+
   return (
     <div className="min-h-[calc(100vh-80px)] bg-[#f0f0f3] font-prompt">
-      <div className="w-full bg-[#f0f0f3] pt-4 sm:pt-6 lg:pt-8">
-        <div className="w-full px-8 sm:px-12 lg:px-16 py-6 lg:py-3"></div>
-      </div>
-      <div className="w-full px-8 sm:px-12 lg:px-16 pb-8">
+      <div className="w-full px-3 sm:px-8 lg:px-16 py-3 lg:py-4">
         <div className="max-w-8xl mx-auto">
-          <div className="w-full flex flex-col lg:flex-row h-[calc(100vh-200px)] gap-6">
+          <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-140px)] gap-3 lg:gap-6">
             <div
-              className={`w-full lg:w-1/4 overflow-y-auto h-full rounded-2xl ${neumorphStyles.base}`}
+              className={`order-1 lg:order-3 w-full ${selectedSpot ? 'lg:w-1/2' : 'lg:w-3/4'} h-[180px] lg:h-full rounded-2xl ${neumorphStyles.base} overflow-hidden relative flex-shrink-0`}
             >
-              <div className="p-6">
+              <Map
+                mapRef={mapRef}
+                markers={spotMarkers}
+                markerType="spot"
+                filteredMarkers={filteredMarkers}
+                activeCategories={activeCategories}
+                setActiveCategories={setActiveCategories}
+              />
+            </div>
+            <div
+              className={`order-2 lg:order-1 w-full lg:w-1/4 overflow-y-auto lg:h-full rounded-2xl ${neumorphStyles.base}`}
+            >
+              <div className="p-3 lg:p-6">
                 <SpotList
                   onSpotClick={handleSpotClick}
                   handleSpotScrap={handleSpotScrap}
@@ -187,7 +212,8 @@ export default function SpotPage() {
             </div>
             {selectedSpot && (
               <div
-                className={`w-full lg:w-1/4 overflow-y-auto h-full rounded-2xl ${neumorphStyles.base}`}
+                ref={spotDetailRef}
+                className={`order-3 lg:order-2 w-full lg:w-1/4 overflow-y-auto lg:h-full rounded-2xl ${neumorphStyles.base}`}
               >
                 <SpotDetail
                   selectedSpot={selectedSpot}
@@ -196,26 +222,12 @@ export default function SpotPage() {
                 />
               </div>
             )}
-
-            <div
-              className={`w-full ${selectedSpot ? 'lg:w-1/2' : 'lg:w-3/4'} rounded-2xl ${neumorphStyles.base} overflow-hidden relative`}
-              style={{ height: 'calc(100vh - 200px)' }}
-            >
-              <Map
-                mapRef={mapRef}
-                markers={spotMarkers}
-                markerType="spot"
-                filteredMarkers={filteredMarkers}
-                activeCategories={activeCategories}
-                setActiveCategories={setActiveCategories}
-              />
-            </div>
           </div>
         </div>
       </div>
       {isAdmin && (
         <div>
-          <div className="fixed bottom-6 right-6">
+          <div className="fixed bottom-[88px] desktop:bottom-6 right-6">
             <button
               className="group relative flex items-center gap-3 z-50 px-6 py-4 bg-[#f0f0f3] text-[#252422] rounded-2xl font-semibold text-lg shadow-[8px_8px_16px_rgba(163,177,198,0.6),-8px_-8px_16px_rgba(255,255,255,0.5)] hover:shadow-[inset_8px_8px_16px_rgba(163,177,198,0.4),inset_-8px_-8px_16px_rgba(255,255,255,0.7)] active:shadow-[inset_4px_4px_8px_rgba(163,177,198,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] transition-all duration-300 ease-out hover:scale-105 active:scale-95 border-2 border-transparent hover:border-[#f5861d] hover:border-opacity-60"
               onClick={handleOpenUploader}

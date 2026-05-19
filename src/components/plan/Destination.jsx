@@ -17,13 +17,13 @@ import Searchbar from '../ui/Searchbar';
 // 목적지 항목 스타일
 const destinationItemStyles = clsx(
   'border-b border-[#252422]/10 bg-[#f0f0f3]',
-  'px-5 py-5 text-base',
+  'px-2.5 py-2.5 sm:px-5 sm:py-4 text-sm sm:text-base',
 );
 
 // 이미지 컨테이너 스타일
 const imageContainerStyles = clsx(
   baseStyles.shadow,
-  'h-16 w-16 flex-shrink-0 rounded-full overflow-hidden',
+  'h-10 w-10 sm:h-14 sm:w-14 flex-shrink-0 rounded-full overflow-hidden',
 );
 
 
@@ -93,9 +93,9 @@ function Destination() {
 
   return (
     <div
-      className={`${neumorphStyles.base} ${neumorphStyles.hover} rounded-2xl p-6 font-prompt h-full flex flex-col`}
+      className={`${neumorphStyles.base} ${neumorphStyles.hover} rounded-2xl p-3 sm:p-6 font-prompt h-full flex flex-col`}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-1">
         <button onClick={goBack} className={styleUtils.closeButton}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +103,7 @@ function Destination() {
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="#252422"
-            className="w-8 h-8"
+            className="w-6 h-6 sm:w-8 sm:h-8"
           >
             <path
               strokeLinecap="round"
@@ -112,10 +112,10 @@ function Destination() {
             />
           </svg>
         </button>
-        <h2 className={componentStyles.header}>어디로 떠나시나요?</h2>
-        <div className="w-8"></div>
+        <h2 className="text-base sm:text-xl font-semibold text-[#252422]">어디로 떠나시나요?</h2>
+        <div className="w-6 sm:w-8"></div>
       </div>
-      <div className="w-4/5 mx-auto py-6">
+      <div className="w-full sm:w-4/5 mx-auto py-2 sm:py-4">
         <Searchbar
           value={searchTerm}
           onChange={handleSearch}
@@ -123,10 +123,10 @@ function Destination() {
           size="lg"
         />
       </div>
-      <div className="flex-grow overflow-y-auto mb-4 mx-8">
+      <div className="flex-grow overflow-y-auto mb-2 sm:mb-4 mx-1 sm:mx-4">
         <table className="w-full">
           <tbody className="text-[#252422]">
-            {filteredDestinations.map((dest, idx) => (
+            {filteredDestinations.map((dest) => (
               <tr key={dest.tripDestinationId}>
                 <td className={destinationItemStyles}>
                   <div className="flex items-center">
@@ -140,19 +140,17 @@ function Destination() {
                         }}
                       />
                     </div>
-                    <div className="ml-3">
-                      <p className="whitespace-no-wrap font-medium">
-                        {dest.name}
-                      </p>
+                    <div className="ml-2 sm:ml-3 min-w-0">
+                      <p className="font-medium truncate">{dest.name}</p>
                       {dest.description && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 mt-0.5 truncate hidden sm:block">
                           {dest.description}
                         </p>
                       )}
                     </div>
                   </div>
                 </td>
-                <td className={destinationItemStyles}>
+                <td className={destinationItemStyles + ' w-16 sm:w-24'}>
                   <div className="flex justify-end">
                     <button
                       onClick={() => toggleSelection(dest)}
@@ -162,14 +160,13 @@ function Destination() {
                             (d) => d.tripDestinationId === dest.tripDestinationId,
                           ),
                         ),
-                        'px-5 py-2 text-base',
                       )}
                     >
                       {selectedDestinations.some(
                         (d) => d.tripDestinationId === dest.tripDestinationId,
                       )
-                        ? '선택'
-                        : '선택'}
+                        ? '✓'
+                        : '+'}
                     </button>
                   </div>
                 </td>
@@ -178,7 +175,7 @@ function Destination() {
           </tbody>
         </table>
       </div>
-      <div className="flex justify-center py-4">
+      <div className="flex justify-center py-2 sm:py-4">
         <button
           onClick={handleNext}
           className={styleUtils.buttonStyle('primary', false, 'lg')}
