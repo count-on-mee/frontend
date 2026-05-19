@@ -9,8 +9,8 @@ const CurationCard = ({ curation, onClick }) => (
       alt={curation.name}
       className="w-full h-full object-cover"
     />
-    <div className="absolute bottom-0 right-0 p-2 text-right">
-      <h4 className="text-white text-base sm:text-lg font-medium">
+    <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/50 to-transparent">
+      <h4 className="text-white text-[9px] sm:text-sm font-medium truncate">
         {curation.name}
       </h4>
     </div>
@@ -57,7 +57,7 @@ export default function ScrapCurations({
   };
 
   return (
-    <div className="mt-8">
+    <div className="mt-3 sm:mt-6">
       <SectionHeader title="스크랩한 큐레이션" />
       <div
         className={
@@ -79,7 +79,7 @@ export default function ScrapCurations({
               스크랩한 큐레이션이 없습니다.
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-3 gap-1 sm:gap-3">
               {(isSectionHovered ? curations : curations.slice(0, 6)).map(
                 (curation) => (
                   <CurationCard

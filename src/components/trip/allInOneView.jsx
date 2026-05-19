@@ -11,7 +11,6 @@ const AllInOneView = ({
   tripId,
   expenses,
   participants,
-  currentUserId,
   accommodations,
   tasks,
   setAccommodations,

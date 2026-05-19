@@ -223,14 +223,16 @@ export const scrapListStyles = {
   ),
 
   // 섹션 헤더
-  sectionHeader: clsx('top-0 bg-[#f0f0f3] py-4 mb-6 z-10'),
-  sectionHeaderTitle: clsx('text-lg sm:text-xl font-semibold text-[#252422]'),
+  sectionHeader: clsx('top-0 bg-[#f0f0f3] py-2 sm:py-4 mb-2 sm:mb-4 z-10'),
+  sectionHeaderTitle: clsx(
+    'text-[13px] font-semibold text-[#252422]/50 uppercase tracking-wider',
+  ),
 
   // 검색 입력 필드
   searchInput: clsx(componentStyles.input, 'h-9 pl-10 pr-4'),
 
   // 스팟 그리드
-  grid: clsx('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3'),
+  grid: clsx('grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-1.5 sm:gap-3'),
 
   // 스팟 카드 컨테이너
   cardContainer: clsx('bg-[#f0f0f3] rounded-lg p-6 shadow-lg'),
@@ -239,13 +241,13 @@ export const scrapListStyles = {
   emptyMessage: clsx('text-center py-8 text-gray-500'),
 
   // 스팟 정보 컨테이너
-  infoContainer: clsx('p-2 sm:p-3 pb-0'),
+  infoContainer: clsx('p-1.5 sm:p-3 pb-0'),
 
   // 스팟 이름
-  name: clsx('font-medium text-sm sm:text-base mb-1'),
+  name: clsx('font-medium text-[11px] sm:text-sm mb-0.5 truncate'),
 
   // 스팟 주소
-  address: clsx('text-gray-600 text-xs sm:text-sm mb-2'),
+  address: clsx('text-gray-500 text-[10px] sm:text-xs mb-1 truncate'),
 };
 
 /**
@@ -355,7 +357,7 @@ export const neumorphStyles = {
  */
 export const tabButtonStyles = {
   base: clsx(
-    'w-full text-center px-4 py-3 rounded-full transition-all duration-200',
+    'w-full text-center px-2 sm:px-4 py-2 sm:py-3 rounded-full transition-all duration-200',
   ),
   active: clsx(
     'shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]',
@@ -392,7 +394,7 @@ export const dateRangePickerStyles = {
   baseButton: (size) => {
     const sizeClasses = {
       small:
-        'flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 text-sm',
+        'flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 text-[13px] font-medium',
       default:
         'flex h-14 w-14 items-center justify-center rounded-full transition-all duration-200 text-2xl',
     };
@@ -438,10 +440,10 @@ export const dateRangePickerStyles = {
   // 헤더 크기별 클래스
   headerSize: {
     small: {
-      container: 'flex items-center p-4',
-      month: 'block text-2xl text-[#f5861d] drop-shadow-[3px_3px_6px_#b8b8b8]',
-      year: 'block text-lg text-[#f5861d] drop-shadow-[3px_3px_6px_#b8b8b8]',
-      icon: 'w-5 h-5',
+      container: 'flex items-center px-3 py-2',
+      month: 'block text-xl text-[#f5861d] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      year: 'block text-base text-[#f5861d] drop-shadow-[3px_3px_6px_#b8b8b8]',
+      icon: 'w-4 h-4',
     },
     default: {
       container: 'flex items-center p-8',
@@ -453,20 +455,20 @@ export const dateRangePickerStyles = {
 
   // 그리드 크기별 클래스
   gridSize: {
-    small: 'grid grid-cols-7 gap-2 px-4',
+    small: 'grid grid-cols-7 gap-1 px-2',
     default: 'grid grid-cols-7 gap-4 px-8',
   },
 
   // 요일 헤더 크기별 클래스
   dayHeaderSize: {
-    small: 'text-sm leading-4 text-center font-medium text-gray-600',
+    small: 'text-xs leading-4 text-center font-medium text-gray-500',
     default: 'text-2xl leading-6 text-center font-medium text-gray-600',
   },
 
   // 완료 버튼 크기별 클래스
   completeButtonSize: {
     small:
-      'w-full py-2 px-4 bg-[#f5861d] text-white rounded-full hover:bg-[#d46a0f] transition-all duration-200 text-sm shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b] hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
+      'w-full py-2.5 px-4 bg-[#f5861d] text-white rounded-full hover:bg-[#d46a0f] transition-all duration-200 text-sm font-semibold shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b] hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
     default:
       'w-full py-4 px-6 bg-[#f5861d] text-white rounded-full hover:bg-[#d46a0f] transition-all duration-200 text-xl shadow-[2px_2px_4px_#b85a0f,-2px_-2px_4px_#ffa82b] hover:shadow-[inset_2px_2px_4px_#b85a0f,inset_-2px_-2px_4px_#ffa82b]',
   },

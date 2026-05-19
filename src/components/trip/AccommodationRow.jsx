@@ -131,7 +131,7 @@ const AccommodationRow = ({
       onClick={() => onRowClick(index)}
     >
       {/* 숙소명 */}
-      <td className={componentStyles.cell}>
+      <td className={`overflow-hidden ${componentStyles.cell}`}>
         <input
           type="text"
           value={accommodationInput}
@@ -139,17 +139,17 @@ const AccommodationRow = ({
             setAccommodationInput(e.target.value);
             debouncedAccommodationChange(e.target.value);
           }}
-          className={componentStyles.input}
-          placeholder={isPlaceholder ? '숙소명을 입력하세요' : ''}
+          className="w-full bg-[#f0f0f3] rounded-full px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-lg truncate shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          placeholder={isPlaceholder ? '숙소명 입력' : ''}
         />
       </td>
       {/* 체크인 ~ 체크아웃 날짜 범위 */}
-      <td className={componentStyles.cell}>
+      <td className={`overflow-hidden ${componentStyles.cell}`}>
         <button
           type="button"
           ref={dateButtonRef}
           onClick={handleDateButtonClick}
-          className={componentStyles.input + ' text-left whitespace-nowrap'}
+          className="w-full bg-[#f0f0f3] rounded-full px-2 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-lg text-left truncate shadow-[3px_3px_6px_#b8b8b8,-3px_-3px_6px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8b8b8,inset_-3px_-3px_6px_#ffffff] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
         >
           {formatDateRange()}
         </button>
@@ -171,7 +171,7 @@ const AccommodationRow = ({
         )}
       </td>
       {/* 메모 */}
-      <td className={componentStyles.cell}>
+      <td className={`hidden sm:table-cell ${componentStyles.cell}`}>
         <input
           type="text"
           value={memoInput}

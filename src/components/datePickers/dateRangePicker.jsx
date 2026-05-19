@@ -113,7 +113,7 @@ function DateRangePicker({
             />
           </button>
         </div>
-        <div className="border-t border-black/10 my-6"></div>
+        <div className="border-t border-black/10 my-3 sm:my-6"></div>
         <div className={dateRangePickerStyles.gridSize[size]}>
           <div className={dateRangePickerStyles.dayHeaderSize[size]}>S</div>
           <div className={dateRangePickerStyles.dayHeaderSize[size]}>M</div>

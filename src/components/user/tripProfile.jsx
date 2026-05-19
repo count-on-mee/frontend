@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const ParticipantImage = ({ participant }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const isLeft = participant.status === 'LEFT';
 
   return (
     <div className="relative">
@@ -9,13 +10,15 @@ const ParticipantImage = ({ participant }) => {
         <img
           src={participant.imgUrl}
           alt={participant.nickname}
-          className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md cursor-pointer"
+          className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md cursor-pointer transition-all duration-200"
+          style={isLeft ? { filter: 'grayscale(100%)', opacity: 0.6 } : undefined}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         />
       ) : (
         <div
-          className="w-14 h-14 rounded-full bg-gray-300 border-2 border-white shadow-md cursor-pointer flex items-center justify-center"
+          className="w-14 h-14 rounded-full bg-gray-300 border-2 border-white shadow-md cursor-pointer flex items-center justify-center transition-all duration-200"
+          style={isLeft ? { filter: 'grayscale(100%)', opacity: 0.6 } : undefined}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
@@ -35,7 +38,11 @@ const ParticipantImage = ({ participant }) => {
       {showTooltip && (
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg whitespace-nowrap z-10">
           <div className="font-medium">{participant.name}</div>
-          <div className="text-xs text-gray-300">{participant.email}</div>
+          {isLeft ? (
+            <div className="text-xs text-gray-400 mt-0.5">여행방을 나간 유저입니다</div>
+          ) : (
+            <div className="text-xs text-gray-300">{participant.email}</div>
+          )}
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
         </div>
       )}

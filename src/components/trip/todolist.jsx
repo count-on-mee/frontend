@@ -245,7 +245,7 @@ const TodoList = ({ tasks, socket, tripId }) => {
   }, [newTask]);
 
   return (
-    <div className="bg-[var(--color-background-gray)] font-prompt p-6 rounded-lg shadow-[4px_4px_8px_#b8b8b8,-4px_-4px_8px_#ffffff]">
+    <div className="bg-[var(--color-background-gray)] font-prompt p-3 sm:p-6 rounded-lg shadow-[4px_4px_8px_#b8b8b8,-4px_-4px_8px_#ffffff]">
       <div className="space-y-2">
         {localTasks.map((task, index) => renderTask(task, index))}
         {newTask && renderTask(newTask, localTasks.length, true)}

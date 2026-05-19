@@ -78,19 +78,18 @@ function MyPageReview() {
   }, []);
 
   return (
-    <div className="px-6 py-8">
+    <div className="w-full">
+      <h2 className="text-[13px] font-semibold text-charcoal/50 uppercase tracking-wider mb-3 px-1">
+        Review
+      </h2>
+
       <div className="w-full">
         {reviews.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-[#f0f0f3] to-[#e0e0e3] rounded-full flex items-center justify-center shadow-[inset_8px_8px_16px_#d1d1d1,inset_-8px_-8px_16px_#ffffff]">
-              <StarIcon className="w-16 h-16 text-[#666]" />
+          <div className="text-center py-10">
+            <div className="w-14 h-14 mx-auto mb-4 bg-[#f0f0f3] rounded-full flex items-center justify-center shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]">
+              <StarIcon className="w-7 h-7 text-charcoal/30" />
             </div>
-            <h3 className="text-2xl font-bold text-[#252422] mb-3">
-              아직 작성한 리뷰가 없습니다
-            </h3>
-            <p className="text-[#666] mb-8 text-lg">
-              방문한 장소에 대한 리뷰를 작성해보세요!
-            </p>
+            <p className="text-sm text-charcoal/40">아직 작성한 리뷰가 없습니다</p>
           </div>
         ) : (
           <div className="space-y-3">
