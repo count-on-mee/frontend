@@ -19,13 +19,13 @@ const ExpenseModal = ({
   currentUserId,
   dateOptions,
   onExpenseUpdate,
+  tripDocumentVersionId,
   expenseType: expenseTypeProp,
   isReadOnly = false,
   onEditModeChange,
 }) => {
   const isEditMode = !!expense;
 
-  // 수정 모드: expense.expenseType 사용, 추가 모드: expenseType prop 사용
   const expenseType = isEditMode
     ? expense?.expenseType || 'SHARED'
     : expenseTypeProp || 'SHARED';
@@ -64,7 +64,6 @@ const ExpenseModal = ({
           const isDirect = new Set(sharedAmounts).size > 1;
           setSettlementMethod(isDirect ? 'DIRECT' : 'SHARED');
 
-          // 직접정산 모드일 때 customAmounts 초기화
           if (isDirect) {
             const customAmountsMap = {};
             expense.participants.forEach((p) => {
@@ -297,25 +296,27 @@ const ExpenseModal = ({
       if (isEditMode) {
         socket.emit('updateExpense', {
           tripDocumentExpenseId: expense.tripDocumentExpenseId,
+          tripDocumentVersionId,
           expenseFields: expenseData,
         });
       } else {
-        socket.emit('addExpense', { expenseData });
+        socket.emit('addExpense', { tripDocumentVersionId, expenseData });
       }
       if (onExpenseUpdate) {
         const isBudget = expenseData.expenseCategory === 'BUDGET';
         const delay = isBudget ? 1500 : 800;
+        const targetVersionId = tripDocumentVersionId || null;
 
         setTimeout(() => {
           if (!hasError) {
-            onExpenseUpdate();
+            onExpenseUpdate(targetVersionId);
           }
         }, delay);
 
         if (isBudget) {
           setTimeout(() => {
             if (!hasError) {
-              onExpenseUpdate();
+              onExpenseUpdate(targetVersionId);
             }
           }, delay + 1000);
         }
@@ -575,7 +576,7 @@ const ExpenseModal = ({
                   <>
                     {showAutoCalculateMessage && (
                       <div className="text-xs text-gray-500 mb-2 px-2 animate-fade-in bg-blue-50 border border-blue-200 rounded-lg p-2">
-                        💡 소비자별 금액을 입력하면 총 금액에 변경됩니다.
+                        💡 입력하신 금액의 합계로 총 금액이 변경됩니다.
                       </div>
                     )}
                     <ConsumerSelector

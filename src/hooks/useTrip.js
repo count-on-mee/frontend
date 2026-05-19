@@ -90,11 +90,41 @@ function useTrip() {
     [navigate],
   );
 
+  const updateTrip = useCallback(
+    async (tripId, payload) => {
+      if (!tripId) throw new Error('tripId가 필요합니다.');
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.patch(`/trips/${tripId}`, payload);
+        return response.data;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          navigate('/login-notice');
+          setError('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        } else if (error.response?.status === 400) {
+          setError(error.response.data?.message || '입력 정보를 확인해주세요.');
+        } else if (error.response?.status === 404) {
+          setError('존재하지 않는 여행입니다.');
+        } else if (error.response?.status === 500) {
+          setError('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        } else {
+          setError('여행 업데이트에 실패했습니다. 다시 시도해주세요.');
+        }
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate],
+  );
+
   return {
     loading,
     error,
     createTrip,
     getTrip,
+    updateTrip,
   };
 }
 

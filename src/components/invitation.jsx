@@ -28,37 +28,31 @@ const Invitation = ({ tripId }) => {
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <img src={koreaMap} alt="Korea Map" className="w-15 h-15" />
-      <div className="flex flex-col gap-2">
+    <div className="flex items-center gap-2 relative">
+      <img
+        src={koreaMap}
+        alt="Korea Map"
+        className="hidden desktop:block w-14 h-14"
+      />
+      <div className="relative">
         <button
           onClick={handleInvite}
-          className={`px-6 py-3 text-base text-primary rounded-full transition-all duration-200 ${neumorphStyles.small} ${neumorphStyles.hover}`}
+          className={`px-3 py-1.5 desktop:px-6 desktop:py-3 text-xs desktop:text-base text-primary rounded-full transition-all duration-200 whitespace-nowrap ${neumorphStyles.small} ${neumorphStyles.hover}`}
         >
           친구 초대하기
         </button>
         {invitationCode && (
-          <div className="mt-2 space-y-2">
-            <div className="flex items-center gap-2 p-3  rounded-lg">
-              <span className="text-gray-600 text-sm font-medium">
-                초대 코드:
-              </span>
-              <span className="text-primary font-bold tracking-wider">
+          <div className="absolute left-0 top-full mt-1.5 z-50 bg-[#f0f0f3] rounded-xl shadow-[4px_4px_12px_rgba(0,0,0,0.12),-2px_-2px_8px_rgba(255,255,255,0.8)] p-2.5 whitespace-nowrap min-w-max">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-xs">초대 코드:</span>
+              <span className="text-primary font-bold text-sm tracking-wider">
                 {invitationCode}
               </span>
             </div>
             {showCopiedMessage && (
-              <div
-                className={`flex items-center justify-center gap-2 transition-all duration-300 ${
-                  showCopiedMessage
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 -translate-y-2'
-                }`}
-              >
-                <span className="text-sm text-[#FF8C4B] font-medium">
-                  클립보드에 복사되었습니다!
-                </span>
-              </div>
+              <p className="text-[10px] text-[#FF8C4B] font-medium mt-1 text-center">
+                클립보드에 복사되었습니다!
+              </p>
             )}
           </div>
         )}

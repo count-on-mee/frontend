@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 const useAccommodations = (initialAccommodations = []) => {
-  // 기본 1행 placeholder
   const getDefaultAccommodation = () => ({
     tripDocumentAccommodationId: null,
     accommodation: '',
@@ -24,26 +23,86 @@ const useAccommodations = (initialAccommodations = []) => {
       JSON.stringify(initialRef.current) !==
       JSON.stringify(initialAccommodations)
     ) {
-      setAccommodations(
-        initialAccommodations.length > 0 ? initialAccommodations : [],
-      );
+      setAccommodations((prev) => {
+        if (prev.length === 0 || prev.every((item) => item.isPlaceholder)) {
+          return initialAccommodations.length > 0 ? initialAccommodations : [];
+        }
+
+        const initialIds = new Set(
+          initialAccommodations
+            .map((item) => item.tripDocumentAccommodationId)
+            .filter((id) => id !== null && id !== undefined),
+        );
+
+        const existingIds = new Set(
+          prev
+            .map((item) => item.tripDocumentAccommodationId)
+            .filter((id) => id !== null && id !== undefined),
+        );
+
+        const newAccommodations = initialAccommodations.filter(
+          (item) => !existingIds.has(item.tripDocumentAccommodationId),
+        );
+
+        const updatedPrev = prev
+          .map((item) => {
+            if (item.isPlaceholder || !item.tripDocumentAccommodationId) {
+              return item;
+            }
+            if (!initialIds.has(item.tripDocumentAccommodationId)) {
+              return null;
+            }
+            const updated = initialAccommodations.find(
+              (init) =>
+                init.tripDocumentAccommodationId ===
+                item.tripDocumentAccommodationId,
+            );
+            if (!updated) {
+              return item;
+            }
+            const localStr = JSON.stringify(item);
+            const serverStr = JSON.stringify(updated);
+
+            if (localStr === serverStr) {
+              return updated;
+            }
+
+            const merged = { ...updated };
+            Object.keys(item).forEach((key) => {
+              if (key === 'isPlaceholder') return;
+              const localValue = item[key];
+              const serverValue = updated[key];
+
+              if (
+                localValue !== serverValue &&
+                localValue !== '' &&
+                localValue !== null &&
+                localValue !== undefined
+              ) {
+                merged[key] = localValue;
+              }
+            });
+
+            return merged;
+          })
+          .filter((item) => item !== null);
+
+        return [...updatedPrev, ...newAccommodations];
+      });
       initialRef.current = initialAccommodations;
     }
   }, [initialAccommodations]);
 
-  // 행 선택 처리
   const handleRowClick = useCallback((index) => {
     setSelectedRow((prev) => (prev === index ? null : index));
   }, []);
 
-  // 입력 필드 변경 처리
   const handleInputChange = useCallback((index, field, value) => {
     setAccommodations((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
     );
   }, []);
 
-  // 새 행 입력 필드 변경 처리
   const handleNewRowInputChange = useCallback((fieldOrObj, value) => {
     setNewRow((prev) => {
       if (typeof fieldOrObj === 'object') {
@@ -53,7 +112,6 @@ const useAccommodations = (initialAccommodations = []) => {
     });
   }, []);
 
-  // 새 행 추가
   const confirmNewRow = useCallback(() => {
     if (
       newRow &&
@@ -62,22 +120,15 @@ const useAccommodations = (initialAccommodations = []) => {
       newRow.checkOutDate
     ) {
       setAccommodations((prev) => [...prev, { ...newRow }]);
-      setNewRow(null); // 입력 완료 후 newRow 초기화
+      setNewRow(null);
     }
   }, [newRow]);
 
-  // 행 삭제
   const deleteRow = useCallback((index) => {
     setAccommodations((prev) => prev.filter((_, i) => i !== index));
     setSelectedRow(null);
   }, []);
 
-  // 수정 완료(blur)
-  const finishEdit = useCallback(() => {
-    setSelectedRow(null);
-  }, []);
-
-  // placeholder 행 노출 여부
   const displayAccommodations =
     accommodations.length === 0 && !newRow
       ? [getDefaultAccommodation()]
@@ -94,7 +145,6 @@ const useAccommodations = (initialAccommodations = []) => {
     confirmNewRow,
     deleteRow,
     setNewRow,
-    finishEdit,
     setAccommodations,
   };
 };

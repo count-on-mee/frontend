@@ -30,7 +30,7 @@ export default function TripJoinCode() {
 
   return (
     <>
-      <div className="fixed bottom-5 right-5">
+      <div className="fixed bottom-[88px] right-5 desktop:bottom-5">
         <motion.button
           className={`z-50 flex items-center gap-3 px-6 py-4 rounded-full ${neumorphStyles.medium} transition-all duration-200`}
           onClick={() => setInviteModalOpen(true)}

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { useRecoilValue } from 'recoil';
 import tripDatesAtom from '../../../recoil/tripDates';
 import userAtom from '../../../recoil/user';
@@ -62,8 +61,17 @@ const AccountBook = ({
   tripId,
   expenses,
   statistics,
+  settlement,
+  versions,
+  activeVersionId,
+  selectedVersionId,
   participants,
   onExpenseUpdate,
+  onVersionChange,
+  onRenameVersion,
+  onCreateInterimSettlement,
+  showNewSettlementToast = false,
+  onDismissNewSettlementToast,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState('accountBook');
   const [expenseType, setExpenseType] = useState('SHARED');
@@ -76,6 +84,14 @@ const AccountBook = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const tripDates = useRecoilValue(tripDatesAtom);
   const user = useRecoilValue(userAtom);
+
+  const ledgerVersionId = activeVersionId ?? selectedVersionId;
+
+  useEffect(() => {
+    if (!showNewSettlementToast) return;
+    const timer = setTimeout(() => onDismissNewSettlementToast?.(), 5000);
+    return () => clearTimeout(timer);
+  }, [showNewSettlementToast, onDismissNewSettlementToast]);
 
   const dateOptions = React.useMemo(() => {
     const dates = [];
@@ -134,34 +150,19 @@ const AccountBook = ({
 
     return typeFiltered;
   }, [expenses, selectedDate, expenseType]);
-
-  // 공동경비에서 결제한 금액 계산 (payUserId가 null인 경우만)
-  const totalSpentFromBudget = React.useMemo(() => {
-    if (!expenses || expenses.length === 0) return 0;
-
-    return expenses
-      .filter(
-        (expense) =>
-          expense.expenseType === 'SHARED' &&
-          expense.expenseCategory !== 'BUDGET' &&
-          expense.payUserId === null,
-      )
-      .reduce((sum, expense) => sum + (expense.totalAmount || 0), 0);
-  }, [expenses]);
-
-  // 공동경비 잔액 계산
   const sharedBudgetInfo = React.useMemo(() => {
     if (!statistics?.shared) return null;
 
     const totalBudget = statistics.shared.totalBudget || 0;
-    const remainingBudget = totalBudget - totalSpentFromBudget;
+    const totalSpent = statistics.shared.totalSpent || 0;
+    const remainingBudget = statistics.shared.remainingBudget || 0;
 
     return {
       totalBudget,
-      totalSpentFromBudget,
+      totalSpentFromBudget: totalSpent,
       remainingBudget,
     };
-  }, [statistics?.shared, totalSpentFromBudget]);
+  }, [statistics?.shared]);
 
   // 개인경비 정보 계산
   const personalBudgetInfo = React.useMemo(() => {
@@ -223,11 +224,12 @@ const AccountBook = ({
 
     socket.emit('deleteExpense', {
       tripDocumentExpenseId: deletingExpense.tripDocumentExpenseId,
+      tripDocumentVersionId: ledgerVersionId,
     });
 
     if (onExpenseUpdate) {
       setTimeout(() => {
-        onExpenseUpdate();
+        onExpenseUpdate(ledgerVersionId);
         setIsDeleting(false);
         setShowDeleteModal(false);
         setDeletingExpense(null);
@@ -250,14 +252,14 @@ const AccountBook = ({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-1.5 sm:gap-3 mb-3 sm:mb-6">
         <button
           onClick={() => setActiveSubTab('accountBook')}
           {...tabButtonStyles.getStyles(activeSubTab === 'accountBook')}
         >
           <div className="flex items-center justify-center">
-            <img src={receiptIcon} alt="가계부" className="w-8 h-8 mr-3" />
-            <span className="text-lg font-medium text-gray-700">가계부</span>
+            <img src={receiptIcon} alt="가계부" className="w-5 h-5 sm:w-8 sm:h-8 mr-1 sm:mr-3" />
+            <span className="text-xs sm:text-lg font-medium text-gray-700">가계부</span>
           </div>
         </button>
         <button
@@ -265,8 +267,8 @@ const AccountBook = ({
           {...tabButtonStyles.getStyles(activeSubTab === 'settlement')}
         >
           <div className="flex items-center justify-center">
-            <img src={paymentIcon} alt="정산" className="w-8 h-8 mr-3" />
-            <span className="text-lg font-medium text-gray-700">정산</span>
+            <img src={paymentIcon} alt="정산" className="w-5 h-5 sm:w-8 sm:h-8 mr-1 sm:mr-3" />
+            <span className="text-xs sm:text-lg font-medium text-gray-700">정산</span>
           </div>
         </button>
         <button
@@ -274,21 +276,45 @@ const AccountBook = ({
           {...tabButtonStyles.getStyles(activeSubTab === 'statistics')}
         >
           <div className="flex items-center justify-center">
-            <img src={chartIcon} alt="통계" className="w-8 h-8 mr-3" />
-            <span className="text-lg font-medium text-gray-700">통계</span>
+            <img src={chartIcon} alt="통계" className="w-5 h-5 sm:w-8 sm:h-8 mr-1 sm:mr-3" />
+            <span className="text-xs sm:text-lg font-medium text-gray-700">통계</span>
           </div>
         </button>
       </div>
 
       {activeSubTab === 'accountBook' && (
         <>
-          <div className="flex gap-3 mb-4">
+          {showNewSettlementToast && (
+            <div className="flex justify-center mb-4">
+              <div
+                className="relative text-white text-sm font-semibold px-5 py-3 rounded-2xl text-center"
+                style={{
+                  backgroundColor: '#f5861d',
+                  boxShadow: '2px 2px 4px #b85a0f, -1px -1px 2px #ffc085',
+                }}
+              >
+                🎉 새로운 정산이 시작되었습니다! 항목을 추가해주세요.
+                <span
+                  className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-full"
+                  style={{
+                    display: 'block',
+                    width: 0,
+                    height: 0,
+                    borderLeft: '8px solid transparent',
+                    borderRight: '8px solid transparent',
+                    borderTop: '8px solid #f5861d',
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          <div className="flex gap-1.5 sm:gap-3 mb-3 sm:mb-4">
             <button
               onClick={() => setExpenseType('SHARED')}
               {...tabButtonStyles.getStyles(expenseType === 'SHARED', true)}
             >
               <div className="flex items-center justify-center">
-                <span className="text-lg font-medium text-gray-700">공동</span>
+                <span className="text-xs sm:text-lg font-medium text-gray-700">공동</span>
               </div>
             </button>
             <button
@@ -296,29 +322,29 @@ const AccountBook = ({
               {...tabButtonStyles.getStyles(expenseType === 'PERSONAL', true)}
             >
               <div className="flex items-center justify-center">
-                <span className="text-lg font-medium text-gray-700">개인</span>
+                <span className="text-xs sm:text-lg font-medium text-gray-700">개인</span>
               </div>
             </button>
           </div>
 
           {expenseType === 'SHARED' && sharedBudgetInfo && (
             <div
-              className={`${neumorphStyles.small} rounded-xl p-6 mb-6 bg-[#f0f0f3]`}
+              className={`${neumorphStyles.small} rounded-xl p-3 sm:p-6 mb-3 sm:mb-6 bg-[#f0f0f3]`}
             >
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-4">
                 공동경비 잔액
               </h3>
-              <div className="text-3xl font-bold text-[#252422] mb-4">
+              <div className="text-xl sm:text-3xl font-bold text-[#252422] mb-2 sm:mb-4">
                 {formatAmount(sharedBudgetInfo.remainingBudget)}원
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
+              <div className="space-y-1 sm:space-y-2">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span className="text-gray-500">모인돈</span>
                   <span className="font-medium text-gray-700">
                     {formatAmount(sharedBudgetInfo.totalBudget)}원
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-sm">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span className="text-gray-500">총쓴돈</span>
                   <span className="font-medium text-gray-700">
                     {formatAmount(sharedBudgetInfo.totalSpentFromBudget)}원
@@ -330,22 +356,22 @@ const AccountBook = ({
 
           {expenseType === 'PERSONAL' && personalBudgetInfo && (
             <div
-              className={`${neumorphStyles.small} rounded-xl p-6 mb-6 bg-[#f0f0f3]`}
+              className={`${neumorphStyles.small} rounded-xl p-3 sm:p-6 mb-3 sm:mb-6 bg-[#f0f0f3]`}
             >
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-4">
                 개인경비 잔액
               </h3>
-              <div className="text-3xl font-bold text-[#252422] mb-4">
+              <div className="text-xl sm:text-3xl font-bold text-[#252422] mb-2 sm:mb-4">
                 {formatAmount(personalBudgetInfo.remainingBudget)}원
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
+              <div className="space-y-1 sm:space-y-2">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span className="text-gray-500">모인돈</span>
                   <span className="font-medium text-gray-700">
                     {formatAmount(personalBudgetInfo.totalBudget)}원
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-sm">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
                   <span className="text-gray-500">총쓴돈</span>
                   <span className="font-medium text-gray-700">
                     {formatAmount(personalBudgetInfo.totalSpent)}원
@@ -359,11 +385,9 @@ const AccountBook = ({
             {dateOptions.map((dateOption) => {
               const isSelected = selectedDate === dateOption.value;
               return (
-                <motion.button
+                <button
                   key={dateOption.value}
                   onClick={() => setSelectedDate(dateOption.value)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
                   className={`px-4 py-2 rounded-full font-medium whitespace-nowrap min-w-fit ${
                     isSelected
                       ? dateOption.isPrep
@@ -380,7 +404,7 @@ const AccountBook = ({
                     />
                   )}
                   {dateOption.label}
-                </motion.button>
+                </button>
               );
             })}
           </div>
@@ -398,10 +422,8 @@ const AccountBook = ({
                 .filter(Boolean);
 
               return (
-                <motion.div
+                <div
                   key={expense.tripDocumentExpenseId}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   className={`${neumorphStyles.smallInset} rounded-xl p-4 mb-3 flex items-center justify-between cursor-pointer overflow-hidden`}
                   onClick={() => handleViewExpense(expense)}
                 >
@@ -481,7 +503,7 @@ const AccountBook = ({
                       />
                     </button>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
             {filteredExpenses.length === 0 && (
@@ -493,7 +515,7 @@ const AccountBook = ({
 
           <button
             onClick={handleAddExpense}
-            className={`fixed bottom-8 right-8 w-14 h-14 rounded-full transition-all duration-200 flex items-center justify-center text-white text-2xl font-semibold z-10 ${scrapListStyles.selectedOrangeButton}`}
+            className={`fixed bottom-[88px] right-8 desktop:bottom-8 w-14 h-14 rounded-full transition-all duration-200 flex items-center justify-center text-white text-2xl font-semibold z-10 ${scrapListStyles.selectedOrangeButton}`}
           >
             +
           </button>
@@ -503,10 +525,15 @@ const AccountBook = ({
       {activeSubTab === 'settlement' && (
         <Settlement
           tripId={tripId}
-          expenses={expenses}
-          statistics={statistics}
+          settlement={settlement}
+          versions={versions}
+          activeVersionId={activeVersionId}
+          selectedVersionId={selectedVersionId}
           participants={participants}
           currentUserId={user?.userId}
+          onVersionChange={onVersionChange}
+          onRenameVersion={onRenameVersion}
+          onCreateInterimSettlement={onCreateInterimSettlement}
         />
       )}
 
@@ -530,6 +557,7 @@ const AccountBook = ({
           tripDates={tripDates}
           dateOptions={dateOptions}
           onExpenseUpdate={onExpenseUpdate}
+          tripDocumentVersionId={ledgerVersionId}
           expenseType={expenseType}
           isReadOnly={isReadOnlyMode}
           onEditModeChange={(readOnly) => {

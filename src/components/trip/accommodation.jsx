@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 import useAccommodations from '../../hooks/useAccommodations';
 import { useSocketDebounce } from '../../utils/debounce';
@@ -9,7 +9,6 @@ import AccommodationRow from './AccommodationRow';
 const AccommodationSection = ({
   accommodations: initialAccommodations,
   socket,
-  tripId,
 }) => {
   const debouncedSocketEmit = useSocketDebounce(socket, 800);
   const {
@@ -20,52 +19,10 @@ const AccommodationSection = ({
     handleRowClick,
     handleInputChange,
     handleNewRowInputChange,
-    confirmNewRow,
     deleteRow,
     setNewRow,
-    finishEdit,
-    setAccommodations,
   } = useAccommodations(initialAccommodations);
 
-  // 소켓 이벤트 리스너 등록
-  useEffect(() => {
-    if (!socket) return;
-    const handleAdded = (newAccommodation) => {
-      setAccommodations((prev) => [...prev, newAccommodation]);
-    };
-    const handleUpdated = ({
-      tripDocumentAccommodationId,
-      accommodationFields,
-    }) => {
-      setAccommodations((prev) =>
-        prev.map((accommodation) =>
-          accommodation.tripDocumentAccommodationId ===
-          tripDocumentAccommodationId
-            ? { ...accommodation, ...accommodationFields }
-            : accommodation,
-        ),
-      );
-    };
-    const handleDeleted = ({ tripDocumentAccommodationId }) => {
-      setAccommodations((prev) =>
-        prev.filter(
-          (accommodation) =>
-            accommodation.tripDocumentAccommodationId !==
-            tripDocumentAccommodationId,
-        ),
-      );
-    };
-    socket.on('accommodationAdded', handleAdded);
-    socket.on('accommodationUpdated', handleUpdated);
-    socket.on('accommodationDeleted', handleDeleted);
-    return () => {
-      socket.off('accommodationAdded', handleAdded);
-      socket.off('accommodationUpdated', handleUpdated);
-      socket.off('accommodationDeleted', handleDeleted);
-    };
-  }, [socket]);
-
-  // 입력/수정 시 소켓 emit
   const handleRowInputChange = (index, field, value) => {
     handleInputChange(index, field, value);
     const item = accommodations[index];
@@ -77,7 +34,6 @@ const AccommodationSection = ({
     }
   };
 
-  // 날짜 변경 시 소켓 emit
   const handleRowDateChange = (index, startDate, endDate) => {
     handleInputChange(
       index,
@@ -101,7 +57,6 @@ const AccommodationSection = ({
     }
   };
 
-  // 새 행 추가(완료)
   const handleConfirmNewRow = () => {
     if (
       newRow &&
@@ -117,22 +72,21 @@ const AccommodationSection = ({
           memo: newRow.memo || null,
         },
       });
-      confirmNewRow();
+      setNewRow(null);
     }
   };
 
-  // 행 삭제
   const handleDeleteRow = (index) => {
     const item = accommodations[index];
     if (item && item.tripDocumentAccommodationId) {
       debouncedSocketEmit('deleteAccommodation', {
         tripDocumentAccommodationId: item.tripDocumentAccommodationId,
       });
+    } else {
+      deleteRow(index);
     }
-    deleteRow(index);
   };
 
-  // 새 행 입력 활성화
   const handleShowNewRow = () => {
     setNewRow({
       accommodation: '',
@@ -144,20 +98,20 @@ const AccommodationSection = ({
   };
 
   return (
-    <div className="bg-[var(--color-background-gray)] font-prompt p-6 rounded-lg shadow-[4px_4px_8px_#b8b8b8,-4px_-4px_8px_#ffffff]">
+    <div className="bg-[var(--color-background-gray)] font-prompt p-3 sm:p-6 rounded-lg shadow-[4px_4px_8px_#b8b8b8,-4px_-4px_8px_#ffffff]">
       <table className="w-full table-fixed">
         <thead>
           <tr>
-            <th className="w-1/4 p-2">
-              <span className={componentStyles.header}>숙소명</span>
+            <th className="w-2/5 sm:w-1/4 p-1 sm:p-2">
+              <span className={`${componentStyles.header} text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2`}>숙소명</span>
             </th>
-            <th className="w-1/3 p-2">
-              <span className={componentStyles.header}>체크인 ~ 체크아웃</span>
+            <th className="w-2/5 sm:w-1/3 p-1 sm:p-2">
+              <span className={`${componentStyles.header} text-[10px] sm:text-lg px-2 sm:px-4 py-1 sm:py-2`}>체크인~체크아웃</span>
             </th>
-            <th className="w-1/3 p-2">
+            <th className="hidden sm:table-cell sm:w-1/3 p-2">
               <span className={componentStyles.header}>메모</span>
             </th>
-            <th className="w-12 p-2"></th>
+            <th className="w-1/5 sm:w-12 p-1 sm:p-2"></th>
           </tr>
         </thead>
         <tbody>

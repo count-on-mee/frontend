@@ -28,8 +28,8 @@ function Carousel({ imgUrls, spot }) {
             <div key={index} className="w-full flex-shrink-0">
               <img
                 src={url || defaultImage}
-                alt={`${spot.title}`}
-                className="object-cover rounded-md mx-auto w-72 h-36"
+                alt={`${spot.name || spot.title}`}
+                className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.src = defaultImage;
                 }}
@@ -37,10 +37,10 @@ function Carousel({ imgUrls, spot }) {
             </div>
           ))
         ) : (
-          <div>
+          <div className="w-full flex-shrink-0">
             <img
               src={defaultImage}
-              className="opacity-50 w-72 h-36 object-cover rounded-md"
+              className="opacity-50 w-full h-full object-cover"
             />
           </div>
         )}

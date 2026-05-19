@@ -1,11 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
 import useTripDetails from '../../hooks/useTripDetails';
 import AccountBook from '../../components/trip/expense/accountBook';
 import Accommodation from '../../components/trip/accommodation';
 import TodoList from '../../components/trip/todolist';
 import AllInOneView from '../../components/trip/allInOneView';
 import { neumorphStyles } from '../../utils/style';
+import userAtom from '../../recoil/user';
 import expenseIcon from '../../assets/expense.png';
 import hotelIcon from '../../assets/hotel.png';
 import todolistIcon from '../../assets/todolist.png';
@@ -15,31 +17,45 @@ const TripDetails = () => {
   const { tripId } = useParams();
   const { socket, tripData } = useOutletContext();
   const [selectedTab, setSelectedTab] = useState('expenses');
+  const [showNewSettlementToast, setShowNewSettlementToast] = useState(false);
+  const user = useRecoilValue(userAtom);
 
   const {
     expenses,
     statistics,
+    settlement,
     accommodations,
     tasks,
+    versions,
+    activeVersionId,
+    selectedVersionId,
     loading,
     error,
-    setExpenses,
     setAccommodations,
     setTasks,
-    participantCount,
-    setParticipantCount,
+    fetchTripVersion,
+    renameTripVersion,
+    createInterimSettlementVersion,
     refetch,
   } = useTripDetails(tripId);
 
-  const tabs = useMemo(
-    () => [
-      { id: 'expenses', title: '비용', icon: expenseIcon },
-      { id: 'accommodation', title: '숙소', icon: hotelIcon },
-      { id: 'todo', title: '할 일', icon: todolistIcon },
-      { id: 'all', title: '한눈에 보기', icon: documentIcon },
-    ],
-    [],
+  const handleVersionChange = useCallback(
+    (tripDocumentVersionId) =>
+      fetchTripVersion(tripDocumentVersionId, { emitSocket: true }),
+    [fetchTripVersion],
   );
+
+  const handleCreateInterimSettlement = useCallback(async () => {
+    await createInterimSettlementVersion();
+    setShowNewSettlementToast(true);
+  }, [createInterimSettlementVersion]);
+
+  const tabs = [
+    { id: 'expenses', title: '비용', icon: expenseIcon },
+    { id: 'accommodation', title: '숙소', icon: hotelIcon },
+    { id: 'todo', title: '할 일', icon: todolistIcon },
+    { id: 'all', title: '한눈에 보기', icon: documentIcon },
+  ];
 
   const renderContent = useMemo(() => {
     switch (selectedTab) {
@@ -50,8 +66,17 @@ const TripDetails = () => {
             tripId={tripId}
             expenses={expenses}
             statistics={statistics}
+            settlement={settlement}
+            versions={versions}
+            activeVersionId={activeVersionId}
+            selectedVersionId={selectedVersionId}
             participants={tripData?.participants || []}
             onExpenseUpdate={refetch}
+            onVersionChange={handleVersionChange}
+            onRenameVersion={renameTripVersion}
+            onCreateInterimSettlement={handleCreateInterimSettlement}
+            showNewSettlementToast={showNewSettlementToast}
+            onDismissNewSettlementToast={() => setShowNewSettlementToast(false)}
           />
         );
       case 'accommodation':
@@ -59,7 +84,7 @@ const TripDetails = () => {
           <Accommodation
             socket={socket}
             tripId={tripId}
-            initialAccommodations={accommodations}
+            accommodations={accommodations}
             setAccommodations={setAccommodations}
           />
         );
@@ -78,13 +103,13 @@ const TripDetails = () => {
             socket={socket}
             tripId={tripId}
             expenses={expenses}
+            participants={tripData?.participants || []}
+            currentUserId={user?.userId}
             accommodations={accommodations}
             tasks={tasks}
-            setExpenses={setExpenses}
             setAccommodations={setAccommodations}
             setTasks={setTasks}
-            participantCount={participantCount}
-            setParticipantCount={setParticipantCount}
+            statistics={statistics}
           />
         );
       default:
@@ -99,12 +124,18 @@ const TripDetails = () => {
     accommodations,
     tasks,
     tripData?.participants,
-    participantCount,
     refetch,
+    settlement,
+    versions,
+    activeVersionId,
+    selectedVersionId,
+    handleVersionChange,
+    renameTripVersion,
+    handleCreateInterimSettlement,
+    showNewSettlementToast,
     setAccommodations,
     setTasks,
-    setExpenses,
-    setParticipantCount,
+    user?.userId,
   ]);
 
   if (loading) {
@@ -126,16 +157,32 @@ const TripDetails = () => {
   }
 
   return (
-    <div className="flex h-full bg-[#f0f0f3]">
-      <div className="w-1/4 bg-[#f0f0f3] p-6">
-        <div className="mb-6">
+    <div className="flex flex-col desktop:flex-row h-full bg-[#f0f0f3]">
+      <div className="desktop:w-1/4 bg-[#f0f0f3] p-2 desktop:p-6">
+        <div className="mb-4 hidden desktop:block">
           <h2 className="text-2xl font-bold text-[#252422] mb-2">
             여행 세부사항
           </h2>
           <div className="h-1 w-16 bg-[#FF8C4B] rounded"></div>
         </div>
 
-        <div className="space-y-3">
+        <div className="flex desktop:hidden gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedTab(tab.id)}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 ${
+                selectedTab === tab.id
+                  ? 'bg-[#f5861d] text-white shadow-[inset_3px_3px_6px_rgba(0,0,0,0.2)]'
+                  : 'bg-[#f0f0f3] text-gray-700 shadow-[3px_3px_6px_#d1d1d1,-3px_-3px_6px_#ffffff]'
+              }`}
+            >
+              <img src={tab.icon} alt={tab.title} className="w-4 h-4" />
+              {tab.title}
+            </button>
+          ))}
+        </div>
+        <div className="hidden desktop:block space-y-3">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -146,9 +193,7 @@ const TripDetails = () => {
                   : 'hover:shadow-[4px_4px_8px_#d1d1d1,-4px_-4px_8px_#ffffff]'
               }`}
               style={{
-                borderLeft: `4px solid ${
-                  tab.id === 'all' ? '#4CAF50' : '#FF8C4B'
-                }`,
+                borderLeft: `4px solid ${tab.id === 'all' ? '#4CAF50' : '#FF8C4B'}`,
                 backgroundColor:
                   selectedTab === tab.id ? '#f0f0f3' : 'transparent',
               }}
@@ -164,9 +209,9 @@ const TripDetails = () => {
         </div>
       </div>
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-2 desktop:p-6 min-h-0">
         <div
-          className={`h-full ${neumorphStyles.base} rounded-2xl p-6 overflow-y-auto`}
+          className={`h-full ${neumorphStyles.base} rounded-2xl p-3 desktop:p-6 overflow-y-auto`}
         >
           {renderContent}
         </div>
